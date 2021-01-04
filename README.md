@@ -45,22 +45,28 @@ Connected to P0.1 (TxD3) (unable to trace from header)
 
 Default pin mapping of UART1 on MCU
 
-#### CLKO
-External clock output connected to external clock input on NEC MCU.  
-TODO: measure frequency
-
-
 
 ## NEC 79F9211
 Running at 5V
 
-#### P120
-Connected to P5.0 (RxD3_2) on STC
-TODO: function unknown, not a TX pin on NEC
 
+#### HALL U
+White  
+3.3k series resistor  
+Connected to P120 on NEC MCU  
+Connected to P5.0 on STC MCU
 
+#### HALL V
+Blue  
+3.3k series resistor  
+Connected to P122 on NEC MCU  
+Connected to P3.4 on STC MCU
 
-
+#### HALL W
+Grey
+3.3k series resistor  
+Connected to P121 on NEC MCU
+Connected to P0.6 on STC MCU
 
 
 
