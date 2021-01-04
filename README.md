@@ -7,23 +7,23 @@
 Running at 4.3V
 
 
-### PAS1
-White
+#### PAS1
+White  
 Via 5k pullup resistor.
 
-### PAS2
-Grey
+#### PAS2
+Grey   
 Via 5k pullup resistor.
 
 
 
-### BRAKE 
+#### BRAKE 
 5V active low  
 Conencted to to P2.4 on MCU via 0.6V diode for voltage drop?
 
 
-### THROTTLE
-3k Series resistor  
+#### THROTTLE
+3k series resistor  
 9k external pulldown on pcb  
 Connected to P1.3 -> ADC3 on MCU
 
