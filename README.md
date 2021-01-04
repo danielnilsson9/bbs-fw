@@ -34,12 +34,28 @@ Connected to P1.3 -> ADC3 on MCU
 Yellow  
 680ohm series resistor  
 0.6V diod paralell connected to 5V??  
-Connected via some ic (level converter or protection?) to P4.7 (TxD2)
+Connected via some ic (level converter or protection?) to P0.0 (RxD3)  
+
+Default pin mapping of UART1 on MCU
 
 #### RX
 Green  
-Probably connected to P1.0 (RxD2)
+Probably connected to P0.1 (TxD3)  
 
+Default pin mapping of UART1 on MCU
+
+#### CLKO
+External clock output connected to external clock input on NEC MCU.  
+TODO: measure frequency
+
+
+
+## NEC 79F9211
+Running at 5V
+
+#### P120
+Connected to P5.0 (RxD3_2) on STC
+TODO: function unknown, not a TX pin on NEC
 
 
 
