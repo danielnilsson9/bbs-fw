@@ -9,13 +9,13 @@ Running at 4.3V
 
 #### PAS1
 White  
-5k external pullup resistor.
+5k external pullup resistor  
 3k series resistor  
 Connected to P4.5 on MCU
 
 #### PAS2
 Grey   
-5k external pullup resistor.
+5k external pullup resistor  
 3k series resistor  
 Connected to P4.6 on MCU
 
@@ -41,7 +41,7 @@ Default pin mapping of UART1 on MCU
 
 #### RX
 Green  
-Probably connected to P0.1 (TxD3)  
+Connected to P0.1 (TxD3) (unable to trace from header)
 
 Default pin mapping of UART1 on MCU
 
