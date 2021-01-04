@@ -49,6 +49,17 @@ Default pin mapping of UART1 on MCU
 ## NEC 79F9211
 Running at 5V
 
+Common chinese MCU for BLDC control.
+Pinout seems to match standard schematic, see datasheets/China-BLDC-motor-controller-36V-250W.pdf
+
+P150 is used for throttle input (i.e. power).
+This is pin is directly connected to STC MCU via series resistor and filter capacitor.
+Most likely is PWM signal from STC used to control motor power.
+All other logic is in STC MCU firmware.
+
+Unclear if there is a serial connection between STC and NEC MCU.
+There seems to be a serial protocol defined for the NEC ebike controller for setting parameters.
+More investigation needed.
 
 #### HALL U
 White  
@@ -68,6 +79,12 @@ Grey
 Connected to P121 on NEC MCU
 Connected to P0.6 on STC MCU
 
+### Throttle
+Only a connection between STC and NEC MCU.
+Not connected to actual throttle signal in any way.
+
+Connected to P150 on NEC MCU   
+Connected to P2.0 on STC MCU.
 
 #### TOOL0
 Breakout to pad on PCB bottom side  
@@ -76,11 +93,4 @@ Programming tool connection?
 #### TOOL1
 Breakout to pad on PCB bottom side  
 Programming tool connection?
-
-
-
-
-
-
-
 
