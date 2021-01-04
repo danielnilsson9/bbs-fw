@@ -24,7 +24,7 @@ Conencted to to P2.4 on MCU via 0.6V diode for voltage drop?
 
 
 #### THROTTLE
-Blue
+Blue  
 3k series resistor  
 9k external pulldown on pcb  
 Connected to P1.3 -> ADC3 on MCU
