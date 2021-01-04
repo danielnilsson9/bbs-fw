@@ -35,7 +35,7 @@ Connected to P1.3(ADC3) on MCU
 Yellow  
 680ohm series resistor  
 0.6V diod paralell connected to 5V??  
-Connected via some ic (level converter or protection?) to P0.0 (RxD3)  
+Connected via shotkey diod array to P0.0 (RxD3)  
 
 Default pin mapping of UART1 on MCU
 
