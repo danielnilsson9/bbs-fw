@@ -84,7 +84,8 @@ Only a connection between STC and NEC MCU.
 Not connected to actual throttle signal in any way.
 
 Connected to P150 on NEC MCU   
-Connected to P2.0 on STC MCU.
+Connected to P2.0 on STC MCU which is (RSTOUT_LOW) probably to force throttle low on controller reset.
+Connected to P4.3 (PWM4_2) on STC MCU (power control output signal)
 
 #### TOOL0
 Breakout to pad on PCB bottom side  
