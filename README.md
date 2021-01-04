@@ -9,11 +9,11 @@ Running at 4.3V
 
 #### PAS1
 White  
-Via 5k pullup resistor.
+5k external pullup resistor.
 
 #### PAS2
 Grey   
-Via 5k pullup resistor.
+5k external pullup resistor.
 
 
 
