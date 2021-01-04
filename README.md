@@ -18,11 +18,14 @@ Via 5k pullup resistor.
 
 
 ### BRAKE 
-5V active low
+5V active low  
 Conencted to to P2.4 on MCU via 0.6V diode for voltage drop?
 
 
-
+### THROTTLE
+3k Series resistor  
+9k external pulldown on pcb  
+Connected to P1.3 -> ADC3 on MCU
 
 
 
