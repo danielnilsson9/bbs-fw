@@ -69,6 +69,18 @@ Connected to P121 on NEC MCU
 Connected to P0.6 on STC MCU
 
 
+#### TOOL0
+Breakout to pad on PCB bottom side  
+Programming tool connection?
+
+#### TOOL1
+Breakout to pad on PCB bottom side  
+Programming tool connection?
+
+
+
+
+
 
 
 
