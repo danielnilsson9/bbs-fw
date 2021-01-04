@@ -76,7 +76,7 @@ Connected to P3.4 on STC MCU
 #### HALL W
 Grey
 3.3k series resistor  
-Connected to P121 on NEC MCU
+Connected to P121 on NEC MCU  
 Connected to P0.6 on STC MCU
 
 #### Throttle
