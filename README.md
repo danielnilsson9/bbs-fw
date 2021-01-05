@@ -1,12 +1,27 @@
 
 
 
+## Hardware Revisions
+
+Revision | MCU 
+-------- | ------------
+V1.3     | STC15W4K32S4
+V1.5     | 
+
+
+
+
+
 
 ## Pins
 
 Function               | Type       | STC15W4K32S4 | D79F9211 | Comment
 ---------------------- | ---------- | ------------ | -------- | -------
 BRAKE (blue)           | External   | P2.4         | P124     | 
+
+
+
+
 
 
 
