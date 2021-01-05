@@ -2,7 +2,7 @@
 
 This is a push for getting a working open source firmware for the BBSHD motor controller.
 
-The controller has two microcontrollers making things more complicated.
+The motor controller has two microcontrollers complicating things a bit.
 
 The main controller is from STC Micro and have available toolchains and can be flashed though the standard serial communication port exposed in the main wire harness.
 
@@ -54,6 +54,8 @@ Green
 Complex net involving diod, possibly multiple transistors before reaching MCU.
 Connected to P3.1 (TxD) on STC MCU
 
+Default pin mapping of UART1 on MCU
+
 #### RX
 Green  
 Connected to P3.0 (RxD) vis series diod and 330ohm resistor.
@@ -77,7 +79,7 @@ There seems to be a direct UART connection between STC and NEC MCU.
 UART2 is used on STC and is directly connected to UART0 on NEC MCU.
 
 There seems to be a serial protocol defined for the NEC ebike controller for setting parameters.
-More investigation needed into this is needed.
+More investigation needed.
 
 It would seem likely that parameters are transfered when Bafang Config Tool is used to upload parameters to STC MCU.  
 At least max current would be needed by NEC MCU since motor control and current sense is implemented there.
@@ -118,11 +120,11 @@ Connected to P1.1 (TxD2) on STC MCU
 
 #### TOOL0
 Breakout to pad on PCB bottom side  
-Programming tool connection?
+Programming tool connection
 
 #### TOOL1
 Breakout to pad on PCB bottom side  
-Programming tool connection?
+Programming tool connection
 
 
 
