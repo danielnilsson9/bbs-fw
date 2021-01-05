@@ -95,3 +95,24 @@ Programming tool connection?
 Breakout to pad on PCB bottom side  
 Programming tool connection?
 
+
+
+## LM358
+Current sensing.  
+VCC 5V
+
+#### IN1
+Unused
+
+#### OUT1
+Unused
+
+#### IN2
+Connected to shunt resistors though some opamp configuration.
+Cannot figure out complex input configuration, feedback gain looks to be 10k/1k.
+
+TODO: Measure
+
+#### OUT2
+Current sense but unexpected input pin??
+Connected to P25 on NEC MCU.
