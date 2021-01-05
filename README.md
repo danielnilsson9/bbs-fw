@@ -3,13 +3,11 @@
 
 ## Hardware Revisions
 
-Revision | MCU 
--------- | ------------
-V1.3     | STC15W4K32S4
-V1.4     | ???
-V1.5     | IAP15W4K61S4
-
-
+Revision | MCU          | Released
+-------- | ------------ | -----------
+V1.3     | STC15W4K32S4 | ~2017
+V1.4     | ???          | ???
+V1.5     | IAP15W4K61S4 | ~2019
 
 
 
