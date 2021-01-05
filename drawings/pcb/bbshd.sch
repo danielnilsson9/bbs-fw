@@ -6567,8 +6567,8 @@ Source: http://cache.national.com/ds/LM/LM158.pdf</description>
 <part name="R29" library="rcl" deviceset="R-EU_" device="R0603" value="2.2K"/>
 <part name="R30" library="rcl" deviceset="R-EU_" device="R0603" value="2.0K"/>
 <part name="IC1" library="linear" deviceset="LM358" device="D"/>
-<part name="R31" library="rcl" deviceset="R-EU_" device="R0603" value="3.3k"/>
-<part name="R32" library="rcl" deviceset="R-EU_" device="R0603" value="3.3k"/>
+<part name="R31" library="rcl" deviceset="R-EU_" device="R0603" value="10K"/>
+<part name="R32" library="rcl" deviceset="R-EU_" device="R0603" value="1K"/>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
 <part name="R33" library="rcl" deviceset="R-EU_" device="R0603" value="5m"/>
 <part name="R34" library="rcl" deviceset="R-EU_" device="R0603" value="5m"/>
@@ -6581,6 +6581,7 @@ Source: http://cache.national.com/ds/LM/LM158.pdf</description>
 <part name="R39" library="rcl" deviceset="R-EU_" device="R0603" value="3k"/>
 <part name="C4" library="rcl" deviceset="C-EU" device="C0603"/>
 <part name="GND11" library="supply1" deviceset="GND" device=""/>
+<part name="P+6" library="supply1" deviceset="+5V" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -7031,10 +7032,7 @@ some form of level conversion to 5V maybe?</text>
 <text x="172.72" y="165.1" size="1.778" layer="97">Serial Communication between MCUs</text>
 <text x="217.17" y="20.32" size="2.54" layer="94">Daniel Nilsson</text>
 <text x="142.24" y="58.42" size="1.778" layer="97">WARNING:
-This OPAMP configuration does not make
-much sense or I'm missing something.
-There are more components involed than I would
-expect, but still, this drawing is probably wrong.
+Not sure this opamp circuit is 100% correct.
 
 OPAMP is there to amplify voltage drop over shunt
 resistors in order to get a more detailed reading with ADC.
@@ -7069,15 +7067,16 @@ Motor temperature sensor?</text>
 <instance part="GND9" gate="1" x="104.14" y="17.78"/>
 <instance part="R33" gate="G$1" x="25.4" y="45.72" rot="R90"/>
 <instance part="R34" gate="G$1" x="33.02" y="45.72" rot="R90"/>
-<instance part="GND10" gate="1" x="25.4" y="15.24"/>
-<instance part="C3" gate="G$1" x="53.34" y="27.94"/>
-<instance part="R35" gate="G$1" x="53.34" y="43.18" rot="R90"/>
-<instance part="R36" gate="G$1" x="60.96" y="53.34" rot="R180"/>
-<instance part="R37" gate="G$1" x="76.2" y="53.34" rot="R180"/>
-<instance part="R38" gate="G$1" x="83.82" y="43.18" rot="R270"/>
+<instance part="GND10" gate="1" x="25.4" y="22.86"/>
+<instance part="C3" gate="G$1" x="66.04" y="40.64"/>
+<instance part="R35" gate="G$1" x="55.88" y="53.34" rot="R180"/>
+<instance part="R36" gate="G$1" x="45.72" y="60.96" rot="R270"/>
+<instance part="R37" gate="G$1" x="45.72" y="73.66" rot="R270"/>
+<instance part="R38" gate="G$1" x="66.04" y="66.04" rot="R270"/>
 <instance part="R39" gate="G$1" x="58.42" y="165.1"/>
 <instance part="C4" gate="G$1" x="66.04" y="160.02"/>
 <instance part="GND11" gate="1" x="66.04" y="149.86"/>
+<instance part="P+6" gate="1" x="45.72" y="86.36"/>
 </instances>
 <busses>
 </busses>
@@ -7121,13 +7120,13 @@ Motor temperature sensor?</text>
 <pinref part="R33" gate="G$1" pin="1"/>
 <wire x1="25.4" y1="35.56" x2="25.4" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="GND10" gate="1" pin="GND"/>
-<wire x1="25.4" y1="35.56" x2="25.4" y2="20.32" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="35.56" x2="25.4" y2="30.48" width="0.1524" layer="91"/>
 <junction x="25.4" y="35.56"/>
+<wire x1="25.4" y1="30.48" x2="25.4" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="30.48" x2="25.4" y2="30.48" width="0.1524" layer="91"/>
+<junction x="25.4" y="30.48"/>
 <pinref part="C3" gate="G$1" pin="2"/>
-<wire x1="25.4" y1="20.32" x2="25.4" y2="17.78" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="22.86" x2="53.34" y2="20.32" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="20.32" x2="25.4" y2="20.32" width="0.1524" layer="91"/>
-<junction x="25.4" y="20.32"/>
+<wire x1="66.04" y1="35.56" x2="66.04" y2="30.48" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="GND11" gate="1" pin="GND"/>
@@ -7302,57 +7301,25 @@ Motor temperature sensor?</text>
 <pinref part="R33" gate="G$1" pin="2"/>
 <wire x1="25.4" y1="50.8" x2="25.4" y2="53.34" width="0.1524" layer="91"/>
 <junction x="25.4" y="53.34"/>
-<pinref part="R36" gate="G$1" pin="2"/>
-<wire x1="55.88" y1="53.34" x2="53.34" y2="53.34" width="0.1524" layer="91"/>
 <junction x="33.02" y="53.34"/>
+<wire x1="45.72" y1="55.88" x2="45.72" y2="53.34" width="0.1524" layer="91"/>
+<pinref part="R36" gate="G$1" pin="2"/>
 <pinref part="R35" gate="G$1" pin="2"/>
-<wire x1="53.34" y1="53.34" x2="33.02" y2="53.34" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="48.26" x2="53.34" y2="53.34" width="0.1524" layer="91"/>
-<junction x="53.34" y="53.34"/>
-</segment>
-</net>
-<net name="N$19" class="0">
-<segment>
-<pinref part="R36" gate="G$1" pin="1"/>
-<pinref part="R37" gate="G$1" pin="2"/>
-<wire x1="66.04" y1="53.34" x2="71.12" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="53.34" x2="33.02" y2="53.34" width="0.1524" layer="91"/>
+<wire x1="50.8" y1="53.34" x2="45.72" y2="53.34" width="0.1524" layer="91"/>
+<junction x="45.72" y="53.34"/>
 </segment>
 </net>
 <net name="NEC_P25" class="0">
 <segment>
-<pinref part="R37" gate="G$1" pin="1"/>
-<wire x1="81.28" y1="53.34" x2="83.82" y2="53.34" width="0.1524" layer="91"/>
-<pinref part="R38" gate="G$1" pin="1"/>
-<wire x1="83.82" y1="53.34" x2="83.82" y2="48.26" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="53.34" x2="83.82" y2="63.5" width="0.1524" layer="91"/>
-<junction x="83.82" y="53.34"/>
 <pinref part="IC1" gate="A" pin="OUT"/>
 <wire x1="124.46" y1="50.8" x2="134.62" y2="50.8" width="0.1524" layer="91"/>
 <wire x1="134.62" y1="50.8" x2="134.62" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="R31" gate="G$1" pin="2"/>
 <wire x1="134.62" y1="35.56" x2="121.92" y2="35.56" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="63.5" x2="134.62" y2="63.5" width="0.1524" layer="91"/>
-<wire x1="134.62" y1="63.5" x2="134.62" y2="50.8" width="0.1524" layer="91"/>
 <junction x="134.62" y="50.8"/>
 <wire x1="134.62" y1="50.8" x2="149.86" y2="50.8" width="0.1524" layer="91"/>
 <label x="149.86" y="50.8" size="1.778" layer="95" xref="yes"/>
-</segment>
-</net>
-<net name="N$21" class="0">
-<segment>
-<pinref part="R38" gate="G$1" pin="2"/>
-<wire x1="83.82" y1="38.1" x2="83.82" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="83.82" y1="33.02" x2="53.34" y2="33.02" width="0.1524" layer="91"/>
-<pinref part="R35" gate="G$1" pin="1"/>
-<pinref part="C3" gate="G$1" pin="1"/>
-<wire x1="53.34" y1="38.1" x2="53.34" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="33.02" x2="53.34" y2="30.48" width="0.1524" layer="91"/>
-<junction x="53.34" y="33.02"/>
-<pinref part="IC1" gate="A" pin="+IN"/>
-<wire x1="109.22" y1="53.34" x2="93.98" y2="53.34" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="53.34" x2="93.98" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="33.02" x2="83.82" y2="33.02" width="0.1524" layer="91"/>
-<junction x="83.82" y="33.02"/>
 </segment>
 </net>
 <net name="N$16" class="0">
@@ -7373,6 +7340,39 @@ Motor temperature sensor?</text>
 <wire x1="66.04" y1="165.1" x2="119.38" y2="165.1" width="0.1524" layer="91"/>
 <junction x="66.04" y="165.1"/>
 <label x="119.38" y="165.1" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="N$18" class="0">
+<segment>
+<pinref part="R37" gate="G$1" pin="2"/>
+<pinref part="R36" gate="G$1" pin="1"/>
+<wire x1="45.72" y1="68.58" x2="45.72" y2="66.04" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="+5V" class="0">
+<segment>
+<pinref part="P+6" gate="1" pin="+5V"/>
+<pinref part="R37" gate="G$1" pin="1"/>
+<wire x1="45.72" y1="83.82" x2="45.72" y2="81.28" width="0.1524" layer="91"/>
+<pinref part="R38" gate="G$1" pin="1"/>
+<wire x1="45.72" y1="81.28" x2="45.72" y2="78.74" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="71.12" x2="66.04" y2="81.28" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="81.28" x2="45.72" y2="81.28" width="0.1524" layer="91"/>
+<junction x="45.72" y="81.28"/>
+</segment>
+</net>
+<net name="N$19" class="0">
+<segment>
+<pinref part="C3" gate="G$1" pin="1"/>
+<pinref part="R35" gate="G$1" pin="1"/>
+<wire x1="60.96" y1="53.34" x2="66.04" y2="53.34" width="0.1524" layer="91"/>
+<pinref part="R38" gate="G$1" pin="2"/>
+<wire x1="66.04" y1="53.34" x2="66.04" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="66.04" y1="60.96" x2="66.04" y2="53.34" width="0.1524" layer="91"/>
+<junction x="66.04" y="53.34"/>
+<wire x1="66.04" y1="53.34" x2="109.22" y2="53.34" width="0.1524" layer="91"/>
+<junction x="66.04" y="53.34"/>
+<pinref part="IC1" gate="A" pin="+IN"/>
 </segment>
 </net>
 </nets>
