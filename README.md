@@ -12,14 +12,12 @@ White
 5k external pullup resistor  
 3k series resistor  
 Connected to P4.5 on STC MCU
-Connected to P73 on NEC MCU
 
 #### PAS2
 Grey   
 5k external pullup resistor  
 3k series resistor  
 Connected to P4.6 on MCU
-Connected to P74 on NEC MCU
 
 #### BRAKE 
 White
