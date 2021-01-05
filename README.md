@@ -2,6 +2,16 @@
 
 
 
+## Pins
+
+Function               | Type       | STC15W4K32S4 | D79F9211 | Comment
+---------------------- | ---------- | ------------ | -------- | -------
+BRAKE (blue)           | External   | P2.4         | P124     | 
+
+
+
+
+
 
 ## STC15W4K32S4
 Running at 4.3V
@@ -30,18 +40,15 @@ Blue
 9k external pulldown on pcb  
 Connected to P1.3(ADC3) on MCU
 
-
 #### TX
-Yellow  
-680ohm series resistor  
-0.6V diod paralell connected to 5V??  
-Connected via shotkey diod array to P0.0 (RxD3)  
-
-Default pin mapping of UART1 on MCU
+Green  
+Complex net involving diod, possibly multiple transistors before reaching MCU.
+Connected to P3.1 (TxD) on STC MCU
 
 #### RX
 Green  
-Connected to P0.1 (TxD3) (unable to trace from header)
+Connected to P3.0 (RxD) vis series diod and 330ohm resistor.
+External 10k pullup resistor to 5V 
 
 Default pin mapping of UART1 on MCU
 
