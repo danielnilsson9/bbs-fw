@@ -11,13 +11,15 @@ Running at 4.3V
 White  
 5k external pullup resistor  
 3k series resistor  
-Connected to P4.5 on MCU
+Connected to P4.5 on STC MCU
+Connected to P73 on NEC MCU
 
 #### PAS2
 Grey   
 5k external pullup resistor  
 3k series resistor  
 Connected to P4.6 on MCU
+Connected to P74 on NEC MCU
 
 #### BRAKE 
 White
@@ -57,7 +59,7 @@ This is pin is directly connected to STC MCU via series resistor and filter capa
 Most likely is PWM signal from STC used to control motor power.
 All other logic is in STC MCU firmware.
 
-Unclear if there is a serial connection between STC and NEC MCU.
+There is nothing that indicates that the is a serial communication connection between STC and NEC MCU.
 There seems to be a serial protocol defined for the NEC ebike controller for setting parameters.
 More investigation needed.
 
@@ -86,6 +88,7 @@ Not connected to actual throttle signal in any way.
 Connected to P150 on NEC MCU  
 Connected to P2.0 on STC MCU which is (RSTOUT_LOW) probably to force throttle low on controller reset.  
 Connected to P4.3 (PWM4_2) on STC MCU (power control output signal)
+
 
 #### TOOL0
 Breakout to pad on PCB bottom side  
