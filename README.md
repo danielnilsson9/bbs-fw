@@ -1,12 +1,11 @@
 
 
-
 ## Hardware Revisions
 
 Revision | MCU          | Released
 -------- | ------------ | -----------
 V1.3     | STC15W4K32S4 | ~2017
-V1.4     | ???          | ???
+V1.4     | IAP ???      | ???
 V1.5     | IAP15W4K61S4 | ~2019
 
 
@@ -17,8 +16,6 @@ V1.5     | IAP15W4K61S4 | ~2019
 Function               | Type       | STC15W4K32S4 | D79F9211 | Comment
 ---------------------- | ---------- | ------------ | -------- | -------
 BRAKE (blue)           | External   | P2.4         | P124     | 
-
-
 
 
 
