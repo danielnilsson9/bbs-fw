@@ -1,3 +1,15 @@
+# BBSHD Open Source Firmware
+
+This is a push for getting a working open source firmware for the BBSHD motor controller.
+
+The controller has two microcontrollers making things more complicated.
+
+The main controller is from STC Micro and have available toolchains and can be flashed though the standard serial communication port exposed in the main wire harness.
+
+There is a secondary microcontroller "79F9211" which apprently is a common controller used in chinese ebike motor controllers using some standard firmware.
+This controller has not easily availble programmer or toolchain as far as I know and cannot be modified.
+
+Some code of a ebike motor controller implemented on the 79F9211 has been found online (see misc/79F9211-bike-dump), it would seem likely bafang has based their implementation on this since they have selected this MCU for motor control.
 
 
 ## Hardware Revisions
@@ -7,20 +19,6 @@ Revision | MCU          | Released
 V1.3     | STC15W4K32S4 | ~2017
 V1.4     | IAP ???      | ???
 V1.5     | IAP15W4K61S4 | ~2019
-
-
-
-
-## Pins
-
-Function               | Type       | STC15W4K32S4 | D79F9211 | Comment
----------------------- | ---------- | ------------ | -------- | -------
-BRAKE (blue)           | External   | P2.4         | P124     | 
-
-
-
-
-
 
 
 
@@ -142,8 +140,5 @@ Unused
 Connected to shunt resistors though some opamp configuration.
 Cannot figure out complex input configuration, feedback gain looks to be 10k/1k.
 
-TODO: Measure
-
 #### OUT2
-Current sense but unexpected input pin??
 Connected to P25 on NEC MCU.
