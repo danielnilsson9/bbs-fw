@@ -59,9 +59,14 @@ This is pin is directly connected to STC MCU via series resistor and filter capa
 Most likely is PWM signal from STC used to control motor power.
 All other logic is in STC MCU firmware.
 
-There is nothing that indicates that the is a serial communication connection between STC and NEC MCU.
+There seems to be a direct UART connection between STC and NEC MCU.  
+UART2 is used on STC and is directly connected to UART0 on NEC MCU.
+
 There seems to be a serial protocol defined for the NEC ebike controller for setting parameters.
-More investigation needed.
+More investigation needed into this is needed.
+
+It would seem likely that parameters are transfered when Bafang Config Tool is used to upload parameters to STC MCU.  
+At least max current would be needed by NEC MCU since motor control and current sense is implemented there.
 
 #### HALL U
 White  
@@ -89,6 +94,13 @@ Connected to P150 on NEC MCU
 Connected to P2.0 on STC MCU which is (RSTOUT_LOW) probably to force throttle low on controller reset.  
 Connected to P4.3 (PWM4_2) on STC MCU (power control output signal)
 
+#### TX
+Connected to P73 (TXD) on NEC MCU  
+Connected to P1.0 (RxD2) on STC MCU
+
+#### RX
+Connected to P74 on NEC MCU
+Connected to P1.1 (TxD2) on STC MCU
 
 #### TOOL0
 Breakout to pad on PCB bottom side  
