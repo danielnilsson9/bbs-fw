@@ -38,6 +38,9 @@ Request  | Response | Interpretation
 64 1C    | 64 1C    | Set parameter? Value 0x1C
 63 0A    | 63 0A    | This is throttle value, see below, no clue why 0x0A is sent at initialization.
 
+The parameters which have not been identified above are probably hardcoded in STC MCU firmware.
+It could potentially be motor parameters for FOC or other stuff? I have no idea clue (anyone here peeking and have the knowledge, feel free to contact me).
+I have gone through all editable parameters in bafang config tool and only current limit and voltage limit have an effect on what is sent during intialization to NEC MCU.
 
 ## Command
 
