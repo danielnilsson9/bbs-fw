@@ -29,7 +29,7 @@ Request  | Response | Interpretation
 6C 50    | 6C 50    | Set parameter? Value 0x50
 6D 46    | 6D 46    | Set parameter? Value 0x46
 6E 0C    | 6E 0C    | Set parameter? Value 0x0C
-60 02 56 | 60 02 56 | Set low voltage cutoff limit 39V. See status request 42.
+60 02 56 | 60 02 56 | Set low voltage cutoff limit 41V. See status request 42.
 61 CF    | 61 CF    | Set parameter? Value 0xCF
 64 1C    | 64 1C    | Set parameter? Value 0x1C
 63 0A    | 63 0A    | This is throttle value, see below, no clue why 0x0A is sent at initialization.
@@ -54,5 +54,5 @@ Request  | Response | Interpretation
 -------- | -------- | --------------
 40       | 40 XX XX | Status/error flags. 0x2000 = Hall sensor error, 0x0800 = Low voltage cutoff active
 41       | 41 XX    | ADC Current, unclear unit not same as in display protocol, probably raw adc from shunt resistor and OPAMP gain. Value is 0 when idle.
-42       | 42 XX XX | ADC Battery voltage (~15 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, must be on both, whyy?)
+42       | 42 XX XX | ADC Battery voltage (~14 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, must be on both, whyy?)
 
