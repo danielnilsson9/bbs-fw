@@ -1,6 +1,6 @@
 # Serial Protocol
 
-The two microcontrollers communicated directly using a an async serial line.  
+The two microcontrollers communicates directly using a an async serial line.  
 Baudrate is 4800.
 
 At first glance the protocol seems to follow the same prinicples of the the display protocol which has already been reverse enginered.
@@ -9,13 +9,13 @@ Rules:
 * All messages start with 0xAA
 * Last byte is checksum which is the sum of all previous bytes (exculding 0xAA) truncated to 8 bits.
 
-STC MCU issues requests and NEC MCU responds, nothing is sent by NEC controlled without a request.
+STC MCU issues requests and NEC MCU responds, nothing is sent by NEC without a request.
 
 
 ## Initialization
 
-STC MCU continously resend first initialization command until NEC reponds which takes a few tries.
-During initialization commands all responses are equal to the requests.
+STC MCU continously resends first initialization command until NEC reponds which takes a few tries.
+During initialization the requests are echoed as response.
 
 Note: In table below leading message header "AA" and trailing checksum has been left out.
 
@@ -39,7 +39,7 @@ Request  | Response | Interpretation
 Status requests are sent frequently by the STC MCU.
 There seems to be 3 types of request.
 
-My guss that two of them would be:
+I guess that two of them would be:
 * Measured current
 * Error code (basing this on the fact that there exist an error code for shunt resistor error which must be detected by NEC MCU)
 
