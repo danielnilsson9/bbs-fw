@@ -17,6 +17,10 @@ STC MCU issues requests and NEC MCU responds, nothing is sent by NEC without a r
 STC MCU continously resends first initialization command until NEC reponds which takes a few tries.
 During initialization the requests are echoed as response.
 
+An intreasting note:  
+When reconfiguring with Bafang Config Tool updated parameters are not immediately sent to
+motor control MCU. Power cycle occur before new parameters are sent to secondary MCU.
+
 Note: In table below leading message header "AA" and trailing checksum has been left out.
 
 Request  | Response | Interpretation
