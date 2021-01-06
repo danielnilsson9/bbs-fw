@@ -51,8 +51,8 @@ Request  | Response | Interpretation
 -------- | -------- | --------------
 63 XX    | 63 XX    | Target current (ADC current steps, see status 41), sent directly by STC MCU on change request.
 
-The values 0x0A and FA could have special meaning. Before motor start 0xFA is sent and before it stops 0x0A seems to be sent.
-This could explain why during intialization target current value of 0x0A is sent, e.g. "disable motor".
+The values 0x0A and 0xFA could have special meaning. Before motor start 0xFA is sent and before it stops 0x0A seems to be sent.
+This could explain why during intialization target current value of 0x0A is sent, i.e. "disable motor".
 
 
 ## Status
