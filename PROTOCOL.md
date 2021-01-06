@@ -39,10 +39,9 @@ Request  | Response | Interpretation
 Status requests are sent frequently by the STC MCU.
 There seems to be 3 types of request.
 
-My guss would be:
+My guss that two of them would be:
 * Measured current
 * Error code (basing this on the fact that there exist an error code for shunt resistor error which must be detected by NEC MCU)
-* Throttle ??
 
 Note: In table below leading message header "AA" and trailing checksum has been left out.
 
