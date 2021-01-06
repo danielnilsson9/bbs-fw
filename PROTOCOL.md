@@ -39,8 +39,9 @@ Request  | Response | Interpretation
 63 0A    | 63 0A    | This is throttle value, see below, no clue why 0x0A is sent at initialization.
 
 The parameters which have not been identified above are probably hardcoded in STC MCU firmware.
-It could potentially be motor parameters for FOC or other stuff? I have no idea clue (anyone here peeking and have the knowledge, feel free to contact me).
+It could potentially be motor parameters for FOC or other stuff? I have no clue (anyone here peeking who have the info, feel free to contact me).
 I have gone through all editable parameters in bafang config tool and only current limit and voltage limit have an effect on what is sent during intialization to NEC MCU.
+
 
 ## Command
 
@@ -60,6 +61,5 @@ Note: In table below leading message header "AA" and trailing checksum has been 
 Request  | Response | Interpretation
 -------- | -------- | --------------
 40       | 40 XX XX | Status/error flags. 0x2000 = Hall sensor error, 0x0800 = Low voltage cutoff active
-41       | 41 XX    | ADC Current (6.9 steps per A)
-42       | 42 XX XX | ADC Battery voltage (~14 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, must be on both, whyy?)
-
+41       | 41 XX    | ADC Current (6.9 steps per amp)
+42       | 42 XX XX | ADC Battery voltage (~14 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, but must be on both)
