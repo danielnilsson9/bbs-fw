@@ -29,7 +29,7 @@ Request  | Response | Interpretation
 6C 50    | 6C 50    | Set parameter? Value 0x50
 6D 46    | 6D 46    | Set parameter? Value 0x46
 6E 0C    | 6E 0C    | Set parameter? Value 0x0C
-60 02 56 | 60 02 56 | Set LVC ADC limit 39V. See status request 42.
+60 02 56 | 60 02 56 | Set low voltage cutoff limit 39V. See status request 42.
 61 CF    | 61 CF    | Set parameter? Value 0xCF
 64 1C    | 64 1C    | Set parameter? Value 0x1C
 63 0A    | 63 0A    | This is throttle value, see below, no clue why 0x0A is sent at initialization.
