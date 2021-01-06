@@ -1,9 +1,9 @@
 # Serial Protocol
 
-The two microcontrollers communicates directly using a an async serial line.  
+The two microcontrollers communicates directly using an async serial line.  
 Baudrate is 4800.
 
-At first glance the protocol seems to follow the same prinicples of the the display protocol which has already been reverse enginered.
+At first glance the protocol seems to follow similar prinicples of the the display protocol which has already been reverse enginered.
 
 Rules:
 * All messages start with 0xAA
@@ -29,7 +29,7 @@ Request  | Response | Interpretation
 6C 50    | 6C 50    | Set parameter? Value 0x50
 6D 46    | 6D 46    | Set parameter? Value 0x46
 6E 0C    | 6E 0C    | Set parameter? Value 0x0C
-60 02 56 | 60 02 56 | Set parameter? Value 0x0256
+60 02 56 | 60 02 56 | Set LVC ADC limit 39V. See status request 42.
 61 CF    | 61 CF    | Set parameter? Value 0xCF
 64 1C    | 64 1C    | Set parameter? Value 0x1C
 63 0A    | 63 0A    | This is throttle value, see below, no clue why 0x0A is sent at initialization.
