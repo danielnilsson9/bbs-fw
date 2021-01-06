@@ -21,11 +21,11 @@ An intreasting note:
 When reconfiguring with Bafang Config Tool updated parameters are not immediately sent to
 motor control MCU. Power cycle occur before new parameters are sent to secondary MCU.
 
-Note: In table below leading message header "AA" and trailing checksum has been left out.
+Note: In table below the leading message header "AA" and trailing checksum has been left out.
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-67 00    | 67 00    | Probably just an "hello" message
+67 00    | 67 00    | Probably just a "hello" message,
 68 5A    | 68 5A    | Set parameter? Value 0x5A
 69 11    | 69 11    | Set parameter? Value 0x11
 6A 78    | 6A 78    | Set parameter? Value 0x78
@@ -45,21 +45,21 @@ I have gone through all editable parameters in bafang config tool and only curre
 
 ## Command
 
-Note: In table below leading message header "AA" and trailing checksum has been left out.
+Note: In table below the leading message header "AA" and trailing checksum has been left out.
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
 63 XX    | 63 XX    | Target current (ADC current steps, see status 41), sent directly by STC MCU on change request.
 
 The values 0x0A and 0xFA could have special meaning. Before motor start 0xFA is sent and before it stops 0x0A seems to be sent.
-This could explain why during intialization target current value of 0x0A is sent, i.e. "disable motor".
+This could explain why during intialization target current value of 0x0A is sent, i.e. "disable motor", but just speculation at the moment.
 
 
 ## Status
 Status requests are sent frequently by the STC MCU.
 There seems to be 3 types of request.
 
-Note: In table below leading message header "AA" and trailing checksum has been left out.
+Note: In table below the leading message header "AA" and trailing checksum has been left out.
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
