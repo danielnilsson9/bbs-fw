@@ -32,7 +32,15 @@ Request  | Response | Interpretation
 60 02 56 | 60 02 56 | Set parameter? Value 0x0256
 61 CF    | 61 CF    | Set parameter? Value 0xCF
 64 1C    | 64 1C    | Set parameter? Value 0x1C
-63 0A    | 63 0A    | Set parameter? Value 0x0A
+
+
+## Command
+
+Note: In table below leading message header "AA" and trailing checksum has been left out.
+
+Request  | Response | Interpretation
+-------- | -------- | --------------
+63 1E    | 63 1E    | Throttle value
 
 
 ## Status
