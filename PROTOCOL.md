@@ -52,7 +52,7 @@ Note: In table below leading message header "AA" and trailing checksum has been 
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-40       | 40 XX XX | Status/error code. 0x2800 = Hall sensor error
+40       | 40 XX XX | Status/error flags. 0x2000 = Hall sensor error, 0x0800 = Low voltage cutoff active
 41       | 41 XX    | ADC Current, unclear unit not same as in display protocol, probably raw adc from shunt resistor and OPAMP gain. Value is 0 when idle.
 42       | 42 XX XX | ADC Battery voltage (~15 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, must be on both, whyy?)
 
