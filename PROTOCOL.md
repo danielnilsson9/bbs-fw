@@ -32,6 +32,7 @@ Request  | Response | Interpretation
 60 02 56 | 60 02 56 | Set parameter? Value 0x0256
 61 CF    | 61 CF    | Set parameter? Value 0xCF
 64 1C    | 64 1C    | Set parameter? Value 0x1C
+63 0A    | 63 0A    | This is throttle value, see below, no clue why 0x0A is sent at initialization.
 
 
 ## Command
@@ -40,22 +41,18 @@ Note: In table below leading message header "AA" and trailing checksum has been 
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-63 XX    | 63 XX    | Throttle value, sent directly on change.
+63 XX    | 63 XX    | Throttle value, sent directly by STC MCU on change.
 
 
 ## Status
 Status requests are sent frequently by the STC MCU.
 There seems to be 3 types of request.
 
-I guess that two of them would be:
-* Measured current
-* Error code (basing this on the fact that there exist an error code for shunt resistor error which must be detected by NEC MCU)
-
 Note: In table below leading message header "AA" and trailing checksum has been left out.
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-40       | 40 00 00 | Amp reading or power
-41       | 41 00    | Error condition???
-42       | 42 03 11 | ???
+40       | 40 00 00 | Only seen zero, my guess is status/error code.
+41       | 41 00    | ADC Current, unclear unit not same as in display protocol, probably raw adc from shunt resistor and OPAMP gain.
+42       | 42 03 11 | ADC Battery voltage (~15 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, must be on both, whyy?)
 
