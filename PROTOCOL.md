@@ -3,13 +3,13 @@
 The two microcontrollers communicated directly using a an async serial line.  
 Baudrate is 4800.
 
-By first glance the protocol seems to follow the same prinicples of the the display protocol which has already been reverse enginered.
+At first glance the protocol seems to follow the same prinicples of the the display protocol which has already been reverse enginered.
 
 Rules:
 * All messages start with 0xAA
 * Last byte is checksum which is the sum of all previous bytes (exculding 0xAA) truncated to 8 bits.
 
-STC MCU issues commands and NEC MCU responds, nothing is sent by NEC controlled without a request.
+STC MCU issues requests and NEC MCU responds, nothing is sent by NEC controlled without a request.
 
 
 ## Initialization
