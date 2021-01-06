@@ -40,7 +40,7 @@ Note: In table below leading message header "AA" and trailing checksum has been 
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-63 1E    | 63 1E    | Throttle value
+63 1E    | 63 1E    | Throttle value, sent directly on change.
 
 
 ## Status
