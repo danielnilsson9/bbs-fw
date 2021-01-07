@@ -34,7 +34,7 @@ Request  | Response | Interpretation
 6D 46    | 6D 46    | Set parameter? Value 0x46
 6E 0C    | 6E 0C    | Set parameter? Value 0x0C
 60 02 56 | 60 02 56 | Set low voltage cutoff limit 41V. See status request 42.
-61 CF    | 61 CF    | Set current limit 30A. See status request 41.
+61 CF    | 61 CF    | Set battery current limit 30A. See status request 41.
 64 1C    | 64 1C    | Set parameter? Value 0x1C
 63 0A    | 63 0A    | Target current, special value (disable motor?)
 
@@ -64,5 +64,5 @@ Note: In table below the leading message header "AA" and trailing checksum has b
 Request  | Response | Interpretation
 -------- | -------- | --------------
 40       | 40 XX XX | Status/error flags. 0x2000 = Hall sensor error, 0x0800 = Low voltage cutoff active
-41       | 41 XX    | ADC Current (6.9 steps per amp)
+41       | 41 XX    | ADC Battery Current (6.9 steps per amp)
 42       | 42 XX XX | ADC Battery voltage (~14 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, but must be on both)
