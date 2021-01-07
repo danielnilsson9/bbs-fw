@@ -114,7 +114,7 @@ Connected to P73 (TXD) on NEC MCU
 Connected to P1.0 (RxD2) on STC MCU
 
 #### RX
-Connected to P74 on NEC MCU
+Connected to P74 on NEC MCU  
 Connected to P1.1 (TxD2) on STC MCU
 
 #### TOOL0
