@@ -20,7 +20,7 @@ The goal at the moment is to only reimplement the STC microcontroller firmware a
 
 Revision | MCU          | Released
 -------- | ------------ | -----------
-V1.3     | STC15W4K32S4 | ~2017
+V1.3     | STC15W4K56S4 | ~2017
 V1.4     | IAP ???      | ???
 V1.5     | IAP15W4K61S4 | ~2019
 
