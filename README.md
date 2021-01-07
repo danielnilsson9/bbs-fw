@@ -66,6 +66,9 @@ Connected to P3.0 (RxD) vis series diod and 330ohm resistor.
 
 Default pin mapping of UART1 on MCU
 
+#### Additional UARTs
+Two more UARTs are brought out to pin headers on pcb, UART3 and UART4 on STC MCU.
+Those are labeled BR/BT and R/T on pcb.
 
 ## NEC 79F9211
 Running at 5V
