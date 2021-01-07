@@ -400,8 +400,8 @@ UsedLibrary="D:/Projects/Git/components/eagle-lbr/element14/atmel_element14.lbr"
 
 [Win_1]
 Type="Control Panel"
-Loc="-2568 -8 -9 1408"
-State=1
+Loc="-310 216 2140 1632"
+State=2
 Number=0
 
 [Desktop]

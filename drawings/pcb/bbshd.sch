@@ -8090,6 +8090,8 @@ Source: www.kingbright.com</description>
 <part name="P+7" library="supply1" deviceset="+5V" device=""/>
 <part name="R40" library="rcl" deviceset="R-EU_" device="R0603" value="5.6K"/>
 <part name="LED1" library="led" deviceset="LED" device=""/>
+<part name="R41" library="rcl" deviceset="R-EU_" device="R0603" value="5.2K"/>
+<part name="R42" library="rcl" deviceset="R-EU_" device="R0603" value="5.2K"/>
 </parts>
 <sheets>
 <sheet>
@@ -8101,9 +8103,6 @@ Source: www.kingbright.com</description>
 <text x="19.558" y="126.238" size="1.778" layer="97">TX</text>
 <text x="17.78" y="123.698" size="1.778" layer="97">GND</text>
 <text x="19.558" y="121.158" size="1.778" layer="97">5V</text>
-<text x="160.02" y="154.94" size="1.778" layer="97">Unconnected Status LEDs?
-
-Usage unclear, may be mirroring two in use RX port for debugging? Check signals</text>
 <text x="144.272" y="100.838" size="1.778" layer="97">RX</text>
 <text x="144.272" y="85.598" size="1.778" layer="97">TX</text>
 <wire x1="73.66" y1="96.52" x2="104.14" y2="96.52" width="0.1524" layer="97"/>
@@ -8117,14 +8116,19 @@ Two SOT-23, likely two transistors,
 some form of level conversion to 5V maybe?</text>
 <text x="17.018" y="60.198" size="1.778" layer="97">PAS1</text>
 <text x="17.018" y="62.738" size="1.778" layer="97">PAS2</text>
-<text x="187.96" y="124.46" size="1.778" layer="97">???</text>
-<text x="187.96" y="119.38" size="1.778" layer="97">???</text>
-<text x="187.96" y="106.68" size="1.778" layer="97">???</text>
-<text x="187.96" y="101.6" size="1.778" layer="97">???</text>
-<text x="187.96" y="83.82" size="1.778" layer="97">???</text>
+<text x="159.766" y="166.878" size="1.778" layer="97">Debug Terminalt?
+Constant data output at 9600 baud.</text>
+<text x="187.96" y="111.76" size="1.778" layer="97">??? Has not been traced</text>
+<text x="187.96" y="106.68" size="1.778" layer="97">??? Has not been traced</text>
+<text x="187.96" y="93.98" size="1.778" layer="97">??? Has not been traced</text>
 <text x="18.796" y="29.718" size="1.778" layer="97">SPD</text>
 <text x="217.17" y="20.066" size="2.54" layer="94">Daniel Nilsson</text>
 <text x="180.34" y="55.88" size="1.778" layer="97">ADC6 - Battery voltage measurement</text>
+<text x="231.648" y="123.698" size="1.778" layer="97">TxD4</text>
+<text x="231.648" y="133.858" size="1.778" layer="97">RxD4</text>
+<text x="231.648" y="159.258" size="1.778" layer="97">RxD3</text>
+<text x="231.648" y="149.098" size="1.778" layer="97">TxD3</text>
+<text x="161.036" y="139.954" size="1.778" layer="97">Another UART brought out to pins, no data has been seen.</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
@@ -8143,10 +8147,10 @@ some form of level conversion to 5V maybe?</text>
 <instance part="R5" gate="G$1" x="86.36" y="109.22" rot="R90"/>
 <instance part="P+3" gate="1" x="86.36" y="119.38"/>
 <instance part="D2" gate="G$1" x="78.74" y="101.6" rot="R180"/>
-<instance part="D3" gate="G$1" x="187.96" y="147.32" rot="R180"/>
-<instance part="R6" gate="G$1" x="208.28" y="147.32" rot="R180"/>
-<instance part="R7" gate="G$1" x="208.28" y="137.16" rot="R180"/>
-<instance part="D4" gate="G$1" x="187.96" y="137.16" rot="R180"/>
+<instance part="D3" gate="G$1" x="187.96" y="134.62" rot="R180"/>
+<instance part="R6" gate="G$1" x="208.28" y="134.62" rot="R180"/>
+<instance part="R7" gate="G$1" x="208.28" y="160.02" rot="R180"/>
+<instance part="D4" gate="G$1" x="187.96" y="160.02" rot="R180"/>
 <instance part="R8" gate="G$1" x="55.88" y="93.98" rot="R270"/>
 <instance part="D5" gate="G$1" x="55.88" y="109.22" rot="R270"/>
 <instance part="P+4" gate="1" x="55.88" y="121.92"/>
@@ -8169,6 +8173,8 @@ some form of level conversion to 5V maybe?</text>
 <instance part="R28" gate="G$1" x="170.18" y="40.64" rot="R270"/>
 <instance part="R29" gate="G$1" x="182.88" y="48.26"/>
 <instance part="R30" gate="G$1" x="195.58" y="48.26"/>
+<instance part="R41" gate="G$1" x="208.28" y="149.86" rot="R180"/>
+<instance part="R42" gate="G$1" x="208.28" y="124.46" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -8307,43 +8313,43 @@ some form of level conversion to 5V maybe?</text>
 <net name="N$5" class="0">
 <segment>
 <pinref part="D3" gate="G$1" pin="A"/>
-<wire x1="190.5" y1="147.32" x2="203.2" y2="147.32" width="0.1524" layer="91"/>
+<wire x1="190.5" y1="134.62" x2="203.2" y2="134.62" width="0.1524" layer="91"/>
 <pinref part="R6" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="STC_P0.2" class="0">
 <segment>
 <pinref part="R6" gate="G$1" pin="1"/>
-<wire x1="213.36" y1="147.32" x2="215.9" y2="147.32" width="0.1524" layer="91"/>
-<label x="215.9" y="147.32" size="1.778" layer="95" xref="yes"/>
+<wire x1="213.36" y1="134.62" x2="215.9" y2="134.62" width="0.1524" layer="91"/>
+<label x="215.9" y="134.62" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="STC_P0.0" class="0">
 <segment>
 <pinref part="R7" gate="G$1" pin="1"/>
-<wire x1="213.36" y1="137.16" x2="215.9" y2="137.16" width="0.1524" layer="91"/>
-<label x="215.9" y="137.16" size="1.778" layer="95" xref="yes"/>
+<wire x1="213.36" y1="160.02" x2="215.9" y2="160.02" width="0.1524" layer="91"/>
+<label x="215.9" y="160.02" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="N$6" class="0">
 <segment>
 <pinref part="R7" gate="G$1" pin="2"/>
 <pinref part="D4" gate="G$1" pin="A"/>
-<wire x1="203.2" y1="137.16" x2="190.5" y2="137.16" width="0.1524" layer="91"/>
+<wire x1="203.2" y1="160.02" x2="190.5" y2="160.02" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="R" class="0">
 <segment>
 <pinref part="D3" gate="G$1" pin="C"/>
-<wire x1="185.42" y1="147.32" x2="165.1" y2="147.32" width="0.1524" layer="91"/>
-<label x="165.1" y="147.32" size="1.778" layer="95" rot="R180" xref="yes"/>
+<wire x1="185.42" y1="134.62" x2="165.1" y2="134.62" width="0.1524" layer="91"/>
+<label x="165.1" y="134.62" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="BR" class="0">
 <segment>
 <pinref part="D4" gate="G$1" pin="C"/>
-<wire x1="185.42" y1="137.16" x2="165.1" y2="137.16" width="0.1524" layer="91"/>
-<label x="165.1" y="137.16" size="1.778" layer="95" rot="R180" xref="yes"/>
+<wire x1="185.42" y1="160.02" x2="165.1" y2="160.02" width="0.1524" layer="91"/>
+<label x="165.1" y="160.02" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="STC_P3.1" class="0">
@@ -8445,32 +8451,34 @@ some form of level conversion to 5V maybe?</text>
 </net>
 <net name="BT" class="0">
 <segment>
-<wire x1="185.42" y1="124.46" x2="165.1" y2="124.46" width="0.1524" layer="91"/>
-<label x="165.1" y="124.46" size="1.778" layer="95" rot="R180" xref="yes"/>
+<wire x1="203.2" y1="149.86" x2="165.1" y2="149.86" width="0.1524" layer="91"/>
+<label x="165.1" y="149.86" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="R41" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="T" class="0">
 <segment>
-<wire x1="185.42" y1="119.38" x2="165.1" y2="119.38" width="0.1524" layer="91"/>
-<label x="165.1" y="119.38" size="1.778" layer="95" rot="R180" xref="yes"/>
+<wire x1="203.2" y1="124.46" x2="165.1" y2="124.46" width="0.1524" layer="91"/>
+<label x="165.1" y="124.46" size="1.778" layer="95" rot="R180" xref="yes"/>
+<pinref part="R42" gate="G$1" pin="2"/>
 </segment>
 </net>
 <net name="GS" class="0">
+<segment>
+<wire x1="185.42" y1="111.76" x2="165.1" y2="111.76" width="0.1524" layer="91"/>
+<label x="165.1" y="111.76" size="1.778" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="DS" class="0">
 <segment>
 <wire x1="185.42" y1="106.68" x2="165.1" y2="106.68" width="0.1524" layer="91"/>
 <label x="165.1" y="106.68" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
-<net name="DS" class="0">
-<segment>
-<wire x1="185.42" y1="101.6" x2="165.1" y2="101.6" width="0.1524" layer="91"/>
-<label x="165.1" y="101.6" size="1.778" layer="95" rot="R180" xref="yes"/>
-</segment>
-</net>
 <net name="W" class="0">
 <segment>
-<wire x1="185.42" y1="83.82" x2="165.1" y2="83.82" width="0.1524" layer="91"/>
-<label x="165.1" y="83.82" size="1.778" layer="95" rot="R180" xref="yes"/>
+<wire x1="185.42" y1="93.98" x2="165.1" y2="93.98" width="0.1524" layer="91"/>
+<label x="165.1" y="93.98" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="N$10" class="0">
@@ -8521,6 +8529,20 @@ some form of level conversion to 5V maybe?</text>
 <pinref part="R30" gate="G$1" pin="2"/>
 <wire x1="200.66" y1="48.26" x2="205.74" y2="48.26" width="0.1524" layer="91"/>
 <label x="205.74" y="48.26" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="STC_P0.1" class="0">
+<segment>
+<pinref part="R41" gate="G$1" pin="1"/>
+<wire x1="213.36" y1="149.86" x2="215.9" y2="149.86" width="0.1524" layer="91"/>
+<label x="215.9" y="149.86" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="STC_P0.3" class="0">
+<segment>
+<pinref part="R42" gate="G$1" pin="1"/>
+<wire x1="213.36" y1="124.46" x2="215.9" y2="124.46" width="0.1524" layer="91"/>
+<label x="215.9" y="124.46" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 </nets>
