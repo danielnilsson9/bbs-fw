@@ -19,7 +19,7 @@ During initialization the requests are echoed as response.
 
 An intreasting note:  
 When reconfiguring with Bafang Config Tool updated parameters are not immediately sent to
-motor control MCU. Power cycle occur before new parameters are sent to secondary MCU.
+motor control MCU. Power cycle must occur before new parameters are sent to secondary MCU.
 
 Note: In table below the leading message header "AA" and trailing checksum has been left out.
 
