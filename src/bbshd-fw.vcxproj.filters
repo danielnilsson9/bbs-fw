@@ -26,5 +26,8 @@
     <ClInclude Include="motor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="stc15.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

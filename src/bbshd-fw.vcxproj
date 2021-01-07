@@ -40,23 +40,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeBuildCommandLine>make all</NMakeBuildCommandLine>
-    <NMakeOutput>bbshd-fw.hex</NMakeOutput>
+    <NMakeOutput>main.hex</NMakeOutput>
     <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>make clean
 make all</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>C:/Program Files/SDCC/include;./;../external/STM8S_StdPeriph_Lib/inc</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>C:/Program Files/SDCC/include/mcs51;./</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)</OutDir>
     <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeBuildCommandLine>make all</NMakeBuildCommandLine>
-    <NMakeOutput>bbshd-fw.hex</NMakeOutput>
+    <NMakeOutput>main.hex</NMakeOutput>
     <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>make clean
 make all</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>C:/Program Files/SDCC/include;./;../external/STM8S_StdPeriph_Lib/inc</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>C:/Program Files/SDCC/include/mcs51;./</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)</OutDir>
     <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -67,6 +67,7 @@ make all</NMakeReBuildCommandLine>
     <ClCompile Include="motor.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="stc15.h" />
     <ClInclude Include="motor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

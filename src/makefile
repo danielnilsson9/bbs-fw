@@ -28,7 +28,7 @@ RELS = $(EXTRASRCS:.c=.rel)
 
 INCLUDES = -I$(IDIR) -I. -I../
 CFLAGS   = -m$(PLATFORM) -Ddouble=float --std-c99 --nolospre 
-ELF_FLAGS = --out-fmt-ihx
+ELF_FLAGS = 
 LIBS     = 
 
 # This just provides the conventional target name "all"; it is optional
@@ -50,7 +50,7 @@ $(PNAME): $(MAINSRC) $(RELS)
 
 hex:
 	@cmd /C tohex.bat
-
+	
 clean:
 	@cmd /C clean.bat
 	@echo "Clean Finished"

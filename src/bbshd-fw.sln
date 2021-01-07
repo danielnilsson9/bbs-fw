@@ -7,14 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bbshd-fw", "bbshd-fw.vcxpro
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|STM8 = Debug|STM8
-		Release|STM8 = Release|STM8
+		Debug|8051 = Debug|8051
+		Release|8051 = Release|8051
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Debug|STM8.ActiveCfg = Debug|x64
-		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Debug|STM8.Build.0 = Debug|x64
-		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Release|STM8.ActiveCfg = Release|x64
-		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Release|STM8.Build.0 = Release|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Debug|8051.ActiveCfg = Debug|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Debug|8051.Build.0 = Debug|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Release|8051.ActiveCfg = Release|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Release|8051.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
