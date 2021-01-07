@@ -1,16 +1,20 @@
 # BBSHD Open Source Firmware
 
-This is a push for getting a working open source firmware for the BBSHD motor controller.
+Work in progress for bringing life to an open source firmware for the BBSHD motor controller.
 
-The motor controller has two microcontrollers complicating things a bit.
+The motor controller has two microcontrollers maing things a bit more complicated.
 
-The main controller is from STC Micro and have available toolchains and can be flashed though the standard serial communication port exposed in the main wire harness.
+The main controller is from STC Micro and have available toolchains and can be flashed though the standard serial communication port exposed in the main wire harness, i.e. without taking the motor apart.
 
 There is a secondary microcontroller "79F9211" which apprently is a common controller used in chinese ebike motor controllers using some standard firmware.
-This controller has not easily availble programmer or toolchain as far as I know and cannot be modified.
+This controller has no cheap availble programmer but there exist a protocol definition on how to program it, so one could most likeley be built, see doc/78Kx3-pgm.pdf
+There exist no free compiler but a propritary one (CC78K0R) can sort of be downloaded from Renesas website, not possible to install it without some form of product number but the installer can be extracted to get hold of the compiler binary.
 
-Some code of a ebike motor controller implemented on the 79F9211 has been found online (see misc/79F9211-bike-dump), it would seem likely bafang has based their implementation on this since they have selected this MCU for motor control.
+This controller can only be flashed by taking the controller out and depotting the backside of the PCB to expose the programming pins.
 
+A code example of a ebike motor controller written by Renesas Electronics and implemented on the 79F9211 has been found online (see misc/79F9211-bike-dump), it would seem likely bafang has based their implementation on this since they have selected this MCU for motor control.
+
+The goal at the moment is to only reimplement the STC microcontroller firmware and keep the 79F9211 motor controller firmware as is.
 
 ## Hardware Revisions
 
@@ -19,7 +23,6 @@ Revision | MCU          | Released
 V1.3     | STC15W4K32S4 | ~2017
 V1.4     | IAP ???      | ???
 V1.5     | IAP15W4K61S4 | ~2019
-
 
 
 ## STC15W4K32S4
@@ -68,21 +71,15 @@ Default pin mapping of UART1 on MCU
 Running at 5V
 
 Common chinese MCU for BLDC control.
-Pinout seems to match standard schematic, see datasheets/China-BLDC-motor-controller-36V-250W.pdf
+Pinout seems to resemble a standard schematic, see datasheets/China-BLDC-motor-controller-36V-250W.pdf
 
-P150 is used for throttle input (i.e. power).
-This is pin is directly connected to STC MCU via series resistor and filter capacitor.
-Most likely is PWM signal from STC used to control motor power.
-All other logic is in STC MCU firmware.
+P150 is used as motor enable signal, controlled by STC MCU.
 
-There seems to be a direct UART connection between STC and NEC MCU.  
-UART2 is used on STC and is directly connected to UART0 on NEC MCU.
+There is a direct UART connection between STC and NEC MCU.  
+UART2 is used on STC and is directly connected to UART1 on NEC MCU.
+Reverse engineered protocol definition can be found in PROTOCOL.md
 
-There seems to be a serial protocol defined for the NEC ebike controller for setting parameters.
-More investigation needed.
-
-It would seem likely that parameters are transfered when Bafang Config Tool is used to upload parameters to STC MCU.  
-At least max current would be needed by NEC MCU since motor control and current sense is implemented there.
+Enable motor signal is used along with the set "target current" message to control motor from STC MCU.
 
 #### HALL U
 White  
@@ -102,13 +99,12 @@ Grey
 Connected to P121 on NEC MCU  
 Connected to P0.6 on STC MCU
 
-#### Throttle
-Only a connection between STC and NEC MCU.  
-Not connected to actual throttle signal in any way.  
+#### Enable
+Direct connection between STC and NEC MCU.  
 
 Connected to P150 on NEC MCU  
-Connected to P2.0 on STC MCU which is (RSTOUT_LOW) probably to force throttle low on controller reset.  
-Connected to P4.3 (PWM4_2) on STC MCU (power control output signal)
+Connected to P2.0 on STC MCU which is (RSTOUT_LOW) probably to force motor disable on STC MCU reset.  
+Connected to P4.3 on STC MCU
 
 #### TX
 Connected to P73 (TXD) on NEC MCU  
@@ -125,7 +121,6 @@ Programming tool connection
 #### TOOL1
 Breakout to pad on PCB bottom side  
 Programming tool connection
-
 
 
 ## LM358
