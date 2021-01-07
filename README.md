@@ -61,7 +61,7 @@ Default pin mapping of UART1 on MCU
 
 #### RX
 Green  
-External 10k pullup resistor to 5V 
+External 10k pullup resistor to 5V  
 Connected to P3.0 (RxD) vis series diod and 330ohm resistor.
 
 Default pin mapping of UART1 on MCU
