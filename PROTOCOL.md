@@ -63,6 +63,6 @@ Note: In table below the leading message header "AA" and trailing checksum has b
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-40       | 40 XX XX | Status/error flags. 0x2000 = Hall sensor error, 0x0800 = Low voltage cutoff active
+40       | 40 XX XX | Status/error flags: 0x0800 = Low voltage cutoff active, 0x0400 = ??,  0x2000 = Hall sensor error, 0x0100 = ??
 41       | 41 XX    | ADC Battery Current (6.9 steps per amp)
 42       | 42 XX XX | ADC Battery voltage (~14 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, but must be on both)
