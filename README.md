@@ -2,7 +2,7 @@
 
 Work in progress for bringing life to an open source firmware for the BBSHD motor controller.
 
-The motor controller has two microcontrollers maing things a bit more complicated.
+The motor controller has two microcontrollers making things a bit more complicated.
 
 The main controller is from STC Micro and have available toolchains and can be flashed through the standard serial communication port exposed in the main wire harness, i.e. without taking the motor apart.
 
