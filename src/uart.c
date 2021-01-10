@@ -101,25 +101,29 @@ void uart2_close()
 
 uint8_t uart1_available()
 {
-	return rx1_head != rx1_tail; //  (rx1_head - rx1_tail)& BUF_SIZE_MASK;
+	return (rx1_head - rx1_tail) & BUF_SIZE_MASK;
 }
 
 uint8_t uart2_available()
 {
-	return rx2_head != rx2_tail; //(rx2_head - rx2_tail) & BUF_SIZE_MASK;
+	return (rx2_head - rx2_tail) & BUF_SIZE_MASK;
 }
 
 uint8_t uart1_read()
 {
+	ES = 0; // Disable UART1 interrupt
 	uint8_t byte = rx1_buf[rx1_tail];
 	rx1_tail = (rx1_tail + 1) & BUF_SIZE_MASK;
+	ES = 1; // Enable UART1 interrupt
 	return byte;
 }
 
 uint8_t uart2_read()
 {
+	IE2 &= ~(1 << 0); // Disable UART2 interrupt
 	uint8_t byte = rx2_buf[rx2_tail];
 	rx2_tail = (rx2_tail + 1) & BUF_SIZE_MASK;
+	IE2 |= (1 << 0); // Enable UART2 interrupt
 	return byte;
 }
 

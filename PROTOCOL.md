@@ -43,13 +43,14 @@ It could potentially be motor parameters for FOC or current ramp up/down etc. I 
 I have gone through all editable parameters in bafang config tool and only current limit and voltage limit have an effect on what is sent during intialization to NEC MCU.
 
 
-## Command
+## Commands
 
 Note: In table below the leading message header "AA" and trailing checksum has been left out.
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-63 XX    | 63 XX    | Target current (ADC current steps, see status 41), sent directly by STC MCU on change request.
+63 XX    | 63 XX    | Target PWM Duty Cycle (0 - 255)
+64 XX    | 64 XX    | Target Current % (0 - 100), percent of max current
 
 The values 0x0A and 0xFA could have special meaning. Before motor start 0xFA is sent and before it stops 0x0A seems to be sent.
 This could explain why during intialization target current value of 0x0A is sent, i.e. "disable motor", but just speculation at the moment.
@@ -66,7 +67,6 @@ Request  | Response | Interpretation
 40       | 40 XX XX | Status/error flags.
 41       | 41 XX    | ADC Battery Current (6.9 steps per amp)
 42       | 42 XX XX | ADC Battery voltage (~14 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, but must be on both)
-
 
 
 ### Status Flags

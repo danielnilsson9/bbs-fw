@@ -30,6 +30,15 @@
     <ClCompile Include="uart.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="throttle.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="app.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pas.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="motor.h">
@@ -54,6 +63,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="uart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="throttle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="app.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

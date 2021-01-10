@@ -9,22 +9,28 @@
 #include "stc15.h"
 
 #include "system.h"
+#include "app.h"
 #include "watchdog.h"
 #include "motor.h"
+#include "pas.h"
+#include "throttle.h"
 #include "uart.h"
 
 #define MAX_CURRENT_X1000		30000
-#define LOW_VOLTAGE_CUTOFF		42
+#define LOW_VOLTAGE_CUTOFF		24
 
 
 void main(void)
 {
+	uart1_open(9600);
+
 	system_init();
 	watchdog_init();
 
-	uart1_open(9600);
-
+	pas_init();
+	throttle_init();
 	motor_init(MAX_CURRENT_X1000, LOW_VOLTAGE_CUTOFF);
+	app_init();
 
 	// battery voltage as input
 	//P1M0 &= ~(1 << 6);
@@ -51,13 +57,22 @@ void main(void)
 	//P4M0 &= ~(1 << 6);
 	//P4M1 |= (1 << 6);
 
-	//motor_enable();
-	//motor_set_target_current(8000);
+	motor_enable();
 
+	motor_set_target_speed(0xff);
+	motor_set_target_current(0x02);
 
 	while (1)
 	{
 		motor_process();
+		app_process();
+
+
+		if (system_ms() > 30000)
+		{
+			motor_disable();
+		}
+
 		watchdog_yeild();
 	}
 }

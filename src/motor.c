@@ -11,8 +11,8 @@
 
 #define OPCODE_LVC				0x60
 #define OPCODE_MAX_CURRENT		0x61
-#define OPCODE_TARGET_CURRENT	0x63
-#define OPCODE_UNKNOWN8			0x64
+#define OPCODE_TARGET_SPEED		0x63
+#define OPCODE_TARGET_CURRENT	0x64
 #define OPCODE_HELLO			0x67
 #define OPCODE_UNKNOWN1			0x68
 #define OPCODE_UNKNOWN2			0x69
@@ -33,10 +33,16 @@
 static uint8_t is_connected = 0;
 static uint8_t msgbuf[8];
 
-static uint32_t next_read_status_ms = 0;
+static uint32_t next_send_ms = 0;
+static uint32_t next_read_ms = 0;
 
+static uint8_t target_speed_changed = 0;
+static uint8_t target_speed = 0;
 
-uint8_t compute_checksum(uint8_t* msg, uint8_t len)
+static uint8_t target_current_changed = 0;
+static uint8_t target_current = 0;
+
+static uint8_t compute_checksum(uint8_t* msg, uint8_t len)
 {
 	uint8_t checksum = 0;
 	for (int i = 0; i < len; ++i)
@@ -47,7 +53,7 @@ uint8_t compute_checksum(uint8_t* msg, uint8_t len)
 	return checksum;
 }
 
-void send_request(uint8_t opcode, uint16_t data)
+static void send_request(uint8_t opcode, uint16_t data)
 {
 	uint8_t idx = 0;
 
@@ -78,7 +84,7 @@ void send_request(uint8_t opcode, uint16_t data)
 	uart2_flush();
 }
 
-int read_response(uint8_t opcode, uint16_t* out_data)
+static int read_response(uint8_t opcode, uint16_t* out_data)
 {
 	uint8_t read = 0;
 	uint32_t start = system_ms();
@@ -93,6 +99,8 @@ int read_response(uint8_t opcode, uint16_t* out_data)
 			msgbuf[i++] = uart2_read();
 		}
 	}
+
+	system_delay_ms(4);
 
 	if (i > 1 && msgbuf[1] == opcode)
 	{
@@ -122,7 +130,7 @@ int read_response(uint8_t opcode, uint16_t* out_data)
 }
 
 
-int motor_connect()
+static int connect()
 {
 	for (int i = 0; i < 10; ++i)
 	{
@@ -130,7 +138,6 @@ int motor_connect()
 	
 		if (read_response(OPCODE_HELLO, 0))
 		{
-			system_delay_ms(10);
 			return 1;
 		}
 		else
@@ -142,7 +149,7 @@ int motor_connect()
 	return 0;
 }
 
-int motor_configure(uint16_t max_current_mA, uint8_t lvc_V)
+static int configure(uint16_t max_current_mA, uint8_t lvc_V)
 {
 	send_request(OPCODE_UNKNOWN1, 0x5a);
 	if (!read_response(OPCODE_UNKNOWN1, 0))
@@ -150,15 +157,11 @@ int motor_configure(uint16_t max_current_mA, uint8_t lvc_V)
 		return 0;
 	}
 
-	system_delay_ms(10);
-
 	send_request(OPCODE_UNKNOWN2, 0x11);
 	if (!read_response(OPCODE_UNKNOWN2, 0))
 	{
 		return 0;
 	}
-
-	system_delay_ms(10);
 
 	send_request(OPCODE_UNKNOWN3, 0x78);
 	if (!read_response(OPCODE_UNKNOWN3, 0))
@@ -166,15 +169,11 @@ int motor_configure(uint16_t max_current_mA, uint8_t lvc_V)
 		return 0;
 	}
 
-	system_delay_ms(10);
-
 	send_request(OPCODE_UNKNOWN4, 0x64);
 	if (!read_response(OPCODE_UNKNOWN4, 0))
 	{
 		return 0;
 	}
-
-	system_delay_ms(10);
 
 	send_request(OPCODE_UNKNOWN5, 0x50);
 	if (!read_response(OPCODE_UNKNOWN5, 0))
@@ -182,15 +181,11 @@ int motor_configure(uint16_t max_current_mA, uint8_t lvc_V)
 		return 0;
 	}
 
-	system_delay_ms(10);
-
 	send_request(OPCODE_UNKNOWN6, 0x46);
 	if (!read_response(OPCODE_UNKNOWN6, 0))
 	{
 		return 0;
 	}
-
-	system_delay_ms(10);
 
 	send_request(OPCODE_UNKNOWN7, 0x0c);
 	if (!read_response(OPCODE_UNKNOWN7, 0))
@@ -198,15 +193,11 @@ int motor_configure(uint16_t max_current_mA, uint8_t lvc_V)
 		return 0;
 	}
 
-	system_delay_ms(10);
-
 	send_request(OPCODE_LVC, lvc_V * 14);
 	if (!read_response(OPCODE_LVC, 0))
 	{
 		return 0;
 	}
-
-	system_delay_ms(10);
 
 	send_request(OPCODE_MAX_CURRENT, (uint16_t)((max_current_mA * 69UL) / 10000UL));
 	if (!read_response(OPCODE_MAX_CURRENT, 0))
@@ -214,27 +205,9 @@ int motor_configure(uint16_t max_current_mA, uint8_t lvc_V)
 		return 0;
 	}
 
-	system_delay_ms(10);
-
-	send_request(OPCODE_UNKNOWN8, 0x1c);
-	if (!read_response(OPCODE_UNKNOWN8, 0))
-	{
-		return 0;
-	}
-
-	system_delay_ms(10);
-
-	// investigate if this is needed, seems strange
-	send_request(OPCODE_TARGET_CURRENT, 0x0a);
-	if (!read_response(OPCODE_TARGET_CURRENT, 0))
-	{
-		return 0;
-	}
-
-	system_delay_ms(10);
-
 	return 1;
 }
+
 
 void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 {
@@ -248,7 +221,7 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 	P4M0 |= (1 << 4);
 
 	P2_0 = 0;
-	P4_4 = 0;
+	P4_4 = 1;
 	P2_1 = 1;
 
 	uart2_open(4800);
@@ -256,10 +229,12 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 	// Extra wait for other MCU to power on
 	system_delay_ms(100);
 
-
-	if (motor_connect() && motor_configure(max_current_mA, lvc_V))
+	if (connect() && configure(max_current_mA, lvc_V))
 	{
 		is_connected = 1;
+
+		motor_set_target_speed(0);
+		motor_set_target_current(0);
 
 		uart1_write('M');
 		uart1_write('C');
@@ -276,7 +251,6 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 void motor_enable()
 {
 	P2_0 = 1;
-	system_delay_ms(10);
 }
 
 void motor_disable()
@@ -284,11 +258,27 @@ void motor_disable()
 	P2_0 = 0;
 }
 
-void motor_set_target_current(uint16_t target_mA)
+void motor_set_target_speed(uint8_t value)
 {
-	send_request(OPCODE_TARGET_CURRENT, (uint16_t)((target_mA * 69UL) / 10000UL));
-	read_response(OPCODE_TARGET_CURRENT, 0);
-	system_delay_ms(2);
+	if (target_speed != value)
+	{
+		target_speed = value;
+		target_speed_changed = 1;
+	}
+}
+
+void motor_set_target_current(uint8_t percent)
+{
+	if (percent > 0x64)
+	{
+		percent = 0x64;
+	}
+
+	if (target_current != percent)
+	{
+		target_current = percent;
+		target_current_changed = 1;
+	}
 }
 
 
@@ -317,9 +307,38 @@ void read_status()
 
 void motor_process()
 {
-	if (is_connected && system_ms() > next_read_status_ms)
+	if (!is_connected)
 	{
-		next_read_status_ms = system_ms() + 150;
+		return;
+	}
+
+	uint32_t ms = system_ms();
+
+	if (ms > next_send_ms)
+	{
+		next_send_ms = ms + 64;
+		if (target_speed_changed)
+		{
+			send_request(OPCODE_TARGET_SPEED, target_speed);
+			if (read_response(OPCODE_TARGET_CURRENT, 0))
+			{
+				target_speed_changed = 0;
+			}	
+		}
+
+		if (target_current_changed)
+		{
+			send_request(OPCODE_TARGET_CURRENT, target_current);
+			if (read_response(OPCODE_TARGET_CURRENT, 0))
+			{
+				target_current = 0;
+			}
+		}
+	}
+
+	if (system_ms() > next_read_ms)
+	{
+		next_read_ms = system_ms() + 150;
 		read_status();
 	}
 }

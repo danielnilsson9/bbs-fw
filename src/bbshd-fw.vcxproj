@@ -63,14 +63,20 @@ make all</NMakeReBuildCommandLine>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="app.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="pas.c" />
+    <ClCompile Include="throttle.c" />
     <ClCompile Include="uart.c" />
     <ClCompile Include="util.c" />
     <ClCompile Include="motor.c" />
     <ClCompile Include="watchdog.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="app.h" />
     <ClInclude Include="interrupt.h" />
+    <ClInclude Include="pas.h" />
+    <ClInclude Include="throttle.h" />
     <ClInclude Include="uart.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="stc15.h" />
