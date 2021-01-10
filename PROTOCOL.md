@@ -70,7 +70,7 @@ Request  | Response | Interpretation
 
 
 ### Status Flags
-16 bits
+uint16
 
 Bit      | Interpretation
 -------- | -----------------

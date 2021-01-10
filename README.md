@@ -18,9 +18,9 @@ The goal at the moment is to only reimplement the STC microcontroller firmware a
 
 ## Hardware Revisions
 
-Revision | MCU          | Released
--------- | ------------ | ----------- | Comment
-V1.4     | STC15W4K56S4 | ???         | V1.3 printed on PCB
+Revision | MCU          | Released    | Comment
+-------- | ------------ | ----------- | --------------------
+V1.4     | STC15W4K56S4 | ~2017       | V1.3 printed on PCB
 V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB
 
 No noticeable changed on PCB:s, pin compataible MCU.  
