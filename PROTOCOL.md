@@ -36,7 +36,7 @@ Request  | Response | Interpretation
 60 02 56 | 60 02 56 | Set low voltage cutoff limit 41V. See status request 42.
 61 CF    | 61 CF    | Set battery max current limit 30A. See status request 41.
 
-The parameters which have not been identified above are hardcoded in the standard firmware to those values.
+The parameters which have not been identified above are hardcoded in the standard firmware to these values.
 It could potentially be motor parameters for FOC or current ramp up/down etc. I have no clue (anyone here peeking who have the info, feel free to contact me).
 
 ## Commands
@@ -47,9 +47,6 @@ Request  | Response | Interpretation
 -------- | -------- | --------------
 63 XX    | 63 XX    | Target Speed (0 - 255)
 64 XX    | 64 XX    | Target Current % (0 - 100), percent of max current
-
-The values 0x0A and 0xFA could have special meaning. Before motor start 0xFA is sent and before it stops 0x0A seems to be sent.
-This could explain why during intialization target current value of 0x0A is sent, i.e. "disable motor", but just speculation at the moment.
 
 
 ## Status
