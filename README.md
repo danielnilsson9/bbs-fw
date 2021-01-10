@@ -2,11 +2,11 @@
 
 Work in progress for bringing life to an open source firmware for the BBSHD motor controller.
 
-The motor controller has two microcontrollers maing things a bit more complicated.
+The motor controller has two microcontrollers making things a bit more complicated.
 
 The main controller is from STC Micro and have available toolchains and can be flashed through the standard serial communication port exposed in the main wire harness, i.e. without taking the motor apart.
 
-There is a secondary microcontroller "79F9211" which apparently is a common controller used in chinese ebike motor controllers using some standard firmware.
+There is a secondary microcontroller NEC 79F9211 which apparently is a common controller used in chinese ebike motor controllers using some standard firmware.
 This controller has no cheap availble programmer but there exist a protocol definition on how to program it, so one could most likeley be built, see doc/78Kx3-pgm.pdf.
 There exist no free compiler but a propritary one (CC78K0R) can be downloaded from Renesas website, it is not possible to install without some form of product number but the installer can be extracted to get hold of the compiler binary (in violation with TOS of course).
 

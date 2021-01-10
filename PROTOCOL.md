@@ -34,14 +34,10 @@ Request  | Response | Interpretation
 6D 46    | 6D 46    | Set parameter? Value 0x46
 6E 0C    | 6E 0C    | Set parameter? Value 0x0C
 60 02 56 | 60 02 56 | Set low voltage cutoff limit 41V. See status request 42.
-61 CF    | 61 CF    | Set battery current limit 30A. See status request 41.
-64 1C    | 64 1C    | Set parameter? Value 0x1C
-63 0A    | 63 0A    | Target current, special value (disable motor?)
+61 CF    | 61 CF    | Set battery max current limit 30A. See status request 41.
 
-The parameters which have not been identified above are probably hardcoded in STC MCU firmware.
+The parameters which have not been identified above are hardcoded in the standard firmware to these values.
 It could potentially be motor parameters for FOC or current ramp up/down etc. I have no clue (anyone here peeking who have the info, feel free to contact me).
-I have gone through all editable parameters in bafang config tool and only current limit and voltage limit have an effect on what is sent during intialization to NEC MCU.
-
 
 ## Commands
 
@@ -49,11 +45,8 @@ Note: In table below the leading message header "AA" and trailing checksum has b
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-63 XX    | 63 XX    | Target PWM Duty Cycle (0 - 255)
+63 XX    | 63 XX    | Target Speed (0 - 255)
 64 XX    | 64 XX    | Target Current % (0 - 100), percent of max current
-
-The values 0x0A and 0xFA could have special meaning. Before motor start 0xFA is sent and before it stops 0x0A seems to be sent.
-This could explain why during intialization target current value of 0x0A is sent, i.e. "disable motor", but just speculation at the moment.
 
 
 ## Status
