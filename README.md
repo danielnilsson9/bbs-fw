@@ -19,10 +19,14 @@ The goal at the moment is to only reimplement the STC microcontroller firmware a
 ## Hardware Revisions
 
 Revision | MCU          | Released
--------- | ------------ | -----------
-V1.3     | STC15W4K56S4 | ~2017
-V1.4     | IAP ???      | ???
-V1.5     | IAP15W4K61S4 | ~2019
+-------- | ------------ | ----------- | Comment
+V1.4     | STC15W4K56S4 | ???         | V1.3 printed on PCB
+V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB
+
+No noticeable changed on PCB:s, pin compataible MCU.  
+Original firmware for V1.5 will not work on V1.4 or earlier.  
+This might be because how configuration is saved in eeprom which  
+differs between the MCUs.
 
 
 ## STC15W4K32S4
@@ -102,12 +106,17 @@ Grey
 Connected to P121 on NEC MCU  
 Connected to P0.6 on STC MCU
 
-#### Enable
+#### Motor Power Enable
 Direct connection between STC and NEC MCU.  
 
 Connected to P150 on NEC MCU  
 Connected to P2.0 on STC MCU which is (RSTOUT_LOW) probably to force motor disable on STC MCU reset.  
-Connected to P4.3 on STC MCU
+
+#### Motor Control Enable
+Must be driven high before communiacting with NEC MCU.
+
+Connected to P23 on NEC MCU.  
+Connected to P2.1 on STC MCU.
 
 #### TX
 Connected to P73 (TXD) on NEC MCU  

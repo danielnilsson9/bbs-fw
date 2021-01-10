@@ -18,10 +18,18 @@ MAINSRC = main.c
 
 # These are the sources that must be compiled to .rel files:
 EXTRASRCS = \
-	motor.c
+	motor.c \
+	uart.c \
+	system.c \
+	util.c \
+	watchdog.c
 	
 HEADERS = \
-	motor.h
+	motor.h \
+	uart.h \
+	system.h \
+	util.h \
+	watchdog.c
 
 # The list of .rel files can be derived from the list of their source files
 RELS = $(EXTRASRCS:.c=.rel)

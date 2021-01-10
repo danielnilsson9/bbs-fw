@@ -8056,7 +8056,6 @@ Source: www.kingbright.com</description>
 <part name="R17" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
 <part name="R18" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
 <part name="R19" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
-<part name="R20" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
 <part name="R21" library="rcl" deviceset="R-EU_" device="R0603" value="3.3k"/>
 <part name="R22" library="rcl" deviceset="R-EU_" device="R0603" value="10k"/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
@@ -8092,6 +8091,8 @@ Source: www.kingbright.com</description>
 <part name="LED1" library="led" deviceset="LED" device=""/>
 <part name="R41" library="rcl" deviceset="R-EU_" device="R0603" value="5.2K"/>
 <part name="R42" library="rcl" deviceset="R-EU_" device="R0603" value="5.2K"/>
+<part name="R20" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
+<part name="R44" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
 </parts>
 <sheets>
 <sheet>
@@ -8118,7 +8119,7 @@ some form of level conversion to 5V maybe?</text>
 <text x="17.018" y="62.738" size="1.778" layer="97">PAS2</text>
 <text x="159.766" y="166.878" size="1.778" layer="97">Debug Terminalt?
 Constant data output at 9600 baud.</text>
-<text x="187.96" y="111.76" size="1.778" layer="97">??? Has not been traced</text>
+<text x="187.96" y="111.76" size="1.778" layer="97">Gear sensor</text>
 <text x="187.96" y="106.68" size="1.778" layer="97">??? Has not been traced</text>
 <text x="187.96" y="93.98" size="1.778" layer="97">??? Has not been traced</text>
 <text x="18.796" y="29.718" size="1.778" layer="97">SPD</text>
@@ -8552,8 +8553,7 @@ Constant data output at 9600 baud.</text>
 <text x="11.684" y="138.684" size="1.778" layer="97">U (white)</text>
 <text x="13.208" y="141.732" size="1.778" layer="97">V (blue)</text>
 <text x="12.192" y="135.89" size="1.778" layer="97">W (grey)</text>
-<text x="17.78" y="99.06" size="1.778" layer="97">Motor Enable</text>
-<text x="17.78" y="111.76" size="1.778" layer="97">RSTOUT_LOW</text>
+<text x="17.78" y="99.06" size="1.778" layer="97">Motor Power Enable</text>
 <text x="220.98" y="154.432" size="1.778" layer="97">NEC TxD</text>
 <text x="151.638" y="154.178" size="1.778" layer="97">STC RxD2</text>
 <text x="151.638" y="141.478" size="1.778" layer="97">STC TxD2</text>
@@ -8573,7 +8573,8 @@ Labeled as "T" on hall sensor board.
 Motor temperature sensor?</text>
 <text x="165.1" y="127" size="1.778" layer="97">Some form of status LED.
 Seems to be blinking during normal operation.</text>
-<text x="120.65" y="102.108" size="1.778" layer="97">Active High</text>
+<text x="17.78" y="106.68" size="1.778" layer="97">Motor Control Enable</text>
+<text x="17.78" y="114.3" size="1.778" layer="97">No effect, but should be high</text>
 </plain>
 <instances>
 <instance part="FRAME2" gate="G$1" x="0" y="0"/>
@@ -8586,7 +8587,6 @@ Seems to be blinking during normal operation.</text>
 <instance part="R17" gate="G$1" x="111.76" y="154.94"/>
 <instance part="R18" gate="G$1" x="111.76" y="142.24"/>
 <instance part="R19" gate="G$1" x="111.76" y="132.08"/>
-<instance part="R20" gate="G$1" x="43.18" y="109.22"/>
 <instance part="R21" gate="G$1" x="66.04" y="96.52"/>
 <instance part="R22" gate="G$1" x="78.74" y="88.9" rot="R90"/>
 <instance part="GND7" gate="1" x="78.74" y="76.2"/>
@@ -8612,6 +8612,8 @@ Seems to be blinking during normal operation.</text>
 <instance part="P+7" gate="1" x="154.94" y="127"/>
 <instance part="R40" gate="G$1" x="193.04" y="119.38"/>
 <instance part="LED1" gate="G$1" x="165.1" y="119.38" rot="R90"/>
+<instance part="R20" gate="G$1" x="66.04" y="104.14"/>
+<instance part="R44" gate="G$1" x="66.04" y="111.76"/>
 </instances>
 <busses>
 </busses>
@@ -8754,21 +8756,8 @@ Seems to be blinking during normal operation.</text>
 </net>
 <net name="STC_P2.0" class="0">
 <segment>
-<wire x1="30.48" y1="109.22" x2="38.1" y2="109.22" width="0.1524" layer="91"/>
-<label x="30.48" y="109.22" size="1.778" layer="95" rot="R180" xref="yes"/>
-<pinref part="R20" gate="G$1" pin="1"/>
-</segment>
-</net>
-<net name="STC_P4.3" class="0">
-<segment>
+<wire x1="30.48" y1="96.52" x2="60.96" y2="96.52" width="0.1524" layer="91"/>
 <label x="30.48" y="96.52" size="1.778" layer="95" rot="R180" xref="yes"/>
-<pinref part="R20" gate="G$1" pin="2"/>
-<wire x1="48.26" y1="109.22" x2="50.8" y2="109.22" width="0.1524" layer="91"/>
-<wire x1="50.8" y1="109.22" x2="50.8" y2="96.52" width="0.1524" layer="91"/>
-<wire x1="50.8" y1="96.52" x2="30.48" y2="96.52" width="0.1524" layer="91"/>
-<wire x1="50.8" y1="96.52" x2="60.96" y2="96.52" width="0.1524" layer="91"/>
-<junction x="50.8" y="96.52"/>
-<pinref part="R21" gate="G$1" pin="1"/>
 </segment>
 </net>
 <net name="NEC_P150" class="0">
@@ -8928,6 +8917,34 @@ Seems to be blinking during normal operation.</text>
 <pinref part="R40" gate="G$1" pin="2"/>
 <wire x1="198.12" y1="119.38" x2="205.74" y2="119.38" width="0.1524" layer="91"/>
 <label x="205.74" y="119.38" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="STC_P2.1" class="0">
+<segment>
+<pinref part="R20" gate="G$1" pin="1"/>
+<wire x1="60.96" y1="104.14" x2="30.48" y2="104.14" width="0.1524" layer="91"/>
+<label x="30.48" y="104.14" size="1.778" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="NEC_P23" class="0">
+<segment>
+<pinref part="R20" gate="G$1" pin="2"/>
+<wire x1="71.12" y1="104.14" x2="119.38" y2="104.14" width="0.1524" layer="91"/>
+<label x="119.38" y="104.14" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="STC_P4.4" class="0">
+<segment>
+<pinref part="R44" gate="G$1" pin="1"/>
+<wire x1="60.96" y1="111.76" x2="30.48" y2="111.76" width="0.1524" layer="91"/>
+<label x="30.48" y="111.76" size="1.778" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="NEC_P22" class="0">
+<segment>
+<pinref part="R44" gate="G$1" pin="2"/>
+<wire x1="71.12" y1="111.76" x2="119.38" y2="111.76" width="0.1524" layer="91"/>
+<label x="119.38" y="111.76" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 </nets>

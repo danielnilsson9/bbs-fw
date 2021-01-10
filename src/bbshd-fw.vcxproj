@@ -64,11 +64,20 @@ make all</NMakeReBuildCommandLine>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.c" />
+    <ClCompile Include="uart.c" />
+    <ClCompile Include="util.c" />
     <ClCompile Include="motor.c" />
+    <ClCompile Include="watchdog.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="interrupt.h" />
+    <ClInclude Include="uart.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="stc15.h" />
     <ClInclude Include="motor.h" />
+    <ClInclude Include="system.c" />
+    <ClInclude Include="system.h" />
+    <ClInclude Include="watchdog.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,7 +3,7 @@
 The two microcontrollers communicates directly using an async serial line.  
 Baudrate is 4800.
 
-At first glance the protocol seems to follow similar prinicples of the the display protocol which has already been reverse enginered.
+The protocol follows similar prinicples of the the display protocol which has earlier been reverse engineered.
 
 Rules:
 * All messages start with 0xAA
@@ -63,6 +63,30 @@ Note: In table below the leading message header "AA" and trailing checksum has b
 
 Request  | Response | Interpretation
 -------- | -------- | --------------
-40       | 40 XX XX | Status/error flags. 0x2000 = Hall sensor error, 0x0800 = Low voltage cutoff active
+40       | 40 XX XX | Status/error flags.
 41       | 41 XX    | ADC Battery Current (6.9 steps per amp)
 42       | 42 XX XX | ADC Battery voltage (~14 steps per volt) (unexpected, only found voltage measuremt circuit connected to STC MCU, but must be on both)
+
+
+
+### Status Flags
+16 bits
+
+Bit      | Interpretation
+-------- | -----------------
+1        | -
+2        | -
+3        | -
+4        | -
+5        | -
+6        | -
+7        | -
+8        | -
+9        | Motor Control Disabled?
+10       | -
+11       | Motor Control Disabled?
+12       | Low voltage cutoff active
+13       | -
+14       | Hall sensor error
+15       | -
+16       | -
