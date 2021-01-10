@@ -1,6 +1,7 @@
 #ifndef _UART_H_
 #define _UART_H_
 #include "stc15.h"
+#include "interrupt.h"
 #include <stdint.h>
 
 
@@ -23,7 +24,7 @@ void uart1_flush();
 void uart2_flush();
 
 
-INTERRUPT_USING(isr_uart1, 4, 3);
-INTERRUPT_USING(isr_uart2, 8, 3);
+INTERRUPT_USING(isr_uart1, IRQ_UART1, 3);
+INTERRUPT_USING(isr_uart2, IRQ_UART2, 3);
 
 #endif

@@ -8,6 +8,7 @@
 #include "motor.h"
 #include "system.h"
 #include "uart.h"
+#include "pins.h"
 
 #define OPCODE_LVC				0x60
 #define OPCODE_MAX_CURRENT		0x61
@@ -208,21 +209,40 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V)
 	return 1;
 }
 
+static void read_status()
+{
+	uint16_t status = 0;
+
+	send_request(OPCODE_READ_STATUS, 0);
+	read_response(OPCODE_READ_STATUS, &status);
+
+	uart1_write(status >> 8);
+	uart1_write(status);
+
+	system_delay_ms(2);
+
+	send_request(OPCODE_READ_CURRENT, 0);
+	read_response(OPCODE_READ_CURRENT, 0);
+
+	system_delay_ms(2);
+
+	send_request(OPCODE_READ_VOLTAGE, 0);
+	read_response(OPCODE_READ_VOLTAGE, 0);
+
+	system_delay_ms(2);
+}
+
+
 
 void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 {
-	P2M1 &= ~(1 << 0);
-	P2M0 |= (1 << 0);
+	SET_PIN_OUTPUT(PIN_MOTOR_POWER_ENABLE);
+	SET_PIN_OUTPUT(PIN_MOTOR_CONTROL_ENABLE);
+	SET_PIN_OUTPUT(PIN_MOTOR_EXTRA);
 
-	P2M1 &= ~(1 << 1);
-	P2M0 |= (1 << 1);
-	
-	P4M1 &= ~(1 << 4);
-	P4M0 |= (1 << 4);
-
-	P2_0 = 0;
-	P4_4 = 1;
-	P2_1 = 1;
+	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
+	SET_PIN_HIGH(PIN_MOTOR_CONTROL_ENABLE);
+	SET_PIN_HIGH(PIN_MOTOR_EXTRA);
 
 	uart2_open(4800);
 
@@ -235,28 +255,58 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 
 		motor_set_target_speed(0);
 		motor_set_target_current(0);
-
-		uart1_write('M');
-		uart1_write('C');
-		uart1_write('\n');
-	}
-	else
-	{
-		uart1_write('M');
-		uart1_write('E');
-		uart1_write('\n');
 	}
 }
 
+void motor_process()
+{
+	if (!is_connected)
+	{
+		return;
+	}
+
+	uint32_t ms = system_ms();
+
+	if (ms > next_send_ms)
+	{
+		next_send_ms = ms + 64;
+		if (target_speed_changed)
+		{
+			send_request(OPCODE_TARGET_SPEED, target_speed);
+			if (read_response(OPCODE_TARGET_CURRENT, 0))
+			{
+				target_speed_changed = 0;
+			}
+		}
+
+		if (target_current_changed)
+		{
+			send_request(OPCODE_TARGET_CURRENT, target_current);
+			if (read_response(OPCODE_TARGET_CURRENT, 0))
+			{
+				target_current_changed = 0;
+			}
+		}
+	}
+
+	if (system_ms() > next_read_ms)
+	{
+		next_read_ms = system_ms() + 150;
+		read_status();
+	}
+}
+
+
 void motor_enable()
 {
-	P2_0 = 1;
+	SET_PIN_HIGH(PIN_MOTOR_POWER_ENABLE);
 }
 
 void motor_disable()
 {
-	P2_0 = 0;
+	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
 }
+
 
 void motor_set_target_speed(uint8_t value)
 {
@@ -281,65 +331,4 @@ void motor_set_target_current(uint8_t percent)
 	}
 }
 
-
-void read_status()
-{
-	uint16_t status = 0;
-
-	send_request(OPCODE_READ_STATUS, 0);
-	read_response(OPCODE_READ_STATUS, &status);
-
-	uart1_write(status >> 8);
-	uart1_write(status);
-
-	system_delay_ms(2);
-
-	send_request(OPCODE_READ_CURRENT, 0);
-	read_response(OPCODE_READ_CURRENT, 0);
-
-	system_delay_ms(2);
-
-	send_request(OPCODE_READ_VOLTAGE, 0);
-	read_response(OPCODE_READ_VOLTAGE, 0);
-
-	system_delay_ms(2);
-}
-
-void motor_process()
-{
-	if (!is_connected)
-	{
-		return;
-	}
-
-	uint32_t ms = system_ms();
-
-	if (ms > next_send_ms)
-	{
-		next_send_ms = ms + 64;
-		if (target_speed_changed)
-		{
-			send_request(OPCODE_TARGET_SPEED, target_speed);
-			if (read_response(OPCODE_TARGET_CURRENT, 0))
-			{
-				target_speed_changed = 0;
-			}	
-		}
-
-		if (target_current_changed)
-		{
-			send_request(OPCODE_TARGET_CURRENT, target_current);
-			if (read_response(OPCODE_TARGET_CURRENT, 0))
-			{
-				target_current = 0;
-			}
-		}
-	}
-
-	if (system_ms() > next_read_ms)
-	{
-		next_read_ms = system_ms() + 150;
-		read_status();
-	}
-}
 

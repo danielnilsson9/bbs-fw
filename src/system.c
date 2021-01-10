@@ -8,7 +8,6 @@
 
 #include "system.h"
 #include "watchdog.h"
-#include "interrupt.h"
 
 #define TIMER0_RELOAD	(65536 - CPU_FREQ / 1000) + 1
 
@@ -53,7 +52,7 @@ void system_delay_ms(uint16_t ms)
 }
 
 
-INTERRUPT_USING(isr_timer0, TIMER0_IRQ, 2)
+INTERRUPT_USING(isr_timer0, IRQ_TIMER0, 2)
 {
 	_ms++;
 }

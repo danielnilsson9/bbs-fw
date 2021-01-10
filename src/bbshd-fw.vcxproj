@@ -76,6 +76,7 @@ make all</NMakeReBuildCommandLine>
     <ClInclude Include="app.h" />
     <ClInclude Include="interrupt.h" />
     <ClInclude Include="pas.h" />
+    <ClInclude Include="pins.h" />
     <ClInclude Include="throttle.h" />
     <ClInclude Include="uart.h" />
     <ClInclude Include="util.h" />

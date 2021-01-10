@@ -74,5 +74,8 @@
     <ClInclude Include="pas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pins.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

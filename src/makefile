@@ -35,7 +35,8 @@ HEADERS = \
 	throttle.h \
 	util.h \
 	watchdog.h \
-	pas.h
+	pas.h \
+	pins.h
 
 # The list of .rel files can be derived from the list of their source files
 RELS = $(EXTRASRCS:.c=.rel)

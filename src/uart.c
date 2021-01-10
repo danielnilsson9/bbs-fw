@@ -172,7 +172,7 @@ void uart2_flush()
 }
 
 
-INTERRUPT_USING(isr_uart1, 4, 3)
+INTERRUPT_USING(isr_uart1, IRQ_UART1, 3)
 {
 	if (RI) // rx interrupt
 	{
@@ -201,7 +201,7 @@ INTERRUPT_USING(isr_uart1, 4, 3)
 	}
 }
 
-INTERRUPT_USING(isr_uart2, 8, 3)
+INTERRUPT_USING(isr_uart2, IRQ_UART2, 3)
 {
 	if (S2CON & (1 << 0)) // rx interrupt
 	{

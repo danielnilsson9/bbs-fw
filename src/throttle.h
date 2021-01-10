@@ -14,6 +14,9 @@
 
 void throttle_init();
 
+void throttle_set_min_voltage(uint8_t volt_x1000);
+void throttle_set_max_voltage(uint8_t volt_x1000);
+
 uint8_t throttle_read();
 
 

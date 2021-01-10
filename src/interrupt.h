@@ -9,6 +9,8 @@
 #ifndef  _INTERRUPT_H_
 #define _INTERRUPT_H_
 
-#define TIMER0_IRQ		1
+#define IRQ_TIMER0		1
+#define IRQ_UART1		4
+#define IRQ_UART2		8
 
 #endif
