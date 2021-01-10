@@ -110,12 +110,12 @@ Connected to P0.6 on STC MCU
 Direct connection between STC and NEC MCU.  
 
 Connected to P150 on NEC MCU  
-Connected to P2.0 on STC MCU which is (RSTOUT_LOW) probably to force motor disable on STC MCU reset.  
+Connected to P2.0 on STC MCU which is also (RSTOUT_LOW) probably to force motor disable on STC MCU reset.  
 
 #### Motor Control Enable
 Must be driven high before communiacting with NEC MCU.
 
-Connected to P23 on NEC MCU.  
+Connected to P22 on NEC MCU.  
 Connected to P2.1 on STC MCU.
 
 #### TX
