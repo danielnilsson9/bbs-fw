@@ -20,6 +20,7 @@
 #define __at(X)		
 
 #define __xdata		
+#define __data		
 
 #define INTERRUPT(name, vector)					void name()
 #define INTERRUPT_USING(name, vector,regnum)	void name()
@@ -41,6 +42,10 @@ SFR(PCON2, 0x97);
 SFR(T2H, 0xD6);
 SFR(T2L, 0xD7);
 
+
+SFR(T4T3M, 0xD1);
+SFR(T4H, 0xD2);
+SFR(T4L, 0xD3);
 
 
 

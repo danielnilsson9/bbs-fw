@@ -12,5 +12,6 @@
 #define IRQ_TIMER0		1
 #define IRQ_UART1		4
 #define IRQ_UART2		8
+#define IRQ_TIMER4		20
 
 #endif

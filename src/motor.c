@@ -9,6 +9,9 @@
 #include "system.h"
 #include "uart.h"
 #include "pins.h"
+#include "eventlog.h"
+
+#include <stdbool.h>
 
 #define OPCODE_LVC				0x60
 #define OPCODE_MAX_CURRENT		0x61
@@ -37,11 +40,14 @@ static uint8_t msgbuf[8];
 static uint32_t next_send_ms = 0;
 static uint32_t next_read_ms = 0;
 
-static uint8_t target_speed_changed = 0;
+static bool target_speed_changed = true;
 static uint8_t target_speed = 0;
 
-static uint8_t target_current_changed = 0;
+static bool target_current_changed = true;
 static uint8_t target_current = 0;
+
+static uint16_t status_flags = 0;
+
 
 static uint8_t compute_checksum(uint8_t* msg, uint8_t len)
 {
@@ -216,8 +222,11 @@ static void read_status()
 	send_request(OPCODE_READ_STATUS, 0);
 	read_response(OPCODE_READ_STATUS, &status);
 
-	uart1_write(status >> 8);
-	uart1_write(status);
+	if (status != status_flags)
+	{
+		status_flags = status;
+		eventlog_write_data(EVT_DATA_MOTOR_STATUS, status_flags);
+	}
 
 	system_delay_ms(2);
 
@@ -231,7 +240,6 @@ static void read_status()
 
 	system_delay_ms(2);
 }
-
 
 
 void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
@@ -253,8 +261,14 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 	{
 		is_connected = 1;
 
+		eventlog_write(EVT_MSG_MOTOR_INIT_OK);
+
 		motor_set_target_speed(0);
 		motor_set_target_current(0);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_INIT_MOTOR);
 	}
 }
 
@@ -270,12 +284,18 @@ void motor_process()
 	if (ms > next_send_ms)
 	{
 		next_send_ms = ms + 64;
+
 		if (target_speed_changed)
 		{
 			send_request(OPCODE_TARGET_SPEED, target_speed);
-			if (read_response(OPCODE_TARGET_CURRENT, 0))
+			if (read_response(OPCODE_TARGET_SPEED, 0))
 			{
-				target_speed_changed = 0;
+				target_speed_changed = false;
+				eventlog_write_data(EVT_DATA_TARGET_SPEED, target_speed);
+			}
+			else
+			{
+				eventlog_write(EVT_ERROR_CHANGE_TARGET_SPEED);
 			}
 		}
 
@@ -284,7 +304,12 @@ void motor_process()
 			send_request(OPCODE_TARGET_CURRENT, target_current);
 			if (read_response(OPCODE_TARGET_CURRENT, 0))
 			{
-				target_current_changed = 0;
+				target_current_changed = false;
+				eventlog_write_data(EVT_DATA_TARGET_CURRENT, target_current);
+			}
+			else
+			{
+				eventlog_write(EVT_ERROR_CHANGE_TARGET_CURRENT);
 			}
 		}
 	}
@@ -313,7 +338,7 @@ void motor_set_target_speed(uint8_t value)
 	if (target_speed != value)
 	{
 		target_speed = value;
-		target_speed_changed = 1;
+		target_speed_changed = true;
 	}
 }
 
@@ -327,8 +352,6 @@ void motor_set_target_current(uint8_t percent)
 	if (target_current != percent)
 	{
 		target_current = percent;
-		target_current_changed = 1;
+		target_current_changed = true;
 	}
 }
-
-

@@ -45,7 +45,7 @@
     <NMakeReBuildCommandLine>make clean
 make all</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>C:/Program Files/SDCC/include/mcs51;./</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>C:/Program Files/SDCC/include;C:/Program Files/SDCC/include/mcs51;./</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)</OutDir>
     <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -56,7 +56,7 @@ make all</NMakeReBuildCommandLine>
     <NMakeReBuildCommandLine>make clean
 make all</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>C:/Program Files/SDCC/include/mcs51;./</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>C:/Program Files/SDCC/include;C:/Program Files/SDCC/include/mcs51;./</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)</OutDir>
     <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -64,8 +64,10 @@ make all</NMakeReBuildCommandLine>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.c" />
+    <ClCompile Include="eventlog.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="pas.c" />
+    <ClCompile Include="speed_sensor.c" />
     <ClCompile Include="throttle.c" />
     <ClCompile Include="uart.c" />
     <ClCompile Include="util.c" />
@@ -74,9 +76,11 @@ make all</NMakeReBuildCommandLine>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
+    <ClInclude Include="eventlog.h" />
     <ClInclude Include="interrupt.h" />
     <ClInclude Include="pas.h" />
     <ClInclude Include="pins.h" />
+    <ClInclude Include="speed_sensor.h" />
     <ClInclude Include="throttle.h" />
     <ClInclude Include="uart.h" />
     <ClInclude Include="util.h" />

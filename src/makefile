@@ -19,6 +19,7 @@ MAINSRC = main.c
 # These are the sources that must be compiled to .rel files:
 EXTRASRCS = \
 	app.c \
+	eventlog.c \
 	motor.c \
 	uart.c \
 	system.c \
@@ -29,6 +30,7 @@ EXTRASRCS = \
 	
 HEADERS = \
 	app.h \
+	eventlog.h \
 	motor.h \
 	uart.h \
 	system.h \
@@ -42,7 +44,7 @@ HEADERS = \
 RELS = $(EXTRASRCS:.c=.rel)
 
 INCLUDES = -I$(IDIR) -I. -I../
-CFLAGS   = -m$(PLATFORM) -Ddouble=float --std-c99 --nolospre 
+CFLAGS   = -m$(PLATFORM) -Ddouble=float --std-c99 --nolospre
 ELF_FLAGS = 
 LIBS     = 
 
