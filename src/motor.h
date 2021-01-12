@@ -20,4 +20,8 @@ void motor_disable();
 void motor_set_target_speed(uint8_t value);
 void motor_set_target_current(uint8_t percent);
 
+uint16_t motor_get_battery_lvc_x10();
+uint16_t motor_get_battery_current_x10();
+uint16_t motor_get_battery_voltage_x10();
+
 #endif

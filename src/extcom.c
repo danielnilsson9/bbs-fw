@@ -11,7 +11,9 @@
 #include "uart.h"
 #include "system.h"
 #include "sensors.h"
+#include "motor.h"
 #include "app.h"
+#include "util.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -37,7 +39,7 @@
 
 // Bafang display communication
 #define OPCODE_BAFANG_DISPLAY_READ_STATUS		0x08
-#define OPCODE_BAFANG_DISPLAY_READ_POWER		0x0a
+#define OPCODE_BAFANG_DISPLAY_READ_CURRENT		0x0a
 #define OPCODE_BAFANG_DISPLAY_READ_BATTERY		0x11
 #define OPCODE_BAFANG_DISPLAY_READ_SPEED		0x20
 #define OPCODE_BAFANG_DISPLAY_READ_UNKNOWN1		0x21
@@ -77,7 +79,7 @@ static uint8_t try_process_bafang_write_request();
 
 
 static uint8_t process_bafang_display_read_status();
-static uint8_t process_bafang_display_read_power();
+static uint8_t process_bafang_display_read_current();
 static uint8_t process_bafang_display_read_battery();
 static uint8_t process_bafang_display_read_speed();
 static uint8_t process_bafang_display_read_unknown1();
@@ -171,8 +173,8 @@ static uint8_t try_process_bafang_read_request()
 	{
 	case OPCODE_BAFANG_DISPLAY_READ_STATUS:
 		return process_bafang_display_read_status();
-	case OPCODE_BAFANG_DISPLAY_READ_POWER:
-		return process_bafang_display_read_power();
+	case OPCODE_BAFANG_DISPLAY_READ_CURRENT:
+		return process_bafang_display_read_current();
 	case OPCODE_BAFANG_DISPLAY_READ_BATTERY:
 		return process_bafang_display_read_battery();
 	case OPCODE_BAFANG_DISPLAY_READ_SPEED:
@@ -221,19 +223,30 @@ static uint8_t process_bafang_display_read_status()
 	return COMPLETE;
 }
 
-static uint8_t process_bafang_display_read_power()
+static uint8_t process_bafang_display_read_current()
 {
-	uart1_write(0);
-	uart1_write(0); // checksum
-	// :TODO: get current from motor and compute checksum (excl op)
+	uint8_t amp_x2 = (uint8_t)(motor_get_battery_current_x10() * 2) / 10;
+
+	uart1_write(amp_x2);
+	uart1_write(amp_x2); // checksum
 
 	return COMPLETE;
 }
 
 static uint8_t process_bafang_display_read_battery()
 {
-	uart1_write(50); // 50%
-	uart1_write(50); // checksum
+	// Some stupid estimation based on configured lvc (unusable, but similar stuff in original firmware)
+	uint16_t max_volt_x10 = (7 * motor_get_battery_lvc_x10()) / 4;
+	uint16_t volt_x10 = motor_get_battery_voltage_x10();
+	if (volt_x10 > max_volt_x10)
+	{
+		volt_x10 = max_volt_x10;
+	}
+
+	uint8_t percent = (uint8_t)map(volt_x10, motor_get_battery_lvc_x10(), max_volt_x10, 0, 100);
+
+	uart1_write(percent);
+	uart1_write(percent);
 
 	return COMPLETE;
 }

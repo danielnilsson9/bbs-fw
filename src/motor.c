@@ -46,200 +46,20 @@ static uint8_t target_speed = 0;
 static bool target_current_changed = true;
 static uint8_t target_current = 0;
 
+static uint8_t lvc_volt_x10 = 0;
+
 static uint16_t status_flags = 0;
+static uint16_t battery_volt_x10 = 0;
+static uint16_t battery_amp_x10 = 0;
 
 
-static uint8_t compute_checksum(uint8_t* msg, uint8_t len)
-{
-	uint8_t checksum = 0;
-	for (int i = 0; i < len; ++i)
-	{
-		checksum += *(msg + i);
-	}
 
-	return checksum;
-}
-
-static void send_request(uint8_t opcode, uint16_t data)
-{
-	uint8_t idx = 0;
-
-	msgbuf[idx++] = 0xaa; // start of message
-	msgbuf[idx++] = opcode;
-
-	if (opcode == OPCODE_LVC)
-	{
-		msgbuf[idx++] = data >> 8;
-		msgbuf[idx++] = data;
-	}
-	else if (opcode != OPCODE_READ_STATUS && opcode != OPCODE_READ_CURRENT && opcode != OPCODE_READ_VOLTAGE)
-	{
-		msgbuf[idx++] = data;
-	}
-
-	uint8_t checksum = compute_checksum(msgbuf + 1, idx - 1);
-	msgbuf[idx++] = checksum;
-
-	// empty rx buffer
-	while (uart2_available()) uart2_read();
-
-	for (uint8_t i = 0; i < idx; ++i)
-	{
-		uart2_write(msgbuf[i]);
-	}
-
-	uart2_flush();
-}
-
-static int read_response(uint8_t opcode, uint16_t* out_data)
-{
-	uint8_t read = 0;
-	uint32_t start = system_ms();
-
-	uint8_t len = (opcode == OPCODE_LVC || opcode == OPCODE_READ_STATUS || opcode == OPCODE_READ_VOLTAGE) ? 5 : 4;
-
-	uint8_t i = 0;
-	while (i < len && system_ms() < start + READ_TIMEOUT)
-	{
-		if (uart2_available())
-		{
-			msgbuf[i++] = uart2_read();
-		}
-	}
-
-	system_delay_ms(4);
-
-	if (i > 1 && msgbuf[1] == opcode)
-	{
-		uint8_t checksum = compute_checksum(&msgbuf[1], (uint8_t)(i - 2));
-		if (checksum == msgbuf[i - 1])
-		{
-			if (out_data != 0)
-			{
-				if (opcode == OPCODE_LVC || opcode == OPCODE_READ_STATUS || opcode == OPCODE_READ_VOLTAGE)
-				{
-					*out_data = msgbuf[2] << 8 | msgbuf[3];
-				}
-				else
-				{
-					*out_data = msgbuf[2];
-				}
-			}
-			
-			return 1;
-		}
-
-		return 0; // failed to verify message
-	}
-	
-	// read failure
-	return 0;
-}
-
-
-static int connect()
-{
-	for (int i = 0; i < 10; ++i)
-	{
-		send_request(OPCODE_HELLO, 0x00);
-	
-		if (read_response(OPCODE_HELLO, 0))
-		{
-			return 1;
-		}
-		else
-		{
-			system_delay_ms(1000);
-		}		
-	}
-
-	return 0;
-}
-
-static int configure(uint16_t max_current_mA, uint8_t lvc_V)
-{
-	send_request(OPCODE_UNKNOWN1, 0x5a);
-	if (!read_response(OPCODE_UNKNOWN1, 0))
-	{
-		return 0;
-	}
-
-	send_request(OPCODE_UNKNOWN2, 0x11);
-	if (!read_response(OPCODE_UNKNOWN2, 0))
-	{
-		return 0;
-	}
-
-	send_request(OPCODE_UNKNOWN3, 0x78);
-	if (!read_response(OPCODE_UNKNOWN3, 0))
-	{
-		return 0;
-	}
-
-	send_request(OPCODE_UNKNOWN4, 0x64);
-	if (!read_response(OPCODE_UNKNOWN4, 0))
-	{
-		return 0;
-	}
-
-	send_request(OPCODE_UNKNOWN5, 0x50);
-	if (!read_response(OPCODE_UNKNOWN5, 0))
-	{
-		return 0;
-	}
-
-	send_request(OPCODE_UNKNOWN6, 0x46);
-	if (!read_response(OPCODE_UNKNOWN6, 0))
-	{
-		return 0;
-	}
-
-	send_request(OPCODE_UNKNOWN7, 0x0c);
-	if (!read_response(OPCODE_UNKNOWN7, 0))
-	{
-		return 0;
-	}
-
-	send_request(OPCODE_LVC, lvc_V * 14);
-	if (!read_response(OPCODE_LVC, 0))
-	{
-		return 0;
-	}
-
-	send_request(OPCODE_MAX_CURRENT, (uint16_t)((max_current_mA * 69UL) / 10000UL));
-	if (!read_response(OPCODE_MAX_CURRENT, 0))
-	{
-		return 0;
-	}
-
-	return 1;
-}
-
-static void read_status()
-{
-	uint16_t status = 0;
-
-	send_request(OPCODE_READ_STATUS, 0);
-	read_response(OPCODE_READ_STATUS, &status);
-
-	if (status != status_flags)
-	{
-		status_flags = status;
-		eventlog_write_data(EVT_DATA_MOTOR_STATUS, status_flags);
-	}
-
-	system_delay_ms(2);
-
-	send_request(OPCODE_READ_CURRENT, 0);
-	read_response(OPCODE_READ_CURRENT, 0);
-
-	system_delay_ms(2);
-
-	send_request(OPCODE_READ_VOLTAGE, 0);
-	read_response(OPCODE_READ_VOLTAGE, 0);
-
-	system_delay_ms(2);
-}
+static uint8_t compute_checksum(uint8_t* msg, uint8_t len);
+static void send_request(uint8_t opcode, uint16_t data);
+static int read_response(uint8_t opcode, uint16_t* out_data);
+static int connect();
+static int configure(uint16_t max_current_mA, uint8_t lvc_V);
+static void read_status();
 
 
 void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
@@ -251,6 +71,8 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
 	SET_PIN_HIGH(PIN_MOTOR_CONTROL_ENABLE);
 	SET_PIN_HIGH(PIN_MOTOR_EXTRA);
+
+	lvc_volt_x10 = lvc_V;
 
 	uart2_open(4800);
 
@@ -355,3 +177,212 @@ void motor_set_target_current(uint8_t percent)
 		target_current_changed = true;
 	}
 }
+
+
+uint16_t motor_get_battery_lvc_x10()
+{
+	return lvc_volt_x10;
+}
+
+uint16_t motor_get_battery_current_x10()
+{
+	return battery_amp_x10;
+}
+
+uint16_t motor_get_battery_voltage_x10()
+{
+	return battery_amp_x10;
+}
+
+
+
+static uint8_t compute_checksum(uint8_t* msg, uint8_t len)
+{
+	uint8_t checksum = 0;
+	for (int i = 0; i < len; ++i)
+	{
+		checksum += *(msg + i);
+	}
+
+	return checksum;
+}
+
+static void send_request(uint8_t opcode, uint16_t data)
+{
+	uint8_t idx = 0;
+
+	msgbuf[idx++] = 0xaa; // start of message
+	msgbuf[idx++] = opcode;
+
+	if (opcode == OPCODE_LVC)
+	{
+		msgbuf[idx++] = data >> 8;
+		msgbuf[idx++] = data;
+	}
+	else if (opcode != OPCODE_READ_STATUS && opcode != OPCODE_READ_CURRENT && opcode != OPCODE_READ_VOLTAGE)
+	{
+		msgbuf[idx++] = data;
+	}
+
+	uint8_t checksum = compute_checksum(msgbuf + 1, idx - 1);
+	msgbuf[idx++] = checksum;
+
+	// empty rx buffer
+	while (uart2_available()) uart2_read();
+
+	for (uint8_t i = 0; i < idx; ++i)
+	{
+		uart2_write(msgbuf[i]);
+	}
+
+	uart2_flush();
+}
+
+static int read_response(uint8_t opcode, uint16_t* out_data)
+{
+	uint8_t read = 0;
+	uint32_t start = system_ms();
+
+	uint8_t len = (opcode == OPCODE_LVC || opcode == OPCODE_READ_STATUS || opcode == OPCODE_READ_VOLTAGE) ? 5 : 4;
+
+	uint8_t i = 0;
+	while (i < len && system_ms() < start + READ_TIMEOUT)
+	{
+		if (uart2_available())
+		{
+			msgbuf[i++] = uart2_read();
+		}
+	}
+
+	system_delay_ms(4);
+
+	if (i > 1 && msgbuf[1] == opcode)
+	{
+		uint8_t checksum = compute_checksum(&msgbuf[1], (uint8_t)(i - 2));
+		if (checksum == msgbuf[i - 1])
+		{
+			if (out_data != 0)
+			{
+				if (opcode == OPCODE_LVC || opcode == OPCODE_READ_STATUS || opcode == OPCODE_READ_VOLTAGE)
+				{
+					*out_data = msgbuf[2] << 8 | msgbuf[3];
+				}
+				else
+				{
+					*out_data = msgbuf[2];
+				}
+			}
+
+			return 1;
+		}
+
+		return 0; // failed to verify message
+	}
+
+	// read failure
+	return 0;
+}
+
+
+static int connect()
+{
+	for (int i = 0; i < 10; ++i)
+	{
+		send_request(OPCODE_HELLO, 0x00);
+
+		if (read_response(OPCODE_HELLO, 0))
+		{
+			return 1;
+		}
+		else
+		{
+			system_delay_ms(1000);
+		}
+	}
+
+	return 0;
+}
+
+static int configure(uint16_t max_current_mA, uint8_t lvc_V)
+{
+	send_request(OPCODE_UNKNOWN1, 0x5a);
+	if (!read_response(OPCODE_UNKNOWN1, 0))
+	{
+		return 0;
+	}
+
+	send_request(OPCODE_UNKNOWN2, 0x11);
+	if (!read_response(OPCODE_UNKNOWN2, 0))
+	{
+		return 0;
+	}
+
+	send_request(OPCODE_UNKNOWN3, 0x78);
+	if (!read_response(OPCODE_UNKNOWN3, 0))
+	{
+		return 0;
+	}
+
+	send_request(OPCODE_UNKNOWN4, 0x64);
+	if (!read_response(OPCODE_UNKNOWN4, 0))
+	{
+		return 0;
+	}
+
+	send_request(OPCODE_UNKNOWN5, 0x50);
+	if (!read_response(OPCODE_UNKNOWN5, 0))
+	{
+		return 0;
+	}
+
+	send_request(OPCODE_UNKNOWN6, 0x46);
+	if (!read_response(OPCODE_UNKNOWN6, 0))
+	{
+		return 0;
+	}
+
+	send_request(OPCODE_UNKNOWN7, 0x0c);
+	if (!read_response(OPCODE_UNKNOWN7, 0))
+	{
+		return 0;
+	}
+
+	send_request(OPCODE_LVC, lvc_V * 14);
+	if (!read_response(OPCODE_LVC, 0))
+	{
+		return 0;
+	}
+
+	send_request(OPCODE_MAX_CURRENT, (uint16_t)((max_current_mA * 69UL) / 10000UL));
+	if (!read_response(OPCODE_MAX_CURRENT, 0))
+	{
+		return 0;
+	}
+
+	return 1;
+}
+
+static void read_status()
+{
+	uint16_t value = 0;
+
+	send_request(OPCODE_READ_STATUS, 0);
+	if (read_response(OPCODE_READ_STATUS, &value) && value != status_flags)
+	{
+		status_flags = value;
+		eventlog_write_data(EVT_DATA_MOTOR_STATUS, status_flags);
+	}
+
+	send_request(OPCODE_READ_CURRENT, 0);
+	if (read_response(OPCODE_READ_CURRENT, &value))
+	{
+		battery_amp_x10 = (value * 100) / 69;
+	}
+
+	send_request(OPCODE_READ_VOLTAGE, 0);
+	if (read_response(OPCODE_READ_VOLTAGE, &value))
+	{
+		battery_volt_x10 = (value * 10) / 14;
+	}
+}
+
