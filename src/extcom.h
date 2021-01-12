@@ -6,13 +6,11 @@
  * Released under the GPL License, Version 3
  */
 
-#ifndef _SPEED_SENSOR_H_
-#define _SPEED_SENSOR_H_
+#ifndef _EXTCOM_H_
+#define _EXTCOM_H_
 
-
-void speed_sensor_init();
-
-void speed_sensor_process();
-
+void extcom_init();
+void extcom_process();
 
 #endif
+

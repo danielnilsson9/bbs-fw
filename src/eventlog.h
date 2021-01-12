@@ -23,7 +23,7 @@
 #define EVT_DATA_MOTOR_STATUS				130
 
 
-void eventlog_init();
+void eventlog_init(bool enabled);
 
 void eventlog_set_enabled(bool enabled);
 

@@ -36,13 +36,13 @@
     <ClCompile Include="app.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pas.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="eventlog.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="speed_sensor.c">
+    <ClCompile Include="sensors.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="extcom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,16 +77,16 @@
     <ClInclude Include="app.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pas.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pins.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="eventlog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="speed_sensor.h">
+    <ClInclude Include="sensors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="extcom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -20,24 +20,26 @@ MAINSRC = main.c
 EXTRASRCS = \
 	app.c \
 	eventlog.c \
+	extcom.c \
 	motor.c \
 	uart.c \
 	system.c \
 	throttle.c \
 	util.c \
 	watchdog.c \
-	pas.c
+	sensors.c
 	
 HEADERS = \
 	app.h \
 	eventlog.h \
+	extcom.h \
 	motor.h \
 	uart.h \
 	system.h \
 	throttle.h \
 	util.h \
 	watchdog.h \
-	pas.h \
+	sensors.h \
 	pins.h
 
 # The list of .rel files can be derived from the list of their source files

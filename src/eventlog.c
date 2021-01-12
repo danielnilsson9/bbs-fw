@@ -16,9 +16,9 @@ static bool is_enabled = false;
 static char __xdata buffer[256];
 
 
-void eventlog_init()
+void eventlog_init(bool enabled)
 {
-
+	is_enabled = enabled;
 }
 
 void eventlog_set_enabled(bool enabled)
