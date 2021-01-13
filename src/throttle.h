@@ -11,14 +11,11 @@
 
 #include <stdint.h>
 
+void throttle_init(uint16_t min_mv, uint16_t max_mv);
 
-void throttle_init();
-
-void throttle_set_min_voltage(uint8_t volt_x1000);
-void throttle_set_max_voltage(uint8_t volt_x1000);
+void throttle_set_start_percent(uint8_t value);
 
 uint8_t throttle_read();
-
 
 #endif
 

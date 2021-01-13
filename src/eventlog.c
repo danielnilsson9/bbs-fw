@@ -11,8 +11,7 @@
 #include "uart.h"
 
 
-static bool is_enabled = false;
-
+static bool __xdata is_enabled;
 static char __xdata buffer[256];
 
 

@@ -19,6 +19,7 @@ MAINSRC = main.c
 # These are the sources that must be compiled to .rel files:
 EXTRASRCS = \
 	app.c \
+	cfgstore.c \
 	eventlog.c \
 	extcom.c \
 	motor.c \
@@ -31,6 +32,7 @@ EXTRASRCS = \
 	
 HEADERS = \
 	app.h \
+	cfgstore.h \
 	eventlog.h \
 	extcom.h \
 	motor.h \

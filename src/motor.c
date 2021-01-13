@@ -34,23 +34,23 @@
 #define READ_TIMEOUT			100
 
 
-static uint8_t is_connected = 0;
-static uint8_t msgbuf[8];
+static uint8_t __xdata is_connected;
+static uint8_t __xdata msgbuf[8];
 
-static uint32_t next_send_ms = 0;
-static uint32_t next_read_ms = 0;
+static uint32_t __xdata next_send_ms;
+static uint32_t __xdata next_read_ms;
 
-static bool target_speed_changed = true;
-static uint8_t target_speed = 0;
+static bool __xdata target_speed_changed;
+static uint8_t __xdata target_speed;
 
-static bool target_current_changed = true;
-static uint8_t target_current = 0;
+static bool __xdata target_current_changed;
+static uint8_t __xdata target_current;
 
-static uint8_t lvc_volt_x10 = 0;
+static uint8_t __xdata lvc_volt_x10;
 
-static uint16_t status_flags = 0;
-static uint16_t battery_volt_x10 = 0;
-static uint16_t battery_amp_x10 = 0;
+static uint16_t __xdata status_flags;
+static uint16_t __xdata battery_volt_x10;
+static uint16_t __xdata battery_amp_x10;
 
 
 
@@ -64,6 +64,18 @@ static void read_status();
 
 void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 {
+	is_connected = 0;
+	next_send_ms = 0;
+	next_read_ms = 0;
+	target_speed_changed = false;
+	target_speed = 0;
+	target_current_changed = false;
+	target_current = 0;
+	lvc_volt_x10 = (uint16_t)lvc_V * 10;
+	status_flags = 0;
+	battery_volt_x10 = 0;
+	battery_amp_x10 = 0;
+
 	SET_PIN_OUTPUT(PIN_MOTOR_POWER_ENABLE);
 	SET_PIN_OUTPUT(PIN_MOTOR_CONTROL_ENABLE);
 	SET_PIN_OUTPUT(PIN_MOTOR_EXTRA);
@@ -71,8 +83,6 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
 	SET_PIN_HIGH(PIN_MOTOR_CONTROL_ENABLE);
 	SET_PIN_HIGH(PIN_MOTOR_EXTRA);
-
-	lvc_volt_x10 = lvc_V;
 
 	uart2_open(4800);
 
@@ -87,6 +97,8 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 
 		motor_set_target_speed(0);
 		motor_set_target_current(0);
+		target_current_changed = true;
+		target_speed_changed = true;
 	}
 	else
 	{

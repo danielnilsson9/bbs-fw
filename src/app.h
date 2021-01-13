@@ -25,10 +25,10 @@
 #define ASSIST_7		0x07
 #define ASSIST_8		0x08
 #define ASSIST_9		0x09
-#define ASSIST_PUSH	0x10
+#define ASSIST_PUSH		0x10
 
-#define MODE_ECO		0x01
-#define MODE_SPORT		0x02
+#define OPERATION_MODE_ECO		0x00
+#define OPERATION_MODE_SPORT	0x01
 
 void app_init();
 

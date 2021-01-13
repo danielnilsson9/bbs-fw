@@ -45,6 +45,9 @@
     <ClCompile Include="extcom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cfgstore.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="motor.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="extcom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cfgstore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

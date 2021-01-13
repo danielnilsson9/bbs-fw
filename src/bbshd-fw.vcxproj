@@ -64,6 +64,7 @@ make all</NMakeReBuildCommandLine>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app.c" />
+    <ClCompile Include="cfgstore.c" />
     <ClCompile Include="eventlog.c" />
     <ClCompile Include="extcom.c" />
     <ClCompile Include="main.c" />
@@ -76,6 +77,7 @@ make all</NMakeReBuildCommandLine>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app.h" />
+    <ClInclude Include="cfgstore.h" />
     <ClInclude Include="eventlog.h" />
     <ClInclude Include="extcom.h" />
     <ClInclude Include="interrupt.h" />

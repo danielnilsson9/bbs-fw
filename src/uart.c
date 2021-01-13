@@ -5,21 +5,21 @@
 #define BUF_SIZE_MASK 0x3F // 64 bytes per buffers
 
 // UART1
-static volatile uint8_t rx1_head = 0;
-static volatile uint8_t rx1_tail = 0;
+static volatile uint8_t rx1_head;
+static volatile uint8_t rx1_tail;
 static volatile uint8_t __xdata rx1_buf[BUF_SIZE_MASK + 1];
-static volatile uint8_t tx1_head = 0;
-static volatile uint8_t tx1_tail = 0;
-static volatile uint8_t tx1_sending = 0;
+static volatile uint8_t tx1_head;
+static volatile uint8_t tx1_tail;
+static volatile uint8_t tx1_sending;
 static volatile uint8_t __xdata tx1_buf[BUF_SIZE_MASK + 1];
 
 // UART2
-static volatile uint8_t rx2_head = 0;
-static volatile uint8_t rx2_tail = 0;
+static volatile uint8_t rx2_head;
+static volatile uint8_t rx2_tail;
 static volatile uint8_t __xdata rx2_buf[BUF_SIZE_MASK + 1];
-static volatile uint8_t tx2_head = 0;
-static volatile uint8_t tx2_tail = 0;
-static volatile uint8_t tx2_sending = 0;
+static volatile uint8_t tx2_head;
+static volatile uint8_t tx2_tail;
+static volatile uint8_t tx2_sending;
 static volatile uint8_t __xdata tx2_buf[BUF_SIZE_MASK + 1];
 
 

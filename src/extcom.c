@@ -65,9 +65,9 @@
 
 
 
-static uint8_t idx = 0;
+static uint8_t msg_len;
 static uint8_t __xdata msgbuf[128];
-static uint32_t last_recv = 0;
+static uint32_t __xdata last_recv;
 
 
 static uint8_t try_process_request();
@@ -95,6 +95,8 @@ static uint8_t process_bafang_display_write_speed_limit();
 
 void extcom_init()
 {
+	msg_len = 0;
+	last_recv = 0;
 	// bafang standard baudrate
 	uart1_open(1200);
 }
@@ -105,28 +107,28 @@ void extcom_process()
 
 	while (uart1_available())
 	{
-		if (idx == BUFFER_SIZE)
+		if (msg_len == BUFFER_SIZE)
 		{
 			// communication error, reset
-			idx = 0;
+			msg_len = 0;
 			while (uart1_available()) uart1_read();
 		}
 		else
 		{
-			msgbuf[idx++] = uart1_read();
+			msgbuf[msg_len++] = uart1_read();
 			last_recv = now;
 		}	
 	}
 
-	if (idx > 0 && now - last_recv > 100)
+	if (msg_len > 0 && now - last_recv > 100)
 	{
 		// communication error, reset
-		idx = 0;
+		msg_len = 0;
 	}
 
 	if (try_process_request() != KEEP)
 	{
-		idx = 0;
+		msg_len = 0;
 		last_recv = 0;
 	}
 }
@@ -135,9 +137,9 @@ void extcom_process()
 
 static uint8_t try_process_request()
 {
-	if (idx == 0)
+	if (msg_len == 0)
 	{
-		return;
+		return KEEP;
 	}
 
 	switch (msgbuf[0])
@@ -169,6 +171,11 @@ static uint8_t try_process_write_request()
 
 static uint8_t try_process_bafang_read_request()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
 	switch (msgbuf[1])
 	{
 	case OPCODE_BAFANG_DISPLAY_READ_STATUS:
@@ -196,6 +203,11 @@ static uint8_t try_process_bafang_read_request()
 
 static uint8_t try_process_bafang_write_request()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
 	switch (msgbuf[1])
 	{
 	case OPCODE_BAFANG_DISPLAY_WRITE_PAS:
@@ -215,6 +227,11 @@ static uint8_t try_process_bafang_write_request()
 
 static uint8_t process_bafang_display_read_status()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
 	uart1_write(0x00); // All ok :TODO: implement bafang error codes
 	// 0x01 = pedaling
 	// 0x03 = braking
@@ -225,6 +242,11 @@ static uint8_t process_bafang_display_read_status()
 
 static uint8_t process_bafang_display_read_current()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
 	uint8_t amp_x2 = (uint8_t)(motor_get_battery_current_x10() * 2) / 10;
 
 	uart1_write(amp_x2);
@@ -235,6 +257,11 @@ static uint8_t process_bafang_display_read_current()
 
 static uint8_t process_bafang_display_read_battery()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
 	// Some stupid estimation based on configured lvc (unusable, but similar stuff in original firmware)
 	uint16_t max_volt_x10 = (7 * motor_get_battery_lvc_x10()) / 4;
 	uint16_t volt_x10 = motor_get_battery_voltage_x10();
@@ -253,6 +280,11 @@ static uint8_t process_bafang_display_read_battery()
 
 static uint8_t process_bafang_display_read_speed()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
 	uint16_t speed = speed_sensor_get_ticks_per_minute();
 	uart1_write(speed >> 8);
 	uart1_write(speed);
@@ -263,6 +295,11 @@ static uint8_t process_bafang_display_read_speed()
 
 static uint8_t process_bafang_display_read_unknown1()
 {
+	if (msg_len < 3)
+	{
+		return KEEP;
+	}
+
 	uart1_write(0x00);
 	uart1_write(0x00);
 	uart1_write(0x00); // checksum
@@ -272,6 +309,11 @@ static uint8_t process_bafang_display_read_unknown1()
 
 static uint8_t process_bafang_display_read_range()
 {
+	if (msg_len < 3)
+	{
+		return KEEP;
+	}
+
 	uart1_write(0x00);
 	uart1_write(0x00);
 	uart1_write(0x00); // checksum
@@ -281,6 +323,11 @@ static uint8_t process_bafang_display_read_range()
 
 static uint8_t process_bafang_display_read_unknown2()
 {
+	if (msg_len < 3)
+	{
+		return KEEP;
+	}
+
 	uart1_write(0x00);
 	uart1_write(0x00);
 	uart1_write(0x00); // checksum
@@ -290,6 +337,11 @@ static uint8_t process_bafang_display_read_unknown2()
 
 static uint8_t process_bafang_display_read_unknown3()
 {
+	if (msg_len < 3)
+	{
+		return KEEP;
+	}
+
 	uart1_write(0x00);
 	uart1_write(0x00);
 	uart1_write(0x00);
@@ -301,6 +353,11 @@ static uint8_t process_bafang_display_read_unknown3()
 
 static uint8_t process_bafang_display_read_moving()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
 	uint8_t data = speed_sensor_is_moving() ? 0x30 : 0x31;
 	uart1_write(data);
 	uart1_write(data); // checksum
@@ -311,6 +368,11 @@ static uint8_t process_bafang_display_read_moving()
 
 static uint8_t process_bafang_display_write_pas()
 {
+	if (msg_len < 4)
+	{
+		return KEEP;
+	}
+
 	uint8_t level = ASSIST_0;
 
 	switch (msgbuf[2])
@@ -359,15 +421,20 @@ static uint8_t process_bafang_display_write_pas()
 
 static uint8_t process_bafang_display_write_mode()
 {
-	uint8_t mode = MODE_SPORT;
+	if (msg_len < 4)
+	{
+		return KEEP;
+	}
+
+	uint8_t mode = OPERATION_MODE_ECO;
 
 	switch (msgbuf[2])
 	{
 	case 0x02:
-		mode = MODE_ECO;
+		mode = OPERATION_MODE_ECO;
 		break;
 	case 0x04:
-		mode = MODE_SPORT;
+		mode = OPERATION_MODE_SPORT;
 		break;
 	default:
 		return DISCARD;
@@ -380,6 +447,11 @@ static uint8_t process_bafang_display_write_mode()
 
 static uint8_t process_bafang_display_write_lights()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
 	switch (msgbuf[2])
 	{
 	case 0xf0:
@@ -397,6 +469,11 @@ static uint8_t process_bafang_display_write_lights()
 
 static uint8_t process_bafang_display_write_speed_limit()
 {
+	if (msg_len < 5)
+	{
+		return KEEP;
+	}
+
 	uint8_t chk = 0;
 	chk += msgbuf[2];
 	chk += msgbuf[3];

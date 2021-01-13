@@ -4,7 +4,6 @@
 #include "interrupt.h"
 #include <stdint.h>
 
-
 void uart1_open(uint32_t baudrate);
 void uart2_open(uint32_t baudrate);
 

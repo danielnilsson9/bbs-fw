@@ -20,20 +20,28 @@
 #define NUM_SIGNALS		24
 
 
-static volatile uint16_t pas_period_counter = 0;
-static volatile uint16_t pas_pulse_counter = 0;
-static volatile bool direction_backward = 0;
-static volatile uint8_t pas_rpm = 0;
-static bool pas_prev1 = false;
-static bool pas_prev2 = false;
+static volatile __xdata uint16_t pas_period_counter;
+static volatile __xdata uint16_t pas_pulse_counter;
+static volatile __xdata bool direction_backward;
+static volatile __xdata uint8_t pas_rpm;
+static bool __xdata pas_prev1;
+static bool __xdata pas_prev2;
 
-static volatile uint16_t speed_period_counter = 0;
-static volatile uint16_t speed_ticks_minute = 0;
-bool speed_prev_state = false;
+static volatile uint16_t __xdata speed_period_counter;
+static volatile uint16_t __xdata speed_ticks_minute;
+static bool __xdata speed_prev_state;
 
 
 void sensors_init()
 {
+	pas_period_counter = 0;
+	pas_pulse_counter = 0;
+	direction_backward = false;
+	pas_rpm = 0;
+	speed_period_counter = 0;
+	speed_ticks_minute = 0;
+	speed_prev_state = false;
+
 	// pins do not have external interrupt, use timer 4 to evaluate state frequently
 	SET_PIN_INPUT(PIN_PAS1);
 	SET_PIN_INPUT(PIN_PAS2);
@@ -44,12 +52,11 @@ void sensors_init()
 	pas_prev2 = GET_PIN_STATE(PIN_PAS2);
 
 
-
 	CLEAR_BIT(T4T3M, 6); // use as timer
 	SET_BIT(T4T3M, 5); // Run at CPU_FREQ
 
 	T4H = TIMER4_RELOAD >> 8;
-	T4L = TIMER4_RELOAD;
+	T4L = TIMER4_RELOAD & 0x0ff;
 
 	SET_BIT(IE2, 6); // Enable interrupts timer 4
 	SET_BIT(T4T3M, 7); // start timer 4
