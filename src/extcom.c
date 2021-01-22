@@ -426,12 +426,12 @@ static uint8_t process_bafang_display_write_mode()
 		return KEEP;
 	}
 
-	uint8_t mode = OPERATION_MODE_ECO;
+	uint8_t mode = OPERATION_MODE_DEFAULT;
 
 	switch (msgbuf[2])
 	{
 	case 0x02:
-		mode = OPERATION_MODE_ECO;
+		mode = OPERATION_MODE_DEFAULT;
 		break;
 	case 0x04:
 		mode = OPERATION_MODE_SPORT;

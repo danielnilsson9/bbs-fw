@@ -15,6 +15,12 @@ static volatile uint32_t	_ms = 0;
 
 void system_init()
 {
+	// Wait for stable voltage (above lvd)
+	while (IS_BIT_SET(PCON, 5))
+	{
+		CLEAR_BIT(PCON, 5);
+	}
+
 	EA = 0; // disable interrupts
 
 	TMOD = (TMOD & 0xf0) | 0x00; // Timer 0: 16-bit with autoreload

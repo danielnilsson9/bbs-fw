@@ -30,7 +30,7 @@ void app_init()
 	config_t* cfg = cfgstore_get();
 
 	assist_level = cfg->assist_startup_level;
-	operation_mode = OPERATION_MODE_ECO;
+	operation_mode = OPERATION_MODE_DEFAULT;
 	global_max_speed_ppm = 65535;
 	reload_assist_params();
 }
@@ -44,8 +44,8 @@ void app_process()
 
 	if (assist_level == ASSIST_PUSH)
 	{
-		target_current = 14;
-		motor_set_target_speed(10);
+		target_current = 10;
+		motor_set_target_speed(40);
 	}
 	else
 	{
@@ -53,17 +53,14 @@ void app_process()
 
 		if (assist_level_data.flags & ASSIST_FLAG_CRUISE)
 		{
-			target_current = assist_level_data.target_current_percent;
+			//target_current = assist_level_data.target_current_percent;
 			// :TODO: implement must pedal one loop to activate and pedal backwards to deatctivate
 		}
-		else
+		else if (assist_level_data.flags & ASSIST_FLAG_PAS)
 		{
-			if (assist_level_data.flags & ASSIST_FLAG_PAS)
+			if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > cfg->pas_start_delay_pulses)
 			{
-				if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > cfg->pas_start_delay_pulses)
-				{
-					target_current = assist_level_data.max_throttle_current_percent;
-				}
+				target_current = assist_level_data.max_throttle_current_percent;
 			}
 		}
 
@@ -116,7 +113,7 @@ void app_set_lights(bool on)
 		}
 		else
 		{
-			operation_mode = OPERATION_MODE_ECO;
+			operation_mode = OPERATION_MODE_DEFAULT;
 		}
 
 		reload_assist_params();

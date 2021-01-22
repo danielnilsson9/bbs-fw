@@ -6,7 +6,7 @@ Main:
 - Select timer 1 as baud rate generator for UART1
 - Setup timer 0 as millisecond counter
 - Set P2.0 low
-- Wait for voltage to stabilize (PCON bit 6)
+- Wait for voltage to stabilize (PCON bit 5)
 
 
 - Read first 4 bytes from EXTMEM?? and verify that they are "!@#$" ?? if so, set bit 20.0 = 1.

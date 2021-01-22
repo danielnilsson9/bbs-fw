@@ -178,9 +178,9 @@ void motor_set_target_speed(uint8_t value)
 
 void motor_set_target_current(uint8_t percent)
 {
-	if (percent > 0x64)
+	if (percent > 100)
 	{
-		percent = 0x64;
+		percent = 100;
 	}
 
 	if (target_current != percent)

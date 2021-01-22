@@ -27,7 +27,7 @@
 #define ASSIST_9		0x09
 #define ASSIST_PUSH		0x10
 
-#define OPERATION_MODE_ECO		0x00
+#define OPERATION_MODE_DEFAULT	0x00
 #define OPERATION_MODE_SPORT	0x01
 
 void app_init();

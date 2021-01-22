@@ -54,9 +54,9 @@ void load_default_config()
 	config.throttle_start_percent = 10;
 
 	config.assist_mode_select = ASSIST_MODE_SELECT_OFF;
-	config.assist_startup_level = 3;
+	config.assist_startup_level = 0;
 
-	memset(&config.assist_levels, 2 * 10, sizeof(assist_level_t));
+	memset(&config.assist_levels, 0, 20 * sizeof(assist_level_t));
 
 	uint8_t current_limits[9] = { 25, 34, 43, 51, 60, 68, 74, 82, 90 };
 	for (uint8_t i = 0; i < 9; ++i)
