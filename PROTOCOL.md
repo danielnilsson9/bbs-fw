@@ -65,21 +65,15 @@ Request  | Response | Interpretation
 ### Status Flags
 uint16
 
-Bit      | Interpretation
--------- | -----------------
-1        | -
-2        | -
-3        | -
-4        | -
-5        | -
-6        | -
-7        | -
-8        | -
-9        | Motor Control Disabled?
-10       | -
-11       | Motor Control Disabled?
-12       | Low voltage cutoff active
-13       | -
-14       | Hall sensor error
-15       | -
-16       | -
+#### Byte 1
+
+B7 | B6 | B5 | B4 | B3 | B2 | B1 | B0
+---|----|----|----|----|----|----|----
+-  |-   |-   |-   |-   |-   |-   |-
+
+#### Byte 2
+
+B7 | B6 | B5                | B4 | B3                 | B2                     | B1 | B0
+---|----|-------------------|----|--------------------|------------------------|----|----------------------
+-  |-   | Hall Sensor Fault |-   | Low Voltage Cutoff | Motor Ctrl Disabled    |-   | Motor Ctrl Disabled
+
