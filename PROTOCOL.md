@@ -74,6 +74,6 @@ B7 | B6 | B5 | B4 | B3 | B2 | B1 | B0
 #### Byte 2
 
 B7 | B6 | B5                | B4 | B3                 | B2                     | B1 | B0
----|----|-------------------|----|--------------------|------------------------|----|----------------------
--  |-   | Hall Sensor Fault |-   | Low Voltage Cutoff | Motor Ctrl Disabled    |-   | Motor Ctrl Disabled
+-- | -- | ----------------- | -- | ------------------ | ---------------------- | -- | --------------------
+   |    | Hall Sensor Fault |    | Low Voltage Cutoff | Motor Ctrl Disabled    |-   | Motor Ctrl Disabled
 
