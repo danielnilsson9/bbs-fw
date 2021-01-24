@@ -11,11 +11,11 @@
 
 void watchdog_init()
 {
-	WDT_CONTR |= 0x10; // Enable watchdog timer.
+	WDT_CONTR = 0x34; // Enable watchdog timer, pre-scaler 32 (680ms)
 }
 
 void watchdog_yeild()
 {
-	WDT_CONTR |= 0x80;
+	SET_BIT(WDT_CONTR, 4);
 }
 

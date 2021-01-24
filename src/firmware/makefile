@@ -9,17 +9,24 @@ PLATFORM = mcs51
 # Target name
 PNAME = main
 
+# Specific to this project, different BBSHD controller revisions 
+# uses different MCUs which affects eeprom operations.
+#
+# V1.5 -> IAP15W4K61
+# V1.4 -> STC15W4K56
+TARGET_MCU = IAP15W4K61
+#TARGET_MCU = STC15W4K56
+
 # External libraries
 IDIR = 
 SDIR = 
 
-# In case you ever want a different name for the main source file
 MAINSRC = main.c
 
-# These are the sources that must be compiled to .rel files:
 EXTRASRCS = \
 	app.c \
 	cfgstore.c \
+	eeprom.c \
 	eventlog.c \
 	extcom.c \
 	motor.c \
@@ -34,6 +41,7 @@ HEADERS = \
 	app.h \
 	cfgstore.h \
 	eventlog.h \
+	eeprom.h \
 	extcom.h \
 	motor.h \
 	uart.h \
@@ -48,20 +56,16 @@ HEADERS = \
 RELS = $(EXTRASRCS:.c=.rel)
 
 INCLUDES = -I$(IDIR) -I. -I../
-CFLAGS   = -m$(PLATFORM) -Ddouble=float --std-c99 --nolospre
+CFLAGS   = -m$(PLATFORM) -Ddouble=float --std-c99 --nolospre -D$(TARGET_MCU)
 ELF_FLAGS = 
 LIBS     = 
 
-# This just provides the conventional target name "all"; it is optional
-# Note: I assume you set PNAME via some means not exhibited in your original file
 all: $(PNAME) hex
 
-# How to build the overall program
 $(PNAME): $(MAINSRC) $(RELS)
 	$(CC) $(INCLUDES) $(CFLAGS) $(ELF_FLAGS) $(LIBS) $(MAINSRC) $(RELS)
 
-# How to build any .rel file from its corresponding .c file
-# GNU would have you use a pattern rule for this, but that's GNU-specific
+# Build .rel file from .c file
 %.rel: %.c $(HEADERS)
 	$(CC) -c $(INCLUDES) $(CFLAGS) $(ELF_FLAGS) $(LIBS) $<
 

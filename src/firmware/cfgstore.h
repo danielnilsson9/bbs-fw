@@ -11,7 +11,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
 #define ASSIST_FLAG_PAS					0x01
 #define ASSIST_FLAG_THROTTLE			0x02
 #define ASSIST_FLAG_CRUISE				0x04
@@ -24,6 +23,7 @@
 
 #define CONFIG_VERSION		1
 
+
 typedef struct
 {
 	uint8_t flags;
@@ -34,8 +34,6 @@ typedef struct
 
 typedef struct
 {
-	uint8_t version;
-
 	// power
 	uint8_t max_current_amps;
 	uint8_t low_voltage_cut_off;

@@ -97,8 +97,11 @@ void extcom_init()
 {
 	msg_len = 0;
 	last_recv = 0;
+
 	// bafang standard baudrate
 	uart1_open(1200);
+
+	// :TODO: wait one second for config tool connection and initialization
 }
 
 void extcom_process()

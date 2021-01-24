@@ -13,6 +13,7 @@
 #include "sensors.h"
 #include "throttle.h"
 #include "uart.h"
+#include "eventlog.h"
 
 static uint8_t __xdata assist_level;
 static uint8_t __xdata operation_mode;
@@ -29,10 +30,9 @@ void app_init()
 
 	config_t* cfg = cfgstore_get();
 
-	assist_level = cfg->assist_startup_level;
 	operation_mode = OPERATION_MODE_DEFAULT;
 	global_max_speed_ppm = 65535;
-	reload_assist_params();
+	app_set_assist_level(cfg->assist_startup_level);
 }
 
 void app_process()
@@ -53,7 +53,7 @@ void app_process()
 
 		if (assist_level_data.flags & ASSIST_FLAG_CRUISE)
 		{
-			//target_current = assist_level_data.target_current_percent;
+			target_current = assist_level_data.target_current_percent;
 			// :TODO: implement must pedal one loop to activate and pedal backwards to deatctivate
 		}
 		else if (assist_level_data.flags & ASSIST_FLAG_PAS)
@@ -76,7 +76,6 @@ void app_process()
 
 	motor_set_target_current(target_current);
 	
-
 	if (target_current > 0)
 	{
 		motor_enable();
@@ -97,6 +96,7 @@ void app_process()
 void app_set_assist_level(uint8_t level)
 {
 	assist_level = level;
+	eventlog_write_data(EVT_DATA_ASSIST_LEVEL, assist_level);
 	reload_assist_params();
 }
 
@@ -116,10 +116,13 @@ void app_set_lights(bool on)
 			operation_mode = OPERATION_MODE_DEFAULT;
 		}
 
+		eventlog_write_data(EVT_DATA_OPERATION_MODE, operation_mode);
+
 		reload_assist_params();
 	}
 	else
 	{
+		eventlog_write_data(EVT_DATA_LIGHTS, on);
 		// :TODO: set lights on/off
 	}
 }
@@ -127,12 +130,14 @@ void app_set_lights(bool on)
 void app_set_operation_mode(uint8_t mode)
 {
 	operation_mode = mode;
+	eventlog_write_data(EVT_DATA_OPERATION_MODE, operation_mode);
 	reload_assist_params();
 }
 
 void app_set_wheel_max_speed_ppm(uint16_t value)
 {
 	global_max_speed_ppm = value;
+	eventlog_write_data(EVT_DATA_WHEEL_SPEED_PPM, value);
 	reload_assist_params();
 }
 

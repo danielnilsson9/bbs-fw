@@ -6,6 +6,7 @@
  * Released under the GPL License, Version 3
  */
 
+#include "eeprom.h"
 #include "cfgstore.h"
 #include "system.h"
 #include "eventlog.h"
@@ -21,13 +22,13 @@
 
 void main(void)
 {
-	system_init();
 	watchdog_init();
+	system_init();
 
 	system_delay_ms(1000);
 
 	extcom_init();
-	eventlog_init(false);
+	eventlog_init(true);
 
 	cfgstore_init();
 	config_t* cfg = cfgstore_get();
