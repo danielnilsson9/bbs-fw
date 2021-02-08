@@ -3,8 +3,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>bbshd_fw_tool</RootNamespace>
+    <RootNamespace>BBSFW</RootNamespace>
     <UseWPF>true</UseWPF>
+    <AssemblyName>BBS-FW Tool</AssemblyName>
+    <Authors>Daniel Nilsson</Authors>
   </PropertyGroup>
 
 </Project>
