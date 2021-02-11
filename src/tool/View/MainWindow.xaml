@@ -4,10 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BBSFW"
+		xmlns:vm="clr-namespace:BBSFW.ViewModel"
 		xmlns:vw="clr-namespace:BBSFW.View"
         mc:Ignorable="d"
         Title="BBS-FW Tool" Height="500" Width="600"
 		Background="#FFE8E8E8">
+
+	<Window.DataContext>
+		<vm:MainViewModel />
+	</Window.DataContext>
+
 	<Grid>
 
 		<Grid.RowDefinitions>
@@ -35,7 +41,7 @@
 				<vw:SystemView Margin="10" />
 			</TabItem>
 			<TabItem Header="Assist Levels" IsEnabled="{Binding ConnectionVm.IsConnected}">
-				<vw:AssistLevelsView Margin="10"/>
+				<vw:AssistLevelsView Margin="10" DataContext="{Binding AssistLevelsVm}"/>
 			</TabItem>
 			<TabItem Header="Event Log">
 				<vw:EventLogView Margin="10" />
