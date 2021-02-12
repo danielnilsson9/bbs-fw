@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 
 #define TIMER4_RELOAD	((65536 - CPU_FREQ / 10000) + 1)		// every 100us
 
@@ -50,6 +51,14 @@ void sensors_init()
 
 	pas_prev1 = GET_PIN_STATE(PIN_PAS1);
 	pas_prev2 = GET_PIN_STATE(PIN_PAS2);
+
+
+	// Setup pin temperature pin as adc input
+	SET_PIN_INPUT(PIN_TEMPERATURE);
+	SET_PIN_LOW(PIN_TEMPERATURE);
+	SET_BIT(P1ASF, GET_PIN_NUM(PIN_TEMPERATURE));
+
+	SET_BIT(ADC_CONTR, 7);	// enable adc power
 
 
 	CLEAR_BIT(T4T3M, 6); // use as timer
@@ -96,8 +105,33 @@ uint16_t speed_sensor_get_ticks_per_minute()
 
 uint8_t temperature_read()
 {
-	// :TODO:
-	return 0;
+	ADC_RES = 0;
+
+	// Arrange adc result for 8bit reading
+	CLEAR_BIT(PCON2, 5);
+
+	// Sample ADC
+	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 3) | (GET_PIN_NUM(PIN_TEMPERATURE) & 0x07));
+
+	// as per specification
+	NOP();
+	NOP();
+	NOP();
+	NOP();
+
+	while (!IS_BIT_SET(ADC_CONTR, 4));
+	CLEAR_BIT(ADC_CONTR, 4);
+
+	// :TODO: Measure and calculate beta value for range 25 - 80 degrees
+	const float invBeta = 1.00 / 3600.00;
+	const float invT0 = 1.00 / 298.15;
+
+	float R = 5100.f * ((255.f / (255.f - ADC_RES)) - 1.f);
+
+	float K = 1.f / (invT0 + invBeta * (logf(R / 10000.f)));
+	float C = K - 273.15;
+
+	return (uint8_t)(C + 0.5f);
 }
 
 

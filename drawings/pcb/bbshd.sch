@@ -8002,6 +8002,86 @@ Source: www.kingbright.com</description>
 </deviceset>
 </devicesets>
 </library>
+<library name="ptc-ntc">
+<description>&lt;b&gt;PTC and NTC Resistors&lt;/b&gt;&lt;p&gt;
+Siemens, Philips, Valvo&lt;p&gt;
+&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
+<packages>
+<package name="P640">
+<description>&lt;b&gt;PHILIPS NTC&lt;/b&gt;</description>
+<wire x1="-0.635" y1="-0.7931" x2="0.635" y2="-0.7931" width="0.1524" layer="21" curve="77.365414"/>
+<wire x1="-0.635" y1="0.7931" x2="0.635" y2="0.7931" width="0.1524" layer="21" curve="-77.365414"/>
+<wire x1="-0.8255" y1="1.127" x2="0.8255" y2="1.127" width="0.1524" layer="21" curve="-72.443733"/>
+<wire x1="-0.8255" y1="-1.127" x2="0.8255" y2="-1.127" width="0.1524" layer="21" curve="72.443733"/>
+<wire x1="-1.1684" y1="1.0109" x2="-1.1684" y2="-1.0109" width="0.1524" layer="51" curve="124.363383"/>
+<wire x1="-0.635" y1="0.7931" x2="-0.635" y2="-0.7931" width="0.1524" layer="51" curve="102.634586"/>
+<wire x1="-1.1684" y1="-1.0109" x2="-0.8255" y2="-1.127" width="0.1524" layer="21" curve="18.224242"/>
+<wire x1="-1.1684" y1="1.0109" x2="-0.8255" y2="1.127" width="0.1524" layer="21" curve="-18.224242"/>
+<wire x1="0.635" y1="-0.7931" x2="0.635" y2="0.7931" width="0.1524" layer="51" curve="102.634586"/>
+<wire x1="1.1684" y1="-1.0109" x2="1.1684" y2="1.0109" width="0.1524" layer="51" curve="124.363383"/>
+<wire x1="0.8255" y1="-1.127" x2="1.1684" y2="-1.0109" width="0.1524" layer="21" curve="18.224242"/>
+<wire x1="0.8255" y1="1.127" x2="1.1684" y2="1.0109" width="0.1524" layer="21" curve="-18.224242"/>
+<pad name="1" x="-1.27" y="0" drill="0.8128" shape="long" rot="R90"/>
+<pad name="2" x="1.27" y="0" drill="0.8128" shape="long" rot="R90"/>
+<text x="-2.54" y="1.905" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-2.54" y="-3.175" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+</package>
+</packages>
+<symbols>
+<symbol name="NTC">
+<wire x1="3.175" y1="6.35" x2="3.175" y2="3.81" width="0.1524" layer="94"/>
+<wire x1="3.175" y1="3.81" x2="3.556" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="3.556" y1="5.08" x2="2.794" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="2.794" y1="5.08" x2="3.175" y2="3.81" width="0.1524" layer="94"/>
+<wire x1="1.905" y1="3.81" x2="1.905" y2="6.35" width="0.1524" layer="94"/>
+<wire x1="1.905" y1="6.35" x2="2.286" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="2.286" y1="5.08" x2="1.524" y2="5.08" width="0.1524" layer="94"/>
+<wire x1="1.524" y1="5.08" x2="1.905" y2="6.35" width="0.1524" layer="94"/>
+<wire x1="2.413" y1="0.381" x2="3.937" y2="0.381" width="0.1524" layer="94" curve="180"/>
+<wire x1="1.905" y1="0.635" x2="2.413" y2="0.635" width="0.1524" layer="94" curve="-180" cap="flat"/>
+<wire x1="2.413" y1="0.381" x2="2.413" y2="0.635" width="0.1524" layer="94"/>
+<wire x1="3.937" y1="0.381" x2="3.937" y2="1.651" width="0.1524" layer="94"/>
+<wire x1="3.429" y1="1.143" x2="3.937" y2="1.651" width="0.1524" layer="94" curve="-270"/>
+<wire x1="4.191" y1="1.143" x2="4.3047" y2="0.9591" width="0.1524" layer="94" curve="-116.545417" cap="flat"/>
+<wire x1="3.429" y1="1.143" x2="4.191" y2="1.143" width="0.1524" layer="94"/>
+<wire x1="0.889" y1="-2.54" x2="0.889" y2="2.54" width="0.254" layer="94"/>
+<wire x1="-0.889" y1="2.54" x2="-0.889" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="0.889" y1="2.54" x2="-0.889" y2="2.54" width="0.254" layer="94"/>
+<wire x1="0.889" y1="-2.54" x2="-0.889" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="1.524" y1="1.524" x2="-1.778" y2="-1.778" width="0.1524" layer="94"/>
+<wire x1="-1.778" y1="-1.778" x2="-1.778" y2="-2.54" width="0.1524" layer="94"/>
+<wire x1="-2.921" y1="-3.048" x2="-1.651" y2="-3.048" width="0.1524" layer="94"/>
+<text x="2.032" y="-2.8194" size="1.778" layer="95">&gt;NAME</text>
+<text x="2.032" y="-5.207" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="2" x="0" y="5.08" visible="off" length="short" direction="pas" swaplevel="1" rot="R270"/>
+<pin name="1" x="0" y="-5.08" visible="off" length="short" direction="pas" swaplevel="1" rot="R90"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="NTC640" prefix="R" uservalue="yes">
+<description>&lt;b&gt;PHILIPS NTC&lt;/b&gt;</description>
+<gates>
+<gate name="1" symbol="NTC" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="P640">
+<connects>
+<connect gate="1" pin="1" pad="1"/>
+<connect gate="1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="MF" value="" constant="no"/>
+<attribute name="MPN" value="" constant="no"/>
+<attribute name="OC_FARNELL" value="unknown" constant="no"/>
+<attribute name="OC_NEWARK" value="unknown" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -8093,6 +8173,11 @@ Source: www.kingbright.com</description>
 <part name="R42" library="rcl" deviceset="R-EU_" device="R0603" value="5.2K"/>
 <part name="R20" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
 <part name="R44" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
+<part name="R43" library="ptc-ntc" deviceset="NTC640" device="" value="10k"/>
+<part name="R45" library="rcl" deviceset="R-EU_" device="R0603" value="5.1k"/>
+<part name="+3V4" library="supply1" deviceset="+3V3" device="" value="+4.3V"/>
+<part name="GND12" library="supply1" deviceset="GND" device=""/>
+<part name="R46" library="rcl" deviceset="R-EU_" device="R0603" value="2.0K"/>
 </parts>
 <sheets>
 <sheet>
@@ -8130,6 +8215,7 @@ Constant data output at 9600 baud.</text>
 <text x="231.648" y="159.258" size="1.778" layer="97">RxD3</text>
 <text x="231.648" y="149.098" size="1.778" layer="97">TxD3</text>
 <text x="161.036" y="139.954" size="1.778" layer="97">Another UART brought out to pins, no data has been seen.</text>
+<text x="208.28" y="71.12" size="1.778" layer="97">ADC7 - Temperature sensor</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
@@ -8176,6 +8262,11 @@ Constant data output at 9600 baud.</text>
 <instance part="R30" gate="G$1" x="195.58" y="48.26"/>
 <instance part="R41" gate="G$1" x="208.28" y="149.86" rot="R180"/>
 <instance part="R42" gate="G$1" x="208.28" y="124.46" rot="R180"/>
+<instance part="R43" gate="1" x="190.5" y="78.74" rot="R90"/>
+<instance part="R45" gate="G$1" x="175.26" y="78.74"/>
+<instance part="+3V4" gate="G$1" x="160.02" y="86.36"/>
+<instance part="GND12" gate="1" x="200.66" y="73.66"/>
+<instance part="R46" gate="G$1" x="190.5" y="66.04"/>
 </instances>
 <busses>
 </busses>
@@ -8237,6 +8328,12 @@ Constant data output at 9600 baud.</text>
 <pinref part="R28" gate="G$1" pin="2"/>
 <pinref part="GND8" gate="1" pin="GND"/>
 <wire x1="170.18" y1="35.56" x2="170.18" y2="33.02" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="R43" gate="1" pin="1"/>
+<wire x1="195.58" y1="78.74" x2="200.66" y2="78.74" width="0.1524" layer="91"/>
+<pinref part="GND12" gate="1" pin="GND"/>
+<wire x1="200.66" y1="78.74" x2="200.66" y2="76.2" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$2" class="0">
@@ -8409,6 +8506,12 @@ Constant data output at 9600 baud.</text>
 <wire x1="43.18" y1="38.1" x2="38.1" y2="38.1" width="0.1524" layer="91"/>
 <junction x="38.1" y="38.1"/>
 </segment>
+<segment>
+<pinref part="+3V4" gate="G$1" pin="+3V3"/>
+<wire x1="160.02" y1="83.82" x2="160.02" y2="78.74" width="0.1524" layer="91"/>
+<pinref part="R45" gate="G$1" pin="1"/>
+<wire x1="160.02" y1="78.74" x2="170.18" y2="78.74" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="N$7" class="0">
 <segment>
@@ -8544,6 +8647,25 @@ Constant data output at 9600 baud.</text>
 <pinref part="R42" gate="G$1" pin="1"/>
 <wire x1="213.36" y1="124.46" x2="215.9" y2="124.46" width="0.1524" layer="91"/>
 <label x="215.9" y="124.46" size="1.778" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="N$21" class="0">
+<segment>
+<pinref part="R45" gate="G$1" pin="2"/>
+<pinref part="R43" gate="1" pin="2"/>
+<wire x1="180.34" y1="78.74" x2="182.88" y2="78.74" width="0.1524" layer="91"/>
+<wire x1="182.88" y1="78.74" x2="185.42" y2="78.74" width="0.1524" layer="91"/>
+<wire x1="182.88" y1="78.74" x2="182.88" y2="66.04" width="0.1524" layer="91"/>
+<junction x="182.88" y="78.74"/>
+<pinref part="R46" gate="G$1" pin="1"/>
+<wire x1="182.88" y1="66.04" x2="185.42" y2="66.04" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STC_P1.7" class="0">
+<segment>
+<pinref part="R46" gate="G$1" pin="2"/>
+<wire x1="195.58" y1="66.04" x2="205.74" y2="66.04" width="0.1524" layer="91"/>
+<label x="205.74" y="66.04" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 </nets>

@@ -28,7 +28,7 @@ void main(void)
 	system_delay_ms(1000);
 
 	extcom_init();
-	eventlog_init(true);
+	eventlog_init(false);
 
 	cfgstore_init();
 	config_t* cfg = cfgstore_get();

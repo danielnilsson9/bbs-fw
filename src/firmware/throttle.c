@@ -33,9 +33,6 @@ void throttle_init(uint16_t min_mv, uint16_t max_mv)
 	SET_PIN_LOW(PIN_THROTTLE);
 	SET_BIT(P1ASF, GET_PIN_NUM(PIN_THROTTLE));
 
-	// Arrange adc result for 8bit reading
-	CLEAR_BIT(PCON2, 5);
-
 	SET_BIT(ADC_CONTR, 7);	// enable adc power
 }
 
@@ -48,6 +45,9 @@ void throttle_set_start_percent(uint8_t value)
 uint8_t throttle_read()
 {
 	ADC_RES = 0;
+
+	// Arrange adc result for 8bit reading
+	CLEAR_BIT(PCON2, 5);
 
 	// Sample ADC on pin 3.
 	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 3) | (GET_PIN_NUM(PIN_THROTTLE) & 0x07));
