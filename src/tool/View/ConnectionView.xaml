@@ -18,8 +18,15 @@
 			<RowDefinition />
 		</Grid.RowDefinitions>
 
-		<ListView ItemsSource="{Binding ComPorts}">
-			
+		<ListView ItemsSource="{Binding ComPorts}" SelectedItem="{Binding SelectedComPort}">
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<StackPanel Orientation="Vertical">
+						<TextBlock Text="{Binding Name}" FontWeight="Bold" />
+						<TextBlock Text="{Binding Description}" />
+					</StackPanel>
+				</DataTemplate>
+			</ListView.ItemTemplate>
 		</ListView>
 
 

@@ -28,6 +28,10 @@
 				<Separator />
 				<MenuItem Header="Exit" />
 			</MenuItem>
+			<MenuItem Header="Flash" Height="22" VerticalContentAlignment="Center">
+				<MenuItem Header="Read" />
+				<MenuItem Header="Write" />
+			</MenuItem>
 			<MenuItem Header="Help" Height="22" VerticalContentAlignment="Center">
 				<MenuItem Header="About" />
 			</MenuItem>
@@ -35,7 +39,7 @@
 
 		<TabControl Margin="4 8 4 4" Grid.Row="1">
 			<TabItem Header="Connection">
-				<vw:ConnectionView Margin="10" />
+				<vw:ConnectionView Margin="10" DataContext="{Binding ConnectionVm}" />
 			</TabItem>
 			<TabItem Header="System" IsEnabled="{Binding ConnectionVm.IsConnected}">
 				<vw:SystemView Margin="10" />
