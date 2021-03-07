@@ -48,6 +48,7 @@ HEADERS = \
 	system.h \
 	throttle.h \
 	util.h \
+	version.h \
 	watchdog.h \
 	sensors.h \
 	pins.h

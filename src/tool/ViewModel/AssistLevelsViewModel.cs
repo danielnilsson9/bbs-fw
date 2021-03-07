@@ -1,3 +1,4 @@
+using BBSFW.Model;
 using BBSFW.ViewModel.Base;
 using System;
 using System.Collections.Generic;
@@ -10,87 +11,100 @@ namespace BBSFW.ViewModel
 	{
 
 
-		public enum OperationModeSwitching
-		{
-			Off,
-			SportButton,
-			LightButton,
-			Pas0PlusLightButton
-		}
-
 		public enum OperationMode
 		{
 			Default,
 			Sport
 		}
 
-		public List<AssistLevelViewModel> AssistLevels { get; private set; }
+
+		public static List<ValueItemViewModel<OperationMode>> OperationModes { get; } =
+			new List<ValueItemViewModel<OperationMode>>
+			{
+				new ValueItemViewModel<OperationMode>(OperationMode.Default, "Default"),
+				new ValueItemViewModel<OperationMode>(OperationMode.Sport, "Sport")
+			};
 
 
-		public List<ValueItemViewModel<OperationMode>> OperationModes { get; private set; }
 
-		public List<ValueItemViewModel<OperationModeSwitching>> OperationModeSwitchingOptions { get; private set; }
 
-		private ValueItemViewModel<OperationModeSwitching> _selectedOperationModeSwitching;
-		public ValueItemViewModel<OperationModeSwitching> SelectedOperationModeSwitching
+		private ConfigurationViewModel _configVm;
+		public ConfigurationViewModel ConfigVm
 		{
-			get { return _selectedOperationModeSwitching; }
+			get { return _configVm; }
+		}
+
+
+		private ValueItemViewModel<OperationMode> _selectedOperationModePage;
+		public ValueItemViewModel<OperationMode> SelectedOperationModePage
+		{
+			get { return _selectedOperationModePage; }
 			set
 			{
-				if (_selectedOperationModeSwitching != value)
+				if (_selectedOperationModePage != value)
 				{
-					_selectedOperationModeSwitching = value;
-					OnPropertyChanged(nameof(SelectedOperationModeSwitching));
+					_selectedOperationModePage = value;
+					LoadAssistLevels(_selectedOperationModePage.Value);
+					OnPropertyChanged(nameof(SelectedOperationModePage));
 				}
 			}
 		}
 
-		public List<int> SelectableDefaultAssistLevels { get; private set; }
-
-		private int _selectedDefaultAssistLevel;
-		public int SelectedDefaultAssistLevel
+		private List<AssistLevelViewModel> _currentAssistLevels;
+		public List<AssistLevelViewModel> CurrentAssistLevels
 		{
-			get { return _selectedDefaultAssistLevel; }
+			get { return _currentAssistLevels; }
 			set
 			{
-				if (_selectedDefaultAssistLevel != value)
+				if (_currentAssistLevels != value)
 				{
-					_selectedDefaultAssistLevel = value;
-					OnPropertyChanged(nameof(SelectedDefaultAssistLevel));
+					_currentAssistLevels = value;
+					OnPropertyChanged(nameof(CurrentAssistLevels));
 				}
 			}
 		}
 
 
-		public AssistLevelsViewModel()
+		private AssistLevelViewModel _selectedAssistLevel;
+		public AssistLevelViewModel SelectedAssistLevel
 		{
-			AssistLevels = new List<AssistLevelViewModel>();
-			SelectableDefaultAssistLevels = new List<int>();
-			for(int i = 0; i < 10; ++i)
+			get { return _selectedAssistLevel; }
+			set
 			{
-				SelectableDefaultAssistLevels.Add(i);
-				AssistLevels.Add(new AssistLevelViewModel(i));
+				if (_selectedAssistLevel != value)
+				{
+					_selectedAssistLevel = value;
+					OnPropertyChanged(nameof(SelectedAssistLevel));
+				}
 			}
-
-			OperationModes = new List<ValueItemViewModel<OperationMode>>();
-			OperationModes.Add(new ValueItemViewModel<OperationMode>(OperationMode.Default, "Default"));
-			OperationModes.Add(new ValueItemViewModel<OperationMode>(OperationMode.Sport, "Sport"));
-
-			OperationModeSwitchingOptions = new List<ValueItemViewModel<OperationModeSwitching>>();
-			OperationModeSwitchingOptions.Add(new ValueItemViewModel<OperationModeSwitching>(OperationModeSwitching.Off, "Off"));
-			OperationModeSwitchingOptions.Add(new ValueItemViewModel<OperationModeSwitching>(OperationModeSwitching.SportButton, "Sport Button"));
-			OperationModeSwitchingOptions.Add(new ValueItemViewModel<OperationModeSwitching>(OperationModeSwitching.LightButton, "Lights Button"));
-			OperationModeSwitchingOptions.Add(new ValueItemViewModel<OperationModeSwitching>(OperationModeSwitching.Pas0PlusLightButton, "PAS 0 + Lights Buttons"));
-
-			SelectedOperationModeSwitching = OperationModeSwitchingOptions.First();
-
 		}
 
 
 
 
 
+		public AssistLevelsViewModel(ConfigurationViewModel config)
+		{
+			_configVm = config;
 
+			SelectedOperationModePage = OperationModes[0];
+		}
+
+
+
+
+
+		private void LoadAssistLevels(OperationMode mode)
+		{
+			if (mode == OperationMode.Default)
+			{
+				CurrentAssistLevels = ConfigVm.GetDefaultAssistLevels();
+			}
+			else if (mode == OperationMode.Sport)
+			{
+				CurrentAssistLevels = ConfigVm.GetSportAssistLevels();
+			}
+		}
 
 	}
 }

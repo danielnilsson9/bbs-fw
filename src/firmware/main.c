@@ -25,17 +25,15 @@ void main(void)
 	watchdog_init();
 	system_init();
 
-	system_delay_ms(1000);
-
-	extcom_init();
 	eventlog_init(false);
+	extcom_init();
 
 	cfgstore_init();
 	config_t* cfg = cfgstore_get();
 
 	sensors_init();
 	throttle_init(cfg->throttle_start_voltage_mv, cfg->throttle_end_voltage_mv);
-	motor_init(cfg->max_current_amps * 1000, cfg->low_voltage_cut_off);
+	motor_init(cfg->max_current_amps * 1000, cfg->low_cut_off_V);
 
 	app_init();
 

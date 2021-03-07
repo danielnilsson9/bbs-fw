@@ -20,6 +20,11 @@ void eventlog_init(bool enabled)
 	is_enabled = enabled;
 }
 
+bool eventlog_is_enabled()
+{
+	return is_enabled;
+}
+
 void eventlog_set_enabled(bool enabled)
 {
 	is_enabled = enabled;

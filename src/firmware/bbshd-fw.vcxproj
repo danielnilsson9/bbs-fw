@@ -92,6 +92,7 @@ make all</NMakeReBuildCommandLine>
     <ClInclude Include="motor.h" />
     <ClInclude Include="system.c" />
     <ClInclude Include="system.h" />
+    <ClInclude Include="version.h" />
     <ClInclude Include="watchdog.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

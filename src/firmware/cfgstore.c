@@ -180,8 +180,10 @@ static bool write_config()
 
 static void load_default_config()
 {
+	config.use_freedom_units = 0;
+
 	config.max_current_amps = 30;
-	config.low_voltage_cut_off = 24;		// :TODO: change!!!
+	config.low_cut_off_V = 24;		// :TODO: change!!!
 
 	config.use_speed_sensor = 1;
 	config.use_display = 1;

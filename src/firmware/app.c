@@ -72,6 +72,11 @@ void app_process()
 				target_current = tmp;
 			}
 		}
+
+		if (cfg->use_speed_sensor)
+		{
+			// limit speed
+		}
 	}
 
 	motor_set_target_current(target_current);

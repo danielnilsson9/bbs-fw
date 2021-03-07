@@ -4,12 +4,12 @@ using System.IO.Ports;
 using System.Linq;
 using System.Management;
 using System.Text;
+using System.Threading;
 
 namespace BBSFW.Model
 {
 	public class ComPort
 	{
-
 		public string Name { get; private set; }
 
 		public string Description { get; private set; }
@@ -26,9 +26,16 @@ namespace BBSFW.Model
 	public class BbsfwConnection
 	{
 		private SerialPort _port = null;
+		private Thread _comThread;
+
+
 
 		public bool IsConnected { get; private set; }
 
+
+
+		public event Action Connected;
+		public event Action Disconnected;
 
 
 		public void Open(ComPort port)
@@ -37,6 +44,9 @@ namespace BBSFW.Model
 			_port.Open();
 
 			// :TODO: start sending hello until response
+
+			_comThread = new Thread(ComThreadRun);
+			_comThread.Start();
 
 		}
 
@@ -72,6 +82,23 @@ namespace BBSFW.Model
 
 			return result;
 		}
+
+
+
+
+
+		private void ComThreadRun()
+		{
+
+			while (true)
+			{
+
+			}
+
+
+
+		}
+
 
 	}
 }

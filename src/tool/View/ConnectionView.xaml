@@ -6,6 +6,11 @@
              xmlns:local="clr-namespace:BBSFW.View"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+	<UserControl.Resources>
+		<BooleanToVisibilityConverter x:Key="BoolToVis" />
+	</UserControl.Resources>
+	
     <Grid>
 
 		<Grid.ColumnDefinitions>
@@ -18,7 +23,7 @@
 			<RowDefinition />
 		</Grid.RowDefinitions>
 
-		<ListView ItemsSource="{Binding ComPorts}" SelectedItem="{Binding SelectedComPort}">
+		<ListView x:Name="PortList" ItemsSource="{Binding ComPorts}" SelectedItem="{Binding SelectedComPort}">
 			<ListView.ItemTemplate>
 				<DataTemplate>
 					<StackPanel Orientation="Vertical">
@@ -31,15 +36,30 @@
 
 
 
-		<StackPanel Grid.Column="2" Grid.Row="0" Height="64" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+		<StackPanel Grid.Column="2" Grid.Row="0" Height="64" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsDisconnected, Converter={StaticResource BoolToVis}}">
 
-			<Button Content="Connect" Width="120" />
-			<ProgressBar IsIndeterminate="True" Width="120" Margin="0 10 0 0" Height="16" />
-
+			<Button Content="Connect" Width="120" Command="{Binding ConnectCommand}">
+				<Button.Style>
+					<Style TargetType="{x:Type Button}">
+						<Setter Property="IsEnabled" Value="True" />
+						<Setter Property="Visibility" Value="Visible" />
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding SelectedComPort}" Value="{x:Null}">
+								<Setter Property="IsEnabled" Value="False" />
+							</DataTrigger>
+							<DataTrigger Binding="{Binding IsConnecting}" Value="True">
+								<Setter Property="Visibility" Value="Collapsed" />
+							</DataTrigger>
+						</Style.Triggers>
+					</Style>
+				</Button.Style>
+			</Button>
+			<Button Content="Cancel" Width="120" Command="{Binding DisconnectCommand}" Visibility="{Binding IsConnecting, Converter={StaticResource BoolToVis}}" />
+			<ProgressBar IsIndeterminate="True" Width="120" Margin="0 10 0 0" Height="16" Visibility="{Binding IsConnecting, Converter={StaticResource BoolToVis}}" />
 		</StackPanel>
 
-		<StackPanel Grid.Column="2" Grid.Row="0" Height="64" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-			<Button Content="Disconnect" Width="120" />
+		<StackPanel Grid.Column="2" Grid.Row="0" Height="64" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsConnected, Converter={StaticResource BoolToVis}}">
+			<Button Content="Disconnect" Width="120" Command="{Binding DisconnectCommand}" />
 
 			<Grid Width="120" Margin="0 10 0 0">
 				<Grid.ColumnDefinitions>
@@ -56,7 +76,7 @@
 				<TextBlock Text="Yes" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" />
 
 				<TextBlock Text="Version:" Grid.Column="0" Grid.Row="1" FontWeight="Bold" />
-				<TextBlock Text="1.1" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" />
+				<TextBlock Text="{Binding FirmwareVersion}" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" />
 			</Grid>
 			
 		</StackPanel>

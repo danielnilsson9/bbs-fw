@@ -1,3 +1,4 @@
+using BBSFW.Model;
 using BBSFW.ViewModel.Base;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ namespace BBSFW.ViewModel
 	public class MainViewModel : ObservableObject
 	{
 
+		public ConfigurationViewModel ConfigVm { get; private set; }
 
 		public ConnectionViewModel ConnectionVm { get; private set; }
 
@@ -21,18 +23,14 @@ namespace BBSFW.ViewModel
 
 		public MainViewModel()
 		{
+			ConfigVm = new ConfigurationViewModel();
+
+
 			ConnectionVm = new ConnectionViewModel();
-			SystemVm = new SystemViewModel();
-			AssistLevelsVm = new AssistLevelsViewModel();
+			SystemVm = new SystemViewModel(ConfigVm);
+			AssistLevelsVm = new AssistLevelsViewModel(ConfigVm);
 			EventLogVm = new EventLogViewModel();
 		}
-
-
-
-
-
-
-
 
 	}
 }

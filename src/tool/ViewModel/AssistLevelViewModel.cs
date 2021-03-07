@@ -1,19 +1,25 @@
+using BBSFW.Model;
 using BBSFW.ViewModel.Base;
-
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BBSFW.ViewModel
 {
 	public class AssistLevelViewModel : ObservableObject
 	{
 
-		public enum AssistType
-		{
-			Disabled = 0x00,
-			Pas = 0x01,
-			Throttle = 0x02,
-			PasAndThrottle = 0x03,
-			Cruise = 0x04
-		};
+		private Configuration.AssistLevel _level;
+
+
+		public static List<ValueItemViewModel<Configuration.AssistType>> AssistTypeOptions { get; } =
+			new List<ValueItemViewModel<Configuration.AssistType>>
+			{
+				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.Disabled, "Motor Disabled"),
+				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.Pas, "PAS"),
+				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.Throttle, "Throttle Only"),
+				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.PasAndThrottle, "PAS & Throttle"),
+				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.Cruise, "Cruise")
+			};
 
 
 		private int _id;
@@ -22,70 +28,64 @@ namespace BBSFW.ViewModel
 			get { return _id; }
 		}
 
-
-
-		private AssistType _type;
-		public AssistType Type
+		public ValueItemViewModel<Configuration.AssistType> Type
 		{
-			get { return _type; }
+			get { return AssistTypeOptions.FirstOrDefault((e) => e.Value == _level.flags); }
 			set
 			{
-				if (_type != value)
+				if (_level.flags != value)
 				{
-					_type = value;
+					_level.flags = value;
 					OnPropertyChanged(nameof(Type));
 				}
 			}
 		}
 
-		private int _targetCurrentPercent;
-		public int TargetCurrentPercent
+		public uint TargetCurrentPercent
 		{
-			get { return _targetCurrentPercent; }
+			get { return _level.MaxCurrentPercent; }
 			set
 			{
-				if (_targetCurrentPercent != value)
+				if (_level.MaxCurrentPercent != value)
 				{
-					_targetCurrentPercent = value;
+					_level.MaxCurrentPercent = value;
 					OnPropertyChanged(nameof(TargetCurrentPercent));
 				}
 			}
 		}
 
-		private int _maxThrottlePercent;
-		public int MaxThrottlePercent
+		public uint MaxThrottlePercent
 		{
-			get { return _maxThrottlePercent; }
+			get { return _level.MaxThrottlePercent; }
 			set
 			{
-				if (_maxThrottlePercent != value)
+				if (_level.MaxThrottlePercent != value)
 				{
-					_maxThrottlePercent = value;
+					_level.MaxThrottlePercent = value;
 					OnPropertyChanged(nameof(MaxThrottlePercent));
 				}
 			}
 		}
 
-		private int _maxSpeedPercent;
-		public int MaxSpeedPercent
+		public uint MaxSpeedPercent
 		{
-			get { return _maxThrottlePercent; }
+			get { return _level.MaxSpeedPercent; }
 			set
 			{
-				if (_maxSpeedPercent != value)
+				if (_level.MaxSpeedPercent != value)
 				{
-					_maxSpeedPercent = value;
+					_level.MaxSpeedPercent = value;
 					OnPropertyChanged(nameof(MaxSpeedPercent));
 				}
 			}
 		}
 
 
-		public AssistLevelViewModel(int id)
+		public AssistLevelViewModel(int id, Configuration.AssistLevel level)
 		{
 			_id = id;
+			_level = level;
 		}
-
 
 	}
 }

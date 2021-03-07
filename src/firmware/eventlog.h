@@ -38,6 +38,7 @@
 
 void eventlog_init(bool enabled);
 
+bool eventlog_is_enabled();
 void eventlog_set_enabled(bool enabled);
 
 void eventlog_write(uint8_t evt);

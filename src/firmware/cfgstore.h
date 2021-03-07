@@ -21,7 +21,7 @@
 #define ASSIST_MODE_SELECT_PAS0_LIGHT	0x03
 
 
-#define CONFIG_VERSION		1
+#define CONFIG_VERSION					1
 
 
 typedef struct
@@ -34,9 +34,12 @@ typedef struct
 
 typedef struct
 {
+	// hmi units
+	uint8_t use_freedom_units;
+
 	// power
 	uint8_t max_current_amps;
-	uint8_t low_voltage_cut_off;
+	uint8_t low_cut_off_V;
 
 	// externals
 	uint8_t use_speed_sensor;
@@ -50,7 +53,7 @@ typedef struct
 
 	// pas options
 	uint8_t pas_start_delay_pulses;
-	uint8_t pas_stop_delay_ms;
+	uint8_t pas_stop_delay_ms_x10;
 
 	// throttle options
 	uint16_t throttle_start_voltage_mv;

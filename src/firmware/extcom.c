@@ -7,6 +7,8 @@
  */
 
 #include "extcom.h"
+#include "cfgstore.h"
+#include "eventlog.h"
 #include "stc15.h"
 #include "uart.h"
 #include "system.h"
@@ -14,9 +16,11 @@
 #include "motor.h"
 #include "app.h"
 #include "util.h"
+#include "version.h"
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define KEEP		0
 #define DISCARD		1
@@ -34,7 +38,12 @@
 
 
 // Firmware config tool communication
+#define OPCODE_READ_FW_VERSION					0x01
+#define OPCODE_READ_EVTLOG_ENABLE				0x02
+#define OPCODE_READ_CONFIG						0x03
 
+#define OPCODE_WRITE_EVTLOG_ENABLE				0xf0
+#define OPCODE_WRITE_CONFIG						0xf1
 
 
 // Bafang display communication
@@ -70,12 +79,22 @@ static uint8_t __xdata msgbuf[128];
 static uint32_t __xdata last_recv;
 
 
+static uint8_t compute_checksum(uint8_t* buf, uint8_t length);
+static void write_uart1_and_increment_checksum(uint8_t data, uint8_t* checksum);
+
 static uint8_t try_process_request();
 static uint8_t try_process_read_request();
 static uint8_t try_process_write_request();
 static uint8_t try_process_bafang_read_request();
 static uint8_t try_process_bafang_write_request();
 
+
+static uint8_t process_read_fw_version();
+static uint8_t process_read_evtlog_enable();
+static uint8_t process_read_config();
+
+static uint8_t process_write_evtlog_enable();
+static uint8_t process_write_config();
 
 
 static uint8_t process_bafang_display_read_status();
@@ -101,7 +120,15 @@ void extcom_init()
 	// bafang standard baudrate
 	uart1_open(1200);
 
-	// :TODO: wait one second for config tool connection and initialization
+
+	// Wait one second for config tool connection.
+	// This is here to that the config tool can enable
+	// the eventlog before system proceeds with initialization.
+	uint32_t end = system_ms() + 1000;
+	while (system_ms() < end)
+	{
+		extcom_process();
+	}
 }
 
 void extcom_process()
@@ -137,6 +164,23 @@ void extcom_process()
 }
 
 
+static uint8_t compute_checksum(uint8_t* buf, uint8_t length)
+{
+	uint8_t result = 0;
+
+	for (uint8_t i = 0; i < length; ++i)
+	{
+		result += buf[i];
+	}
+
+	return result;
+}
+
+static void write_uart1_and_increment_checksum(uint8_t data, uint8_t* checksum)
+{
+	checksum += data;
+	uart1_write(data);
+}
 
 static uint8_t try_process_request()
 {
@@ -153,7 +197,6 @@ static uint8_t try_process_request()
 		return try_process_bafang_write_request();
 	case REQUEST_TYPE_BAFANG_READ:
 		return try_process_bafang_read_request();
-		break;
 	case REQUEST_TYPE_BAFANG_WRITE:
 		return try_process_bafang_write_request();
 	}
@@ -163,11 +206,38 @@ static uint8_t try_process_request()
 
 static uint8_t try_process_read_request()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
+	switch (msgbuf[1])
+	{
+	case OPCODE_READ_FW_VERSION:
+		return process_read_fw_version();
+	case OPCODE_READ_EVTLOG_ENABLE:
+		return process_read_evtlog_enable();
+	case OPCODE_READ_CONFIG:
+		return process_read_config();
+	}
+
 	return DISCARD;
 }
 
 static uint8_t try_process_write_request()
 {
+	if (msg_len < 2)
+	{
+		return KEEP;
+	}
+
+	switch (msgbuf[2])
+	{
+	case OPCODE_WRITE_EVTLOG_ENABLE:
+		return process_write_evtlog_enable();
+	case OPCODE_WRITE_CONFIG:
+		return process_write_config();
+	}
 
 	return DISCARD;
 }
@@ -228,6 +298,127 @@ static uint8_t try_process_bafang_write_request()
 
 
 
+static uint8_t process_read_fw_version()
+{
+	if (msg_len < 3)
+	{
+		return KEEP;
+	}
+
+	if (compute_checksum(msgbuf, 2) != msgbuf[2])
+	{
+		return DISCARD;
+	}
+
+	uint8_t checksum = 0;
+	write_uart1_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
+	write_uart1_and_increment_checksum(OPCODE_READ_FW_VERSION, &checksum);
+	write_uart1_and_increment_checksum(VERSION_MAJOR, &checksum);
+	write_uart1_and_increment_checksum(VERSION_MINOR, &checksum);
+	write_uart1_and_increment_checksum(VERSION_PATCH, &checksum);
+	write_uart1_and_increment_checksum(CONFIG_VERSION, &checksum);
+	uart1_write(checksum);
+
+	return COMPLETE;
+}
+
+static uint8_t process_read_evtlog_enable()
+{
+	if (msg_len < 3)
+	{
+		return KEEP;
+	}
+
+	if (compute_checksum(msgbuf, 2) != msgbuf[2])
+	{
+		return DISCARD;
+	}
+
+	uint8_t checksum = 0;
+	write_uart1_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
+	write_uart1_and_increment_checksum(OPCODE_READ_EVTLOG_ENABLE, &checksum);
+	write_uart1_and_increment_checksum((uint8_t)eventlog_is_enabled(), &checksum);
+	uart1_write(checksum);
+
+	return COMPLETE;
+}
+
+static uint8_t process_read_config()
+{
+	if (msg_len < 3)
+	{
+		return KEEP;
+	}
+
+	if (compute_checksum(msgbuf, 2) != msgbuf[2])
+	{
+		return DISCARD;
+	}
+
+	uint8_t checksum = 0;
+	write_uart1_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
+	write_uart1_and_increment_checksum(OPCODE_READ_CONFIG, &checksum);
+
+	uint8_t* cfg = (uint8_t*)cfgstore_get();
+	for (uint8_t i = 0; i < sizeof(config_t); ++i)
+	{
+		write_uart1_and_increment_checksum(*(cfg + i), &checksum);
+	}
+
+	uart1_write(checksum);
+
+	return COMPLETE;
+}
+
+
+static uint8_t process_write_evtlog_enable()
+{
+	if (msg_len < 4)
+	{
+		return KEEP;
+	}
+
+	if (compute_checksum(msgbuf, 3) != msgbuf[3])
+	{
+		return DISCARD;
+	}
+
+	eventlog_set_enabled((bool)msgbuf[2]);
+
+	uint8_t checksum = 0;
+	write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
+	write_uart1_and_increment_checksum(OPCODE_WRITE_EVTLOG_ENABLE, &checksum);
+	write_uart1_and_increment_checksum(msgbuf[2], &checksum);
+	uart1_write(checksum);
+
+	return COMPLETE;
+}
+
+static uint8_t process_write_config()
+{
+	if (msg_len < (3 + sizeof(config_t)))
+	{
+		return KEEP;
+	}
+
+	if (compute_checksum(msgbuf, 2 + sizeof(config_t)) != msgbuf[2 + sizeof(config_t)])
+	{
+		return DISCARD;
+	}
+
+	memcpy(cfgstore_get(), msgbuf + 2, sizeof(config_t));
+	bool result = cfgstore_save();
+
+	uint8_t checksum = 0;
+	write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
+	write_uart1_and_increment_checksum(OPCODE_WRITE_CONFIG, &checksum);
+	write_uart1_and_increment_checksum(result, &checksum);
+	uart1_write(checksum);
+
+	return COMPLETE;
+}
+
+
 static uint8_t process_bafang_display_read_status()
 {
 	if (msg_len < 2)
@@ -276,7 +467,7 @@ static uint8_t process_bafang_display_read_battery()
 	uint8_t percent = (uint8_t)map(volt_x10, motor_get_battery_lvc_x10(), max_volt_x10, 0, 100);
 
 	uart1_write(percent);
-	uart1_write(percent);
+	uart1_write(percent); // checksum
 
 	return COMPLETE;
 }
@@ -477,10 +668,7 @@ static uint8_t process_bafang_display_write_speed_limit()
 		return KEEP;
 	}
 
-	uint8_t chk = 0;
-	chk += msgbuf[2];
-	chk += msgbuf[3];
-	if (chk != msgbuf[4])
+	if (compute_checksum(msgbuf + 2, 2) != msgbuf[4])
 	{
 		return DISCARD;
 	}

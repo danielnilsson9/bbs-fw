@@ -29,8 +29,14 @@
 				<MenuItem Header="Exit" />
 			</MenuItem>
 			<MenuItem Header="Flash" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="Read" />
-				<MenuItem Header="Write" />
+				<MenuItem Header="Read" IsEnabled="{Binding ConnectionVm.IsConnected}" />
+				<MenuItem Header="Write" IsEnabled="{Binding ConnectionVm.IsConnected}" />
+			</MenuItem>
+			<MenuItem Header="Options" Height="22" VerticalContentAlignment="Center">
+				<MenuItem Header="Units">
+					<MenuItem Header="Metric" IsCheckable="True" IsChecked="{Binding ConfigVm.UseMetricUnits}" />
+					<MenuItem Header="Imperial" IsCheckable="True" IsChecked="{Binding ConfigVm.UseImperialUnits}" />
+				</MenuItem>
 			</MenuItem>
 			<MenuItem Header="Help" Height="22" VerticalContentAlignment="Center">
 				<MenuItem Header="About" />
@@ -41,10 +47,10 @@
 			<TabItem Header="Connection">
 				<vw:ConnectionView Margin="10" DataContext="{Binding ConnectionVm}" />
 			</TabItem>
-			<TabItem Header="System" IsEnabled="{Binding ConnectionVm.IsConnected}">
+			<TabItem Header="System">
 				<vw:SystemView Margin="10" />
 			</TabItem>
-			<TabItem Header="Assist Levels" IsEnabled="{Binding ConnectionVm.IsConnected}">
+			<TabItem Header="Assist Levels">
 				<vw:AssistLevelsView Margin="10" DataContext="{Binding AssistLevelsVm}"/>
 			</TabItem>
 			<TabItem Header="Event Log">
