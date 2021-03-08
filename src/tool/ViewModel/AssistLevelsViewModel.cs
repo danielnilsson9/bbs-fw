@@ -13,7 +13,7 @@ namespace BBSFW.ViewModel
 
 		public enum OperationMode
 		{
-			Default,
+			Standard,
 			Sport
 		}
 
@@ -21,7 +21,7 @@ namespace BBSFW.ViewModel
 		public static List<ValueItemViewModel<OperationMode>> OperationModes { get; } =
 			new List<ValueItemViewModel<OperationMode>>
 			{
-				new ValueItemViewModel<OperationMode>(OperationMode.Default, "Default"),
+				new ValueItemViewModel<OperationMode>(OperationMode.Standard, "Standard"),
 				new ValueItemViewModel<OperationMode>(OperationMode.Sport, "Sport")
 			};
 
@@ -44,26 +44,10 @@ namespace BBSFW.ViewModel
 				if (_selectedOperationModePage != value)
 				{
 					_selectedOperationModePage = value;
-					LoadAssistLevels(_selectedOperationModePage.Value);
 					OnPropertyChanged(nameof(SelectedOperationModePage));
 				}
 			}
 		}
-
-		private List<AssistLevelViewModel> _currentAssistLevels;
-		public List<AssistLevelViewModel> CurrentAssistLevels
-		{
-			get { return _currentAssistLevels; }
-			set
-			{
-				if (_currentAssistLevels != value)
-				{
-					_currentAssistLevels = value;
-					OnPropertyChanged(nameof(CurrentAssistLevels));
-				}
-			}
-		}
-
 
 		private AssistLevelViewModel _selectedAssistLevel;
 		public AssistLevelViewModel SelectedAssistLevel
@@ -93,18 +77,6 @@ namespace BBSFW.ViewModel
 
 
 
-
-		private void LoadAssistLevels(OperationMode mode)
-		{
-			if (mode == OperationMode.Default)
-			{
-				CurrentAssistLevels = ConfigVm.GetDefaultAssistLevels();
-			}
-			else if (mode == OperationMode.Sport)
-			{
-				CurrentAssistLevels = ConfigVm.GetSportAssistLevels();
-			}
-		}
 
 	}
 }

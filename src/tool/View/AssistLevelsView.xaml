@@ -37,7 +37,20 @@
 			<TextBlock Grid.Column="0" Grid.Row="0" Text="Operation Mode Page:" VerticalAlignment="Center" />
 			<ComboBox Grid.Column="1" Grid.Row="0" Margin="10 0 0 0" ItemsSource="{Binding OperationModes}" SelectedValue="{Binding SelectedOperationModePage}" />
 
-			<ListView Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding CurrentAssistLevels}" SelectedItem="{Binding SelectedAssistLevel}" Margin="0 4 0 4">
+			<ListView Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"
+					  ItemsSource="{Binding ConfigVm.StandardAssistLevels}"
+					  SelectedItem="{Binding SelectedAssistLevel}" Margin="0 4 0 4">
+				<ListView.Style>
+					<Style TargetType="{x:Type ListView}">
+						<Setter Property="Visibility" Value="Collapsed" />
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding SelectedOperationModePage.Value}" Value="Standard">
+								<Setter Property="Visibility" Value="Visible" />
+							</DataTrigger>
+						</Style.Triggers>
+					</Style>
+				</ListView.Style>
+				
 				<ListView.ItemTemplate>
 					<DataTemplate DataType="{x:Type vm:AssistLevelViewModel}">
 						<StackPanel Orientation="Vertical">
@@ -52,7 +65,36 @@
 						</StackPanel>
 					</DataTemplate>
 				</ListView.ItemTemplate>
+			</ListView>
 
+			<ListView Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"
+					  ItemsSource="{Binding ConfigVm.SportAssistLevels}"
+					  SelectedItem="{Binding SelectedAssistLevel}" Margin="0 4 0 4">
+				<ListView.Style>
+					<Style TargetType="{x:Type ListView}">
+						<Setter Property="Visibility" Value="Collapsed" />
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding SelectedOperationModePage.Value}" Value="Sport">
+								<Setter Property="Visibility" Value="Visible" />
+							</DataTrigger>
+						</Style.Triggers>
+					</Style>
+				</ListView.Style>
+
+				<ListView.ItemTemplate>
+					<DataTemplate DataType="{x:Type vm:AssistLevelViewModel}">
+						<StackPanel Orientation="Vertical">
+							<TextBlock FontWeight="Bold">
+							<Run Text="Level " />
+							<Run Text="{Binding Id, Mode=OneWay}" />
+							</TextBlock>
+
+							<TextBlock>
+							<Run Text="{Binding Type, Mode=OneWay}" />
+							</TextBlock>
+						</StackPanel>
+					</DataTemplate>
+				</ListView.ItemTemplate>
 			</ListView>
 		</Grid>
 		
@@ -83,7 +125,7 @@
 
 				<TextBlock Grid.Row="0" FontSize="18" FontWeight="Bold">
 					<Run Text="Level " />
-					<Run Text="{Binding SelectedLevel.Id}" />
+					<Run Text="{Binding SelectedAssistLevel.Id, Mode=OneWay}" />
 				</TextBlock>
 
 

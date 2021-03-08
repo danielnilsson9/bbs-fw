@@ -12,9 +12,7 @@ namespace BBSFW.ViewModel
 		private Configuration _config;
 
 
-		private List<AssistLevelViewModel> _page1AssistLevels;
-		private List<AssistLevelViewModel> _page2AssistLevels;
-
+		
 
 		public static List<uint> PasStartDelayOptions { get; } =
 			new List<uint>() {
@@ -47,6 +45,10 @@ namespace BBSFW.ViewModel
 				if (_config.UseFreedomUnits == value)
 				{
 					_config.UseFreedomUnits = !value;
+
+					Properties.Settings.Default.UseFreedomUnits = _config.UseFreedomUnits;
+					Properties.Settings.Default.Save();
+
 					OnPropertyChanged(nameof(UseImperialUnits));
 					OnPropertyChanged(nameof(UseMetricUnits));
 				}
@@ -64,6 +66,10 @@ namespace BBSFW.ViewModel
 				if (_config.UseFreedomUnits != value)
 				{
 					_config.UseFreedomUnits = value;
+
+					Properties.Settings.Default.UseFreedomUnits = _config.UseFreedomUnits;
+					Properties.Settings.Default.Save();
+
 					OnPropertyChanged(nameof(UseImperialUnits));
 					OnPropertyChanged(nameof(UseMetricUnits));
 				}
@@ -137,6 +143,7 @@ namespace BBSFW.ViewModel
 				}
 			}
 		}
+
 		public bool UseSpeedSensor
 		{
 			get { return _config.UseSpeedSensor; }
@@ -288,43 +295,86 @@ namespace BBSFW.ViewModel
 		}
 
 
+		private List<AssistLevelViewModel> _standardAssistLevels;
+		public List<AssistLevelViewModel> StandardAssistLevels
+		{
+			get { return _standardAssistLevels; }
+			private set
+			{
+				if (_standardAssistLevels != value)
+				{
+					_standardAssistLevels = value;
+					OnPropertyChanged(nameof(StandardAssistLevels));
+				}
+			}
+		}
+
+		private List<AssistLevelViewModel> _sportAssistLevels;
+		public List<AssistLevelViewModel> SportAssistLevels
+		{
+			get { return _sportAssistLevels; }
+			private set
+			{
+				if (_sportAssistLevels != value)
+				{
+					_sportAssistLevels = value;
+					OnPropertyChanged(nameof(SportAssistLevels));
+				}
+			}
+		}
+
+
 		public ConfigurationViewModel()
 		{
 			_config = new Configuration();
-			_config.LoadDefault();
 
-			_page1AssistLevels = new List<AssistLevelViewModel>();
-			for (int i = 0; i < _config.AssistLevels.GetLength(1); ++i)
-			{
-				_page1AssistLevels.Add(new AssistLevelViewModel(i, _config.AssistLevels[0, i]));
-			}
-
-			_page2AssistLevels = new List<AssistLevelViewModel>();
-			for (int i = 0; i < _config.AssistLevels.GetLength(1); ++i)
-			{
-				_page2AssistLevels.Add(new AssistLevelViewModel(i, _config.AssistLevels[1, i]));
-			}
-
+			StandardAssistLevels = new List<AssistLevelViewModel>();
+			SportAssistLevels = new List<AssistLevelViewModel>();
 			
+			for (int i = 0; i < _config.StandardAssistLevels.Length; ++i)
+			{
+				_standardAssistLevels.Add(new AssistLevelViewModel(i, _config.StandardAssistLevels[i]));
+			}
+
+			for (int i = 0; i < _config.SportAssistLevels.Length; ++i)
+			{
+				_sportAssistLevels.Add(new AssistLevelViewModel(i, _config.SportAssistLevels[i]));
+			}
 		}
 
 
 
-
-
-		public List<AssistLevelViewModel> GetDefaultAssistLevels()
+		public void ReadConfiguration(string filepath)
 		{
-			return _page1AssistLevels;
+			_config.ReadFromFile(filepath);
+
+			OnPropertyChanged(nameof(UseMetricUnits));
+			OnPropertyChanged(nameof(UseImperialUnits));
+			OnPropertyChanged(nameof(MaxCurrentAmps));
+			OnPropertyChanged(nameof(LowCutoffVolts));
+			OnPropertyChanged(nameof(MaxSpeedKph));
+			OnPropertyChanged(nameof(MaxSpeedMph));
+			OnPropertyChanged(nameof(UseDisplay));
+			OnPropertyChanged(nameof(UseSpeedSensor));
+			OnPropertyChanged(nameof(UsePushWalk));
+			OnPropertyChanged(nameof(UsePushWalk));
+			OnPropertyChanged(nameof(ThrottleStartVoltageMillivolts));
+			OnPropertyChanged(nameof(ThrottleEndVoltageMillivolts));
+			OnPropertyChanged(nameof(ThrottleStartCurrentPercent));
+			OnPropertyChanged(nameof(PasStartDelayDegrees));
+			OnPropertyChanged(nameof(PasStopDelayMilliseconds));
+			OnPropertyChanged(nameof(WheelSizeInch));
+			OnPropertyChanged(nameof(SpeedSensorSignals));
+			OnPropertyChanged(nameof(StartupAssistLevel));
+			OnPropertyChanged(nameof(AssistModeSelection));
+			OnPropertyChanged(nameof(StandardAssistLevels));
+			OnPropertyChanged(nameof(SportAssistLevels));
 		}
 
-		public List<AssistLevelViewModel> GetSportAssistLevels()
+		public void WriteConfiguration(string filepath)
 		{
-			return _page2AssistLevels;
+			_config.WriteToFile(filepath);
 		}
-
-
-
-
 
 
 		private static uint KphToMph(uint kph)

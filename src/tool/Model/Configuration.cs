@@ -1,7 +1,11 @@
 using System;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace BBSFW.Model
 {
+
+	[XmlRoot("BBSFW", Namespace ="https://github.com/danielnilsson9/bbshd-fw")]
 	public class Configuration
 	{
 		public static int Version = 1;
@@ -26,13 +30,21 @@ namespace BBSFW.Model
 
 		public class AssistLevel
 		{
-			public AssistType flags;
+			[XmlAttribute]
+			public AssistType Type;
+
+			[XmlAttribute]
 			public uint MaxCurrentPercent;
+
+			[XmlAttribute]
 			public uint MaxThrottlePercent;
+
+			[XmlAttribute]
 			public uint MaxSpeedPercent;
 		}
 
 		// hmi
+		[XmlIgnore]
 		public bool UseFreedomUnits;
 
 		// power
@@ -61,8 +73,10 @@ namespace BBSFW.Model
 		// assists options
 		public AssistModeSelect AssistModeSelection;
 		public uint AssistStartupLevel;
-		public AssistLevel[,] AssistLevels = new AssistLevel[2, 10];
 
+
+		public AssistLevel[] StandardAssistLevels = new AssistLevel[10];
+		public AssistLevel[] SportAssistLevels = new AssistLevel[10];
 
 
 		public Configuration()
@@ -72,7 +86,7 @@ namespace BBSFW.Model
 
 		public void LoadDefault()
 		{
-			UseFreedomUnits = false;
+			UseFreedomUnits = Properties.Settings.Default.UseFreedomUnits;
 			MaxCurrentAmps = 30;
 			LowCutoffVolts = 42;
 
@@ -94,15 +108,68 @@ namespace BBSFW.Model
 			AssistModeSelection = AssistModeSelect.Off;
 			AssistStartupLevel = 3;
 
-			for (int i = 0; i < AssistLevels.GetLength(0); ++i)
+			for(int i = 0; i < StandardAssistLevels.Length; ++i)
 			{
-				for (int j = 0; j < AssistLevels.GetLength(1); ++j)
-				{
-					AssistLevels[i, j] = new AssistLevel();
-				}
+				StandardAssistLevels[i] = new AssistLevel();
 			}
 
+			for (int i = 0; i < SportAssistLevels.Length; ++i)
+			{
+				SportAssistLevels[i] = new AssistLevel();
+			}
 			// :TODO: assist levels
+		}
+
+		public void ReadFromFile(string filepath)
+		{
+			var serializer = new XmlSerializer(typeof(Configuration));
+
+			using (var reader = new FileStream(filepath, FileMode.Open))
+			{
+				var obj = serializer.Deserialize(reader) as Configuration;
+
+				UseFreedomUnits = obj.UseFreedomUnits;
+				MaxCurrentAmps = obj.MaxCurrentAmps;
+				LowCutoffVolts = obj.LowCutoffVolts;
+				UseSpeedSensor = obj.UseSpeedSensor;
+				UseDisplay = obj.UseDisplay;
+				UsePushWalk = obj.UsePushWalk;
+				WheelSizeInch = obj.WheelSizeInch;
+				NumWheelSensorSignals = obj.NumWheelSensorSignals;
+				MaxSpeedKph = obj.MaxSpeedKph;
+				PasStartDelayPulses = obj.PasStartDelayPulses;
+				PasStopDelayMilliseconds = obj.PasStopDelayMilliseconds;
+				ThrottleStartMillivolts = obj.ThrottleStartMillivolts;
+				ThrottleEndMillivolts = obj.ThrottleEndMillivolts;
+				ThrottleStartPercent = obj.ThrottleStartPercent;
+				AssistModeSelection = obj.AssistModeSelection;
+				AssistStartupLevel = obj.AssistStartupLevel;
+
+				for (int i = 0; i < Math.Min(obj.StandardAssistLevels.Length, 10); ++i)
+				{
+					StandardAssistLevels[i].Type = obj.StandardAssistLevels[i].Type;
+					StandardAssistLevels[i].MaxCurrentPercent = obj.StandardAssistLevels[i].MaxCurrentPercent;
+					StandardAssistLevels[i].MaxSpeedPercent = obj.StandardAssistLevels[i].MaxSpeedPercent;
+					StandardAssistLevels[i].MaxThrottlePercent = obj.StandardAssistLevels[i].MaxThrottlePercent;
+				}
+
+				for (int i = 0; i < Math.Min(obj.SportAssistLevels.Length, 10); ++i)
+				{
+					SportAssistLevels[i].Type = obj.SportAssistLevels[i].Type;
+					SportAssistLevels[i].MaxCurrentPercent = obj.SportAssistLevels[i].MaxCurrentPercent;
+					SportAssistLevels[i].MaxSpeedPercent = obj.SportAssistLevels[i].MaxSpeedPercent;
+					SportAssistLevels[i].MaxThrottlePercent = obj.SportAssistLevels[i].MaxThrottlePercent;
+				}
+			}
+		}
+
+		public void WriteToFile(string filepath)
+		{
+			var serializer = new XmlSerializer(typeof(Configuration));
+			using (var writer = new StreamWriter(filepath))
+			{
+				serializer.Serialize(writer, this);
+			}
 		}
 
 

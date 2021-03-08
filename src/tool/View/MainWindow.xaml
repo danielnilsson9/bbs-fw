@@ -23,10 +23,10 @@
 		
 		<Menu Grid.Row="0">
 			<MenuItem Header="File" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="Open..." />
-				<MenuItem Header="Save As..." />
+				<MenuItem Header="Open..." Command="{Binding OpenConfigCommand}" />
+				<MenuItem Header="Save As..." Command="{Binding SaveConfigCommand}" />
 				<Separator />
-				<MenuItem Header="Exit" />
+				<MenuItem Header="Exit" Command="{Binding ExitCommand}" />
 			</MenuItem>
 			<MenuItem Header="Flash" Height="22" VerticalContentAlignment="Center">
 				<MenuItem Header="Read" IsEnabled="{Binding ConnectionVm.IsConnected}" />
@@ -39,7 +39,7 @@
 				</MenuItem>
 			</MenuItem>
 			<MenuItem Header="Help" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="About" />
+				<MenuItem Header="About" Command="{Binding ShowAboutCommand}" />
 			</MenuItem>
 		</Menu>
 

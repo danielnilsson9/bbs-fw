@@ -30,12 +30,12 @@ namespace BBSFW.ViewModel
 
 		public ValueItemViewModel<Configuration.AssistType> Type
 		{
-			get { return AssistTypeOptions.FirstOrDefault((e) => e.Value == _level.flags); }
+			get { return AssistTypeOptions.FirstOrDefault((e) => e.Value == _level.Type); }
 			set
 			{
-				if (_level.flags != value)
+				if (_level.Type != value)
 				{
-					_level.flags = value;
+					_level.Type = value;
 					OnPropertyChanged(nameof(Type));
 				}
 			}
