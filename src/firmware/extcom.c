@@ -358,6 +358,7 @@ static uint8_t process_read_config()
 	uint8_t checksum = 0;
 	write_uart1_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
 	write_uart1_and_increment_checksum(OPCODE_READ_CONFIG, &checksum);
+	write_uart1_and_increment_checksum(sizeof(config_t), &checksum);
 
 	uint8_t* cfg = (uint8_t*)cfgstore_get();
 	for (uint8_t i = 0; i < sizeof(config_t); ++i)

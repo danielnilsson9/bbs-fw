@@ -8,7 +8,9 @@ namespace BBSFW.Model
 	[XmlRoot("BBSFW", Namespace ="https://github.com/danielnilsson9/bbshd-fw")]
 	public class Configuration
 	{
-		public static int Version = 1;
+		public const int Version = 1;
+		public const int ByteSize = 99;
+
 
 		public enum AssistModeSelect
 		{
@@ -47,9 +49,10 @@ namespace BBSFW.Model
 		[XmlIgnore]
 		public bool UseFreedomUnits;
 
-		// power
+		// global
 		public uint MaxCurrentAmps;
 		public uint LowCutoffVolts;
+		public uint MaxSpeedKph;
 
 		// externals
 		public bool UseSpeedSensor;
@@ -59,8 +62,7 @@ namespace BBSFW.Model
 		// speed sensor
 		public float WheelSizeInch;
 		public uint NumWheelSensorSignals;
-		public uint MaxSpeedKph;
-
+		
 		// pas options
 		public uint PasStartDelayPulses;
 		public uint PasStopDelayMilliseconds;
@@ -120,6 +122,97 @@ namespace BBSFW.Model
 			// :TODO: assist levels
 		}
 
+
+		public bool ParseFromBuffer(byte[] buffer)
+		{
+			if (buffer.Length != ByteSize)
+			{
+				return false;
+			}
+
+			using (var s = new MemoryStream(buffer))
+			{
+				var br = new BinaryReader(s);
+
+				UseFreedomUnits = br.ReadBoolean();
+
+				MaxCurrentAmps = br.ReadByte();
+				LowCutoffVolts = br.ReadByte();
+				MaxSpeedKph = br.ReadByte();
+
+				UseSpeedSensor = br.ReadBoolean();
+				UseDisplay = br.ReadBoolean();
+				UsePushWalk = br.ReadBoolean();
+
+				WheelSizeInch = br.ReadUInt16() / 10f;
+				NumWheelSensorSignals = br.ReadByte();
+
+				PasStartDelayPulses = br.ReadByte();
+				PasStopDelayMilliseconds = br.ReadByte() * 10u;
+
+				ThrottleStartMillivolts = br.ReadUInt16();
+				ThrottleEndMillivolts = br.ReadUInt16();
+				ThrottleStartPercent = br.ReadByte();
+
+				AssistModeSelection = (AssistModeSelect)br.ReadByte();
+				AssistStartupLevel = br.ReadByte();
+
+				for (int i = 0; i < 10; ++i)
+				{
+					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
+					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
+					StandardAssistLevels[i].MaxThrottlePercent = br.ReadByte();
+					StandardAssistLevels[i].MaxSpeedPercent = br.ReadByte();
+				}
+
+				for (int i = 0; i < 10; ++i)
+				{
+					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
+					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
+					SportAssistLevels[i].MaxThrottlePercent = br.ReadByte();
+					SportAssistLevels[i].MaxSpeedPercent = br.ReadByte();
+				}
+			}
+
+			return true;
+		}
+
+		public void CopyFrom(Configuration cfg)
+		{
+			UseFreedomUnits = cfg.UseFreedomUnits;
+			MaxCurrentAmps = cfg.MaxCurrentAmps;
+			LowCutoffVolts = cfg.LowCutoffVolts;
+			UseSpeedSensor = cfg.UseSpeedSensor;
+			UseDisplay = cfg.UseDisplay;
+			UsePushWalk = cfg.UsePushWalk;
+			WheelSizeInch = cfg.WheelSizeInch;
+			NumWheelSensorSignals = cfg.NumWheelSensorSignals;
+			MaxSpeedKph = cfg.MaxSpeedKph;
+			PasStartDelayPulses = cfg.PasStartDelayPulses;
+			PasStopDelayMilliseconds = cfg.PasStopDelayMilliseconds;
+			ThrottleStartMillivolts = cfg.ThrottleStartMillivolts;
+			ThrottleEndMillivolts = cfg.ThrottleEndMillivolts;
+			ThrottleStartPercent = cfg.ThrottleStartPercent;
+			AssistModeSelection = cfg.AssistModeSelection;
+			AssistStartupLevel = cfg.AssistStartupLevel;
+
+			for (int i = 0; i < Math.Min(cfg.StandardAssistLevels.Length, 10); ++i)
+			{
+				StandardAssistLevels[i].Type = cfg.StandardAssistLevels[i].Type;
+				StandardAssistLevels[i].MaxCurrentPercent = cfg.StandardAssistLevels[i].MaxCurrentPercent;
+				StandardAssistLevels[i].MaxThrottlePercent = cfg.StandardAssistLevels[i].MaxThrottlePercent;
+				StandardAssistLevels[i].MaxSpeedPercent = cfg.StandardAssistLevels[i].MaxSpeedPercent;
+			}
+
+			for (int i = 0; i < Math.Min(cfg.SportAssistLevels.Length, 10); ++i)
+			{
+				SportAssistLevels[i].Type = cfg.SportAssistLevels[i].Type;
+				SportAssistLevels[i].MaxCurrentPercent = cfg.SportAssistLevels[i].MaxCurrentPercent;
+				SportAssistLevels[i].MaxThrottlePercent = cfg.SportAssistLevels[i].MaxThrottlePercent;
+				SportAssistLevels[i].MaxSpeedPercent = cfg.SportAssistLevels[i].MaxSpeedPercent;
+			}
+		}
+
 		public void ReadFromFile(string filepath)
 		{
 			var serializer = new XmlSerializer(typeof(Configuration));
@@ -127,39 +220,7 @@ namespace BBSFW.Model
 			using (var reader = new FileStream(filepath, FileMode.Open))
 			{
 				var obj = serializer.Deserialize(reader) as Configuration;
-
-				UseFreedomUnits = obj.UseFreedomUnits;
-				MaxCurrentAmps = obj.MaxCurrentAmps;
-				LowCutoffVolts = obj.LowCutoffVolts;
-				UseSpeedSensor = obj.UseSpeedSensor;
-				UseDisplay = obj.UseDisplay;
-				UsePushWalk = obj.UsePushWalk;
-				WheelSizeInch = obj.WheelSizeInch;
-				NumWheelSensorSignals = obj.NumWheelSensorSignals;
-				MaxSpeedKph = obj.MaxSpeedKph;
-				PasStartDelayPulses = obj.PasStartDelayPulses;
-				PasStopDelayMilliseconds = obj.PasStopDelayMilliseconds;
-				ThrottleStartMillivolts = obj.ThrottleStartMillivolts;
-				ThrottleEndMillivolts = obj.ThrottleEndMillivolts;
-				ThrottleStartPercent = obj.ThrottleStartPercent;
-				AssistModeSelection = obj.AssistModeSelection;
-				AssistStartupLevel = obj.AssistStartupLevel;
-
-				for (int i = 0; i < Math.Min(obj.StandardAssistLevels.Length, 10); ++i)
-				{
-					StandardAssistLevels[i].Type = obj.StandardAssistLevels[i].Type;
-					StandardAssistLevels[i].MaxCurrentPercent = obj.StandardAssistLevels[i].MaxCurrentPercent;
-					StandardAssistLevels[i].MaxSpeedPercent = obj.StandardAssistLevels[i].MaxSpeedPercent;
-					StandardAssistLevels[i].MaxThrottlePercent = obj.StandardAssistLevels[i].MaxThrottlePercent;
-				}
-
-				for (int i = 0; i < Math.Min(obj.SportAssistLevels.Length, 10); ++i)
-				{
-					SportAssistLevels[i].Type = obj.SportAssistLevels[i].Type;
-					SportAssistLevels[i].MaxCurrentPercent = obj.SportAssistLevels[i].MaxCurrentPercent;
-					SportAssistLevels[i].MaxSpeedPercent = obj.SportAssistLevels[i].MaxSpeedPercent;
-					SportAssistLevels[i].MaxThrottlePercent = obj.SportAssistLevels[i].MaxThrottlePercent;
-				}
+				CopyFrom(obj);
 			}
 		}
 

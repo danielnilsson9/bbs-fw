@@ -125,7 +125,7 @@ namespace BBSFW.ViewModel
 
 
 
-		private void OnConnected()
+		private void OnConnected(string fwversion, int configVersion)
 		{
 			IsConnected = true;
 			IsConnecting = false;

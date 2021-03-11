@@ -23,23 +23,23 @@
 
 #define CONFIG_VERSION					1
 
-
 typedef struct
 {
 	uint8_t flags;
 	uint8_t target_current_percent;
 	uint8_t max_throttle_current_percent;
-	uint16_t max_speed_percent;
-} assist_level_t;
+	uint8_t max_speed_percent;
+}  assist_level_t;
 
 typedef struct
 {
 	// hmi units
 	uint8_t use_freedom_units;
 
-	// power
+	// global
 	uint8_t max_current_amps;
 	uint8_t low_cut_off_V;
+	uint8_t max_speed_kph;
 
 	// externals
 	uint8_t use_speed_sensor;
@@ -49,7 +49,6 @@ typedef struct
 	// speed sensor
 	uint16_t wheel_size_inch_x10;
 	uint8_t speed_sensor_signals;
-	uint8_t max_speed_kph;
 
 	// pas options
 	uint8_t pas_start_delay_pulses;
@@ -65,7 +64,6 @@ typedef struct
 	uint8_t assist_startup_level;
 	assist_level_t assist_levels[2][10];
 } config_t;
-
 
 
 void cfgstore_init();
