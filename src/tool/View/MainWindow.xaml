@@ -29,8 +29,8 @@
 				<MenuItem Header="Exit" Command="{Binding ExitCommand}" />
 			</MenuItem>
 			<MenuItem Header="Flash" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="Read" IsEnabled="{Binding ConnectionVm.IsConnected}" />
-				<MenuItem Header="Write" IsEnabled="{Binding ConnectionVm.IsConnected}" />
+				<MenuItem Header="Read" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ReadFlashCommand}" />
+				<MenuItem Header="Write" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding WriteFlashCommand}" />
 			</MenuItem>
 			<MenuItem Header="Options" Height="22" VerticalContentAlignment="Center">
 				<MenuItem Header="Units">

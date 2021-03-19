@@ -347,7 +347,28 @@ namespace BBSFW.ViewModel
 		public void ReadConfiguration(string filepath)
 		{
 			_config.ReadFromFile(filepath);
+			TriggerPropertyChanges();
+		}
 
+		public void WriteConfiguration(string filepath)
+		{
+			_config.WriteToFile(filepath);
+		}
+
+		public void UpdateFrom(Configuration config)
+		{
+			_config.CopyFrom(config);
+			TriggerPropertyChanges();
+		}
+
+		public Configuration GetConfig()
+		{
+			return _config;
+		}
+
+
+		private void TriggerPropertyChanges()
+		{
 			OnPropertyChanged(nameof(UseMetricUnits));
 			OnPropertyChanged(nameof(UseImperialUnits));
 			OnPropertyChanged(nameof(MaxCurrentAmps));
@@ -369,11 +390,6 @@ namespace BBSFW.ViewModel
 			OnPropertyChanged(nameof(AssistModeSelection));
 			OnPropertyChanged(nameof(StandardAssistLevels));
 			OnPropertyChanged(nameof(SportAssistLevels));
-		}
-
-		public void WriteConfiguration(string filepath)
-		{
-			_config.WriteToFile(filepath);
 		}
 
 

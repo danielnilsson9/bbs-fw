@@ -177,6 +177,56 @@ namespace BBSFW.Model
 			return true;
 		}
 
+		public byte[] WriteToBuffer()
+		{
+			using (var s = new MemoryStream())
+			{
+				var bw = new BinaryWriter(s);
+
+				bw.Write(UseFreedomUnits);
+
+
+				bw.Write((byte)MaxCurrentAmps);
+				bw.Write((byte)LowCutoffVolts);
+				bw.Write((byte)MaxSpeedKph);
+
+				bw.Write(UseSpeedSensor);
+				bw.Write(UseDisplay);
+				bw.Write(UsePushWalk);
+
+				bw.Write((UInt16)(WheelSizeInch * 10));
+				bw.Write((byte)NumWheelSensorSignals);
+
+				bw.Write((byte)PasStartDelayPulses);
+				bw.Write((byte)(PasStopDelayMilliseconds / 10u));
+
+				bw.Write((UInt16)ThrottleStartMillivolts);
+				bw.Write((UInt16)ThrottleEndMillivolts);
+				bw.Write((byte)ThrottleStartPercent);
+
+				bw.Write((byte)AssistModeSelection);
+				bw.Write((byte)AssistStartupLevel);
+
+				for (int i = 0; i < 10; ++i)
+				{
+					bw.Write((byte)StandardAssistLevels[i].Type);
+					bw.Write((byte)StandardAssistLevels[i].MaxCurrentPercent);
+					bw.Write((byte)StandardAssistLevels[i].MaxThrottlePercent);
+					bw.Write((byte)StandardAssistLevels[i].MaxSpeedPercent);
+				}
+
+				for (int i = 0; i < 10; ++i)
+				{
+					bw.Write((byte)SportAssistLevels[i].Type);
+					bw.Write((byte)SportAssistLevels[i].MaxCurrentPercent);
+					bw.Write((byte)SportAssistLevels[i].MaxThrottlePercent);
+					bw.Write((byte)SportAssistLevels[i].MaxSpeedPercent);
+				}
+
+				return s.ToArray();
+			}
+		}
+
 		public void CopyFrom(Configuration cfg)
 		{
 			UseFreedomUnits = cfg.UseFreedomUnits;

@@ -2,25 +2,24 @@
 #include "system.h"
 #include <stdint.h>
 
-#define BUF_SIZE_MASK 0x3F // 64 bytes per buffers
 
 // UART1
 static volatile uint8_t rx1_head;
 static volatile uint8_t rx1_tail;
-static volatile uint8_t __xdata rx1_buf[BUF_SIZE_MASK + 1];
+static volatile uint8_t __xdata rx1_buf[256];
 static volatile uint8_t tx1_head;
 static volatile uint8_t tx1_tail;
 static volatile uint8_t tx1_sending;
-static volatile uint8_t __xdata tx1_buf[BUF_SIZE_MASK + 1];
+static volatile uint8_t __xdata tx1_buf[256];
 
 // UART2
 static volatile uint8_t rx2_head;
 static volatile uint8_t rx2_tail;
-static volatile uint8_t __xdata rx2_buf[BUF_SIZE_MASK + 1];
+static volatile uint8_t __xdata rx2_buf[256];
 static volatile uint8_t tx2_head;
 static volatile uint8_t tx2_tail;
 static volatile uint8_t tx2_sending;
-static volatile uint8_t __xdata tx2_buf[BUF_SIZE_MASK + 1];
+static volatile uint8_t __xdata tx2_buf[256];
 
 
 void uart1_open(uint32_t baudrate)
@@ -101,19 +100,19 @@ void uart2_close()
 
 uint8_t uart1_available()
 {
-	return (rx1_head - rx1_tail) & BUF_SIZE_MASK;
+	return (rx1_head - rx1_tail);
 }
 
 uint8_t uart2_available()
 {
-	return (rx2_head - rx2_tail) & BUF_SIZE_MASK;
+	return (rx2_head - rx2_tail);
 }
 
 uint8_t uart1_read()
 {
 	ES = 0; // Disable UART1 interrupt
 	uint8_t byte = rx1_buf[rx1_tail];
-	rx1_tail = (rx1_tail + 1) & BUF_SIZE_MASK;
+	rx1_tail = (rx1_tail + 1);
 	ES = 1; // Enable UART1 interrupt
 	return byte;
 }
@@ -122,7 +121,7 @@ uint8_t uart2_read()
 {
 	IE2 &= ~(1 << 0); // Disable UART2 interrupt
 	uint8_t byte = rx2_buf[rx2_tail];
-	rx2_tail = (rx2_tail + 1) & BUF_SIZE_MASK;
+	rx2_tail = (rx2_tail + 1);
 	IE2 |= (1 << 0); // Enable UART2 interrupt
 	return byte;
 }
@@ -132,10 +131,10 @@ void uart1_write(uint8_t byte)
 	if (tx1_sending)
 	{
 		// wait for free space in buffer
-		while (((tx1_head + 1) & BUF_SIZE_MASK) == tx1_tail);
+		while ((tx1_head + 1) == tx1_tail);
 
 		tx1_buf[tx1_head] = byte;
-		tx1_head = (tx1_head + 1) & BUF_SIZE_MASK;
+		tx1_head = (tx1_head + 1);
 	}
 	else
 	{
@@ -149,10 +148,10 @@ void uart2_write(uint8_t byte)
 	if (tx2_sending)
 	{
 		// wait for free space in buffer
-		while (((tx2_head + 1) & BUF_SIZE_MASK) == tx2_tail);
+		while (((tx2_head + 1)) == tx2_tail);
 
 		tx2_buf[tx2_head] = byte;
-		tx2_head = (tx2_head + 1) & BUF_SIZE_MASK;
+		tx2_head = (tx2_head + 1);
 	}
 	else
 	{
@@ -177,10 +176,10 @@ INTERRUPT_USING(isr_uart1, IRQ_UART1, 3)
 	if (RI) // rx interrupt
 	{
 		RI = 0;		
-		if (rx1_head != (rx1_tail - 1) & BUF_SIZE_MASK)
+		if (rx1_head != (rx1_tail - 1))
 		{
 			rx1_buf[rx1_head] = SBUF;
-			rx1_head = (rx1_head + 1) & BUF_SIZE_MASK;
+			rx1_head = (rx1_head + 1);
 		}
 	}
 
@@ -192,7 +191,7 @@ INTERRUPT_USING(isr_uart1, IRQ_UART1, 3)
 		{
 			tx1_sending = 1;
 			SBUF = tx1_buf[tx1_tail];
-			tx1_tail = (tx1_tail + 1) & BUF_SIZE_MASK;
+			tx1_tail = (tx1_tail + 1);
 		}
 		else
 		{
@@ -207,10 +206,10 @@ INTERRUPT_USING(isr_uart2, IRQ_UART2, 3)
 	{
 		S2CON &= ~(1 << 0);
 
-		if (rx2_head != (rx2_tail - 1) & BUF_SIZE_MASK)
+		if (rx2_head != (rx2_tail - 1))
 		{
 			rx2_buf[rx2_head] = S2BUF;
-			rx2_head = (rx2_head + 1) & BUF_SIZE_MASK;
+			rx2_head = (rx2_head + 1);
 		}
 	}
 
@@ -222,7 +221,7 @@ INTERRUPT_USING(isr_uart2, IRQ_UART2, 3)
 		{
 			tx2_sending = 1;
 			S2BUF = tx2_buf[tx2_tail];
-			tx2_tail = (tx2_tail + 1) & BUF_SIZE_MASK;
+			tx2_tail = (tx2_tail + 1);
 		}
 		else
 		{

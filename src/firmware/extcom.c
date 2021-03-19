@@ -128,6 +128,7 @@ void extcom_init()
 	while (system_ms() < end)
 	{
 		extcom_process();
+		system_delay_ms(10);
 	}
 }
 
@@ -178,7 +179,7 @@ static uint8_t compute_checksum(uint8_t* buf, uint8_t length)
 
 static void write_uart1_and_increment_checksum(uint8_t data, uint8_t* checksum)
 {
-	checksum += data;
+	*checksum += data;
 	uart1_write(data);
 }
 
@@ -194,7 +195,7 @@ static uint8_t try_process_request()
 	case REQUEST_TYPE_READ:
 		return try_process_read_request();
 	case REQUEST_TYPE_WRITE:
-		return try_process_bafang_write_request();
+		return try_process_write_request();
 	case REQUEST_TYPE_BAFANG_READ:
 		return try_process_bafang_read_request();
 	case REQUEST_TYPE_BAFANG_WRITE:
@@ -231,7 +232,7 @@ static uint8_t try_process_write_request()
 		return KEEP;
 	}
 
-	switch (msgbuf[2])
+	switch (msgbuf[1])
 	{
 	case OPCODE_WRITE_EVTLOG_ENABLE:
 		return process_write_evtlog_enable();
@@ -358,8 +359,9 @@ static uint8_t process_read_config()
 	uint8_t checksum = 0;
 	write_uart1_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
 	write_uart1_and_increment_checksum(OPCODE_READ_CONFIG, &checksum);
+	write_uart1_and_increment_checksum(CONFIG_VERSION, &checksum);
 	write_uart1_and_increment_checksum(sizeof(config_t), &checksum);
-
+	
 	uint8_t* cfg = (uint8_t*)cfgstore_get();
 	for (uint8_t i = 0; i < sizeof(config_t); ++i)
 	{
@@ -397,17 +399,30 @@ static uint8_t process_write_evtlog_enable()
 
 static uint8_t process_write_config()
 {
-	if (msg_len < (3 + sizeof(config_t)))
+	if (msg_len < 4)
 	{
 		return KEEP;
 	}
 
-	if (compute_checksum(msgbuf, 2 + sizeof(config_t)) != msgbuf[2 + sizeof(config_t)])
+	uint8_t version = msgbuf[2];
+	uint8_t length = msgbuf[3];
+
+	if (msg_len < 4 + length + 1)
+	{
+		return KEEP;
+	}
+
+	if (version != CONFIG_VERSION || length != sizeof(config_t))
 	{
 		return DISCARD;
 	}
 
-	memcpy(cfgstore_get(), msgbuf + 2, sizeof(config_t));
+	if (compute_checksum(msgbuf, 4 + sizeof(config_t)) != msgbuf[4 + sizeof(config_t)])
+	{
+		return DISCARD;
+	}
+
+	memcpy(cfgstore_get(), msgbuf + 4, sizeof(config_t));
 	bool result = cfgstore_save();
 
 	uint8_t checksum = 0;

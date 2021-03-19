@@ -2,7 +2,7 @@ using BBSFW.Model;
 using BBSFW.ViewModel.Base;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Windows;
 using System.Windows.Input;
 
 namespace BBSFW.ViewModel
@@ -84,12 +84,29 @@ namespace BBSFW.ViewModel
 			{
 				return _firmwareVersion;
 			}
-			set
+			private set
 			{
 				if (_firmwareVersion != value)
 				{
 					_firmwareVersion = value;
 					OnPropertyChanged(nameof(FirmwareVersion));
+				}
+			}
+		}
+
+		private int _configVersion = 0;
+		public int ConfigVersion
+		{
+			get
+			{
+				return _configVersion;
+			}
+			private set
+			{
+				if (_configVersion != value)
+				{
+					_configVersion = value;
+					OnPropertyChanged(nameof(ConfigVersion));
 				}
 			}
 		}
@@ -123,12 +140,19 @@ namespace BBSFW.ViewModel
 		}
 
 
+		public BbsfwConnection GetConnection()
+		{
+			return _connection;
+		}
 
 
 		private void OnConnected(string fwversion, int configVersion)
 		{
 			IsConnected = true;
 			IsConnecting = false;
+
+			FirmwareVersion = fwversion;
+			ConfigVersion = configVersion;
 		}
 
 		private void OnDisconnected()
@@ -136,15 +160,21 @@ namespace BBSFW.ViewModel
 			IsConnected = false;
 			IsConnecting = false;
 			FirmwareVersion = "N/A";
+			ConfigVersion = 0;
 		}
 
 
-		private void OnConnect()
+		private async void OnConnect()
 		{
 			if (SelectedComPort != null)
 			{
 				IsConnecting = true;
-				_connection.Open(SelectedComPort);
+				var connected = await _connection.Connect(SelectedComPort, TimeSpan.FromSeconds(120));
+
+				if (!connected)
+				{
+					MessageBox.Show("Failed to connect, timeout occured.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
 			}
 		}
 

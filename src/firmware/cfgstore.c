@@ -37,7 +37,6 @@ void cfgstore_init()
 	}
 	else
 	{
-		load_default_config();
 		eventlog_write(EVT_MSG_CONFIG_READ);
 	}
 }
@@ -194,7 +193,7 @@ static void load_default_config()
 	config.max_speed_kph = 40;
 
 	config.pas_start_delay_pulses = 5;
-	config.pas_stop_delay_ms = 200;
+	config.pas_stop_delay_ms_x10 = 20;
 
 	config.throttle_start_voltage_mv = 1100;
 	config.throttle_end_voltage_mv = 4000;

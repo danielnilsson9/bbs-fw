@@ -11,10 +11,12 @@
 
 #define TIMER0_RELOAD	((65536 - CPU_FREQ / 1000) + 1)
 
-static volatile uint32_t	_ms = 0;
+static volatile uint32_t	_ms;
 
 void system_init()
 {
+	_ms = 0;
+
 	// Wait for stable voltage (above lvd)
 	while (IS_BIT_SET(PCON, 5))
 	{

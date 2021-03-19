@@ -35,6 +35,16 @@ namespace BBSFW.ViewModel
 			get { return new DelegateCommand(OnSaveConfig); }
 		}
 
+		public ICommand ReadFlashCommand
+		{
+			get { return new DelegateCommand(OnReadFlash); }
+		}
+
+		public ICommand WriteFlashCommand
+		{
+			get { return new DelegateCommand(OnWriteFlash); }
+		}
+
 		public ICommand ExitCommand
 		{
 			get { return new DelegateCommand(OnExit); }
@@ -88,6 +98,55 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		private async void OnReadFlash()
+		{
+			if (!ConnectionVm.IsConnected)
+			{
+				return;
+			}
+
+			VerifyConfigVersion();
+
+			var res = await ConnectionVm.GetConnection().ReadConfiguration(TimeSpan.FromSeconds(5));
+			if (!res.Timeout && res.Result != null)
+			{
+				ConfigVm.UpdateFrom(res.Result);
+			}
+			else
+			{
+				MessageBox.Show("Failed to read configuration from flash, timeout occured.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+		private async void OnWriteFlash()
+		{
+			if (!ConnectionVm.IsConnected)
+			{
+				return;
+			}
+
+			VerifyConfigVersion();
+
+			var res = await ConnectionVm.GetConnection().WriteConfiguration(ConfigVm.GetConfig(), TimeSpan.FromSeconds(5));
+			if (!res.Timeout)
+			{
+				if (res.Result)
+				{
+					MessageBox.Show("Configuration Written!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+				}
+				else
+				{
+					MessageBox.Show("Failed to write configuration to flash, try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
+			}
+			else
+			{
+				MessageBox.Show("Failed to write configuration to flash, timeout occured.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
+
+
+
 		private void OnShowAbout()
 		{
 			MessageBox.Show("Version: 1.0\nAuthor: Daniel Nilsson", "BBS-FW Tool", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -96,6 +155,18 @@ namespace BBSFW.ViewModel
 		private void OnExit()
 		{
 			Application.Current.Shutdown();
+		}
+
+
+		private bool VerifyConfigVersion()
+		{
+			if (ConnectionVm.ConfigVersion != Configuration.Version)
+			{
+				MessageBox.Show("Wrong firmware config version. Make sure you are using BBS-FW Config Tool for firmware version " + ConnectionVm.FirmwareVersion + ".", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				return false;
+			}
+
+			return true;
 		}
 
 	}
