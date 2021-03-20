@@ -507,7 +507,7 @@ static uint8_t process_bafang_display_read_battery()
 		volt_x10 = max_volt_x10;
 	}
 
-	uint8_t percent = (uint8_t)map(volt_x10, motor_get_battery_lvc_x10(), max_volt_x10, 0, 100);
+	uint8_t percent = (uint8_t)MAP(volt_x10, motor_get_battery_lvc_x10(), max_volt_x10, 0, 100);
 
 	uart1_write(percent);
 	uart1_write(percent); // checksum
@@ -522,7 +522,7 @@ static uint8_t process_bafang_display_read_speed()
 		return KEEP;
 	}
 
-	uint16_t speed = speed_sensor_get_ticks_per_minute();
+	uint16_t speed = speed_sensor_get_rpm_x10() / 10;
 	uart1_write(speed >> 8);
 	uart1_write(speed);
 	uart1_write(0x20 + (speed >> 8) + speed); // weird checksum
@@ -717,7 +717,7 @@ static uint8_t process_bafang_display_write_speed_limit()
 	}
 
 	uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
-	app_set_wheel_max_speed_ppm(value);
+	app_set_wheel_max_speed_rpm(value);
 
 	return COMPLETE;
 }

@@ -10,7 +10,6 @@ namespace BBSFW.ViewModel
 	public class AssistLevelsViewModel : ObservableObject
 	{
 
-
 		public enum OperationMode
 		{
 			Standard,
@@ -24,8 +23,6 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<OperationMode>(OperationMode.Standard, "Standard"),
 				new ValueItemViewModel<OperationMode>(OperationMode.Sport, "Sport")
 			};
-
-
 
 
 		private ConfigurationViewModel _configVm;
@@ -63,20 +60,11 @@ namespace BBSFW.ViewModel
 			}
 		}
 
-
-
-
-
 		public AssistLevelsViewModel(ConfigurationViewModel config)
 		{
 			_configVm = config;
-
 			SelectedOperationModePage = OperationModes[0];
 		}
-
-
-
-
 
 	}
 }

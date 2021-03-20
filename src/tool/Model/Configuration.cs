@@ -83,11 +83,6 @@ namespace BBSFW.Model
 
 		public Configuration()
 		{
-			LoadDefault();
-		}
-
-		public void LoadDefault()
-		{
 			UseFreedomUnits = Properties.Settings.Default.UseFreedomUnits;
 			MaxCurrentAmps = 0;
 			LowCutoffVolts = 0;
@@ -110,7 +105,7 @@ namespace BBSFW.Model
 			AssistModeSelection = AssistModeSelect.Off;
 			AssistStartupLevel = 0;
 
-			for(int i = 0; i < StandardAssistLevels.Length; ++i)
+			for (int i = 0; i < StandardAssistLevels.Length; ++i)
 			{
 				StandardAssistLevels[i] = new AssistLevel();
 			}
@@ -120,7 +115,6 @@ namespace BBSFW.Model
 				SportAssistLevels[i] = new AssistLevel();
 			}
 		}
-
 
 		public bool ParseFromBuffer(byte[] buffer)
 		{

@@ -33,7 +33,6 @@ EXTRASRCS = \
 	uart.c \
 	system.c \
 	throttle.c \
-	util.c \
 	watchdog.c \
 	sensors.c
 	

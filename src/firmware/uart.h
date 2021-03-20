@@ -1,3 +1,11 @@
+/*
+ * bbshd-fw
+ *
+ * Copyright (C) Daniel Nilsson, 2021.
+ *
+ * Released under the GPL License, Version 3
+ */
+
 #ifndef _UART_H_
 #define _UART_H_
 #include "stc15.h"

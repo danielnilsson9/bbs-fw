@@ -5,6 +5,7 @@
  *
  * Released under the GPL License, Version 3
  */
+
 #include "watchdog.h"
 #include "stc15.h"
 

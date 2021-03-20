@@ -386,10 +386,10 @@ namespace BBSFW.ViewModel
 			OnPropertyChanged(nameof(PasStopDelayMilliseconds));
 			OnPropertyChanged(nameof(WheelSizeInch));
 			OnPropertyChanged(nameof(SpeedSensorSignals));
-			OnPropertyChanged(nameof(StartupAssistLevel));
+			OnPropertyChanged(nameof(StartupAssistLevel));	
 			OnPropertyChanged(nameof(AssistModeSelection));
-			OnPropertyChanged(nameof(StandardAssistLevels));
-			OnPropertyChanged(nameof(SportAssistLevels));
+			StandardAssistLevels = StandardAssistLevels.ToList();
+			SportAssistLevels = SportAssistLevels.ToList();
 		}
 
 

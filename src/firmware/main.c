@@ -32,6 +32,8 @@ void main(void)
 	config_t* cfg = cfgstore_get();
 
 	sensors_init();
+	speed_sensor_set_signals_per_rpm(cfg->speed_sensor_signals);
+
 	throttle_init(cfg->throttle_start_voltage_mv, cfg->throttle_end_voltage_mv);
 	motor_init(cfg->max_current_amps * 1000, cfg->low_cut_off_V);
 

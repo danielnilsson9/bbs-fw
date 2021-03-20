@@ -21,9 +21,6 @@
     <ClCompile Include="motor.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="util.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="watchdog.c">
       <Filter>Source Files</Filter>
     </ClCompile>

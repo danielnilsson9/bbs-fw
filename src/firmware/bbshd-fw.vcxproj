@@ -72,7 +72,6 @@ make all</NMakeReBuildCommandLine>
     <ClCompile Include="sensors.c" />
     <ClCompile Include="throttle.c" />
     <ClCompile Include="uart.c" />
-    <ClCompile Include="util.c" />
     <ClCompile Include="motor.c" />
     <ClCompile Include="watchdog.c" />
   </ItemGroup>

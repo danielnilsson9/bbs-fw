@@ -1,3 +1,11 @@
+/*
+ * bbshd-fw
+ *
+ * Copyright (C) Daniel Nilsson, 2021.
+ *
+ * Released under the GPL License, Version 3
+ */
+
 #include "cfgstore.h"
 #include "stc15.h"
 #include "eeprom.h"

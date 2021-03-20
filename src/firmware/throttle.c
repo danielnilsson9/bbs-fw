@@ -5,6 +5,7 @@
  *
  * Released under the GPL License, Version 3
  */
+
 #include "throttle.h"
 #include "stc15.h"
 #include "pins.h"
@@ -34,12 +35,6 @@ void throttle_init(uint16_t min_mv, uint16_t max_mv)
 	SET_BIT(P1ASF, GET_PIN_NUM(PIN_THROTTLE));
 
 	SET_BIT(ADC_CONTR, 7);	// enable adc power
-}
-
-
-void throttle_set_start_percent(uint8_t value)
-{
-	start_percent = value;
 }
 
 uint8_t throttle_read()
@@ -74,6 +69,6 @@ uint8_t throttle_read()
 		volt_x1000 = max_voltage_x1000;
 	}
 
-	return (uint8_t)map(volt_x1000, min_voltage_x1000, max_voltage_x1000, start_percent, 100);
+	return (uint8_t)MAP(volt_x1000, min_voltage_x1000, max_voltage_x1000, 0, 100);
 }
 

@@ -29,8 +29,9 @@ static bool __xdata pas_prev1;
 static bool __xdata pas_prev2;
 
 static volatile uint16_t __xdata speed_period_counter;
-static volatile uint16_t __xdata speed_ticks_minute;
+static volatile uint16_t __xdata speed_ticks_minute_x10;
 static bool __xdata speed_prev_state;
+static uint8_t __xdata speed_ticks_per_rpm;
 
 
 void sensors_init()
@@ -40,8 +41,9 @@ void sensors_init()
 	direction_backward = false;
 	pas_rpm = 0;
 	speed_period_counter = 0;
-	speed_ticks_minute = 0;
+	speed_ticks_minute_x10 = 0;
 	speed_prev_state = false;
+	speed_ticks_per_rpm = 1;
 
 	// pins do not have external interrupt, use timer 4 to evaluate state frequently
 	SET_PIN_INPUT(PIN_PAS1);
@@ -77,7 +79,7 @@ uint8_t pas_get_cadence_rpm()
 	return pas_rpm;
 }
 
-uint8_t pas_get_pulse_counter()
+uint16_t pas_get_pulse_counter()
 {
 	return pas_pulse_counter;
 }
@@ -92,15 +94,19 @@ bool pas_is_pedaling_backwards()
 	return pas_rpm > 0 && direction_backward;
 }
 
+void speed_sensor_set_signals_per_rpm(uint8_t num_signals)
+{
+	speed_ticks_per_rpm = num_signals;
+}
 
 bool speed_sensor_is_moving()
 {
-	return speed_ticks_minute > 0;
+	return speed_ticks_minute_x10 > 0;
 }
 
-uint16_t speed_sensor_get_ticks_per_minute()
+uint16_t speed_sensor_get_rpm_x10()
 {
-	return speed_ticks_minute;
+	return speed_ticks_minute_x10 / speed_ticks_per_rpm;;
 }
 
 uint8_t temperature_read()
@@ -184,7 +190,7 @@ INTERRUPT(isr_timer4, IRQ_TIMER4)
 		{
 			if (speed_period_counter > 0)
 			{
-				speed_ticks_minute = 600000UL / speed_period_counter;
+				speed_ticks_minute_x10 = 6000000UL / speed_period_counter;
 				speed_period_counter = 0;
 			}
 		}
@@ -192,9 +198,9 @@ INTERRUPT(isr_timer4, IRQ_TIMER4)
 		{
 			++speed_period_counter;
 
-			if (speed_ticks_minute > 0 && speed_period_counter > 50000)
+			if (speed_ticks_minute_x10 > 0 && speed_period_counter > 50000)
 			{
-				speed_ticks_minute = 0;
+				speed_ticks_minute_x10 = 0;
 			}
 		}
 

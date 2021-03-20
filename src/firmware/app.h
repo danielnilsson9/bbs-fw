@@ -25,7 +25,7 @@
 #define ASSIST_7		0x07
 #define ASSIST_8		0x08
 #define ASSIST_9		0x09
-#define ASSIST_PUSH		0x10
+#define ASSIST_PUSH		0x0A
 
 #define OPERATION_MODE_DEFAULT	0x00
 #define OPERATION_MODE_SPORT	0x01
@@ -37,7 +37,7 @@ void app_process();
 void app_set_assist_level(uint8_t level);
 void app_set_lights(bool on);
 void app_set_operation_mode(uint8_t mode);
-void app_set_wheel_max_speed_ppm(uint16_t value);
+void app_set_wheel_max_speed_rpm(uint16_t value);
 
 
 #endif

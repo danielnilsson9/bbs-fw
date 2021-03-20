@@ -7,7 +7,7 @@
 		xmlns:vm="clr-namespace:BBSFW.ViewModel"
 		xmlns:vw="clr-namespace:BBSFW.View"
         mc:Ignorable="d"
-        Title="BBS-FW Tool" Height="500" Width="600"
+        Title="BBS-FW Tool" Height="500" Width="680"
 		Background="#FFE8E8E8">
 
 	<Window.DataContext>

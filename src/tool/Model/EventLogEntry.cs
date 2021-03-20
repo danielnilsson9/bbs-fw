@@ -109,7 +109,7 @@ namespace BBSFW.Model
 				case EVT_DATA_OPERATION_MODE:
 					return $"Operation mode changed to {_data}.";
 				case EVT_DATA_WHEEL_SPEED_PPM:
-					return $"Wheel speed {_data} pulses/min.";
+					return $"Max wheel speed changed to {_data} rpm.";
 				case EVT_DATA_LIGHTS:
 					return $"Lights status changed to {_data}.";
 			}
