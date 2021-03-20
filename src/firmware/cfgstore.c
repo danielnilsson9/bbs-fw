@@ -29,11 +29,7 @@ void cfgstore_init()
 {
 	if (!read_config())
 	{
-		load_default_config();
-		if (write_config())
-		{
-			eventlog_write(EVT_MSG_CONFIG_RESET);
-		}
+		cfgstore_reset();
 	}
 	else
 	{
@@ -41,6 +37,18 @@ void cfgstore_init()
 	}
 }
 
+
+bool cfgstore_reset()
+{
+	load_default_config();
+	if (write_config())
+	{
+		eventlog_write(EVT_MSG_CONFIG_RESET);
+		return true;
+	}
+
+	return false;
+}
 
 config_t* cfgstore_get()
 {
@@ -174,6 +182,8 @@ static bool write_config()
 		++ptr;
 	}
 
+	eventlog_write(EVT_MSG_CONFIG_WRITTEN);
+
 	return true;
 }
 
@@ -182,7 +192,7 @@ static void load_default_config()
 	config.use_freedom_units = 0;
 
 	config.max_current_amps = 30;
-	config.low_cut_off_V = 24;		// :TODO: change!!!
+	config.low_cut_off_V = 42;
 
 	config.use_speed_sensor = 1;
 	config.use_display = 1;
@@ -190,13 +200,13 @@ static void load_default_config()
 
 	config.wheel_size_inch_x10 = 280;
 	config.speed_sensor_signals = 1;
-	config.max_speed_kph = 40;
+	config.max_speed_kph = 60;
 
 	config.pas_start_delay_pulses = 5;
 	config.pas_stop_delay_ms_x10 = 20;
 
-	config.throttle_start_voltage_mv = 1100;
-	config.throttle_end_voltage_mv = 4000;
+	config.throttle_start_voltage_mv = 900;
+	config.throttle_end_voltage_mv = 3600;
 	config.throttle_start_percent = 10;
 
 	config.assist_mode_select = ASSIST_MODE_SELECT_OFF;

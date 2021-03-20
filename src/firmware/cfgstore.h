@@ -68,6 +68,7 @@ typedef struct
 
 void cfgstore_init();
 
+bool cfgstore_reset();
 config_t* cfgstore_get();
 bool cfgstore_save();
 

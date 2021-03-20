@@ -2,8 +2,7 @@ using BBSFW.Model;
 using BBSFW.ViewModel.Base;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 
@@ -35,6 +34,11 @@ namespace BBSFW.ViewModel
 			get { return new DelegateCommand(OnSaveConfig); }
 		}
 
+		public ICommand SaveLogCommand
+		{
+			get { return new DelegateCommand(OnSaveLog); }
+		}
+
 		public ICommand ReadFlashCommand
 		{
 			get { return new DelegateCommand(OnReadFlash); }
@@ -43,6 +47,11 @@ namespace BBSFW.ViewModel
 		public ICommand WriteFlashCommand
 		{
 			get { return new DelegateCommand(OnWriteFlash); }
+		}
+
+		public ICommand ResetFlashCommand
+		{
+			get { return new DelegateCommand(OnResetFlash); }
 		}
 
 		public ICommand ExitCommand
@@ -66,9 +75,33 @@ namespace BBSFW.ViewModel
 			SystemVm = new SystemViewModel(ConfigVm);
 			AssistLevelsVm = new AssistLevelsViewModel(ConfigVm);
 			EventLogVm = new EventLogViewModel();
+
+
+			ConnectionVm.EventLogReceived += EventLogVm.AddEvent;
 		}
 
 
+		private void OnSaveLog()
+		{
+			var dialog = new SaveFileDialog();
+
+			dialog.Filter = "Log File|*.log";
+			dialog.Title = "Save Log";
+			dialog.FileName = "bbsfw.log";
+
+			var result = dialog.ShowDialog();
+			if (result.HasValue && result.Value)
+			{
+				try
+				{
+					EventLogVm.ExportLog(dialog.FileName);
+				}
+				catch(Exception e)
+				{
+					MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
+			}
+		}
 
 		private void OnOpenConfig()
 		{
@@ -79,12 +112,24 @@ namespace BBSFW.ViewModel
 			var result = dialog.ShowDialog();
 			if (result.HasValue && result.Value)
 			{
-				ConfigVm.ReadConfiguration(dialog.FileName);
+				try
+				{
+					ConfigVm.ReadConfiguration(dialog.FileName);
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
 			}
 		}
 
 		private void OnSaveConfig()
 		{
+			if (!ValidateConfig())
+			{
+				return;
+			}
+
 			var dialog = new SaveFileDialog();
 
 			dialog.Filter = "XML File|*.xml";
@@ -94,7 +139,14 @@ namespace BBSFW.ViewModel
 			var result = dialog.ShowDialog();
 			if (result.HasValue && result.Value)
 			{
-				ConfigVm.WriteConfiguration(dialog.FileName);
+				try
+				{
+					ConfigVm.WriteConfiguration(dialog.FileName);
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
 			}
 		}
 
@@ -125,6 +177,11 @@ namespace BBSFW.ViewModel
 				return;
 			}
 
+			if (!ValidateConfig())
+			{
+				return;
+			}
+
 			VerifyConfigVersion();
 
 			var res = await ConnectionVm.GetConnection().WriteConfiguration(ConfigVm.GetConfig(), TimeSpan.FromSeconds(5));
@@ -145,11 +202,36 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		private async void OnResetFlash()
+		{
+			if (!ConnectionVm.IsConnected)
+			{
+				return;
+			}
+
+			var res = await ConnectionVm.GetConnection().ResetConfiguration(TimeSpan.FromSeconds(5));
+			if (!res.Timeout)
+			{
+				if (res.Result)
+				{
+					OnReadFlash();
+				}
+				else
+				{
+					MessageBox.Show("Failed to reset configuration, try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
+			}
+			else
+			{
+				MessageBox.Show("Failed to reset configuration, timeout occured.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+		}
 
 
 		private void OnShowAbout()
 		{
-			MessageBox.Show("Version: 1.0\nAuthor: Daniel Nilsson", "BBS-FW Tool", MessageBoxButton.OK, MessageBoxImage.Information);
+			var version = Assembly.GetExecutingAssembly().GetName().Version;
+			MessageBox.Show($"Version: {version.Major}.{version.Minor}.{version.Build}\nAuthor: Daniel Nilsson", "BBS-FW Tool", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
 
 		private void OnExit()
@@ -167,6 +249,21 @@ namespace BBSFW.ViewModel
 			}
 
 			return true;
+		}
+
+		private bool ValidateConfig()
+		{
+			try
+			{
+				ConfigVm.GetConfig().Validate();
+				return true;
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
+
+			return false;
 		}
 
 	}

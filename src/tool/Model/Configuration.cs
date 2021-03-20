@@ -89,26 +89,26 @@ namespace BBSFW.Model
 		public void LoadDefault()
 		{
 			UseFreedomUnits = Properties.Settings.Default.UseFreedomUnits;
-			MaxCurrentAmps = 30;
-			LowCutoffVolts = 42;
+			MaxCurrentAmps = 0;
+			LowCutoffVolts = 0;
 
-			UseSpeedSensor = true;
-			UseDisplay = true;
-			UsePushWalk = true;
+			UseSpeedSensor = false;
+			UseDisplay = false;
+			UsePushWalk = false;
 
-			WheelSizeInch = 28;
-			NumWheelSensorSignals = 1;
-			MaxSpeedKph = 60;
+			WheelSizeInch = 0;
+			NumWheelSensorSignals = 0;
+			MaxSpeedKph = 0;
 
-			PasStartDelayPulses = 3;
-			PasStopDelayMilliseconds = 150;
+			PasStartDelayPulses = 0;
+			PasStopDelayMilliseconds = 0;
 
-			ThrottleStartMillivolts = 800;
-			ThrottleEndMillivolts = 4200;
-			ThrottleStartPercent = 10;
+			ThrottleStartMillivolts = 0;
+			ThrottleEndMillivolts = 0;
+			ThrottleStartPercent = 0;
 
 			AssistModeSelection = AssistModeSelect.Off;
-			AssistStartupLevel = 3;
+			AssistStartupLevel = 0;
 
 			for(int i = 0; i < StandardAssistLevels.Length; ++i)
 			{
@@ -119,7 +119,6 @@ namespace BBSFW.Model
 			{
 				SportAssistLevels[i] = new AssistLevel();
 			}
-			// :TODO: assist levels
 		}
 
 
@@ -289,12 +288,12 @@ namespace BBSFW.Model
 			ValidateLimits(MaxCurrentAmps, 5, 33, "Max Current (A)");
 			ValidateLimits(LowCutoffVolts, 1, 100, "Low Volage Cut Off (V)");
 
-			//ValidateLimits(WheelSizeInch, 1, 40, "Wheel Size (inch)");
+			ValidateLimits((uint)WheelSizeInch, 10, 40, "Wheel Size (inch)");
 			ValidateLimits(NumWheelSensorSignals, 1, 10, "Wheel Sensor Signals");
 			ValidateLimits(MaxSpeedKph, 0, 100, "Max Speed (km/h)");
 
 			ValidateLimits(PasStartDelayPulses, 0, 24, "Pas Delay (pulses)");
-			ValidateLimits(PasStartDelayPulses, 50, 1000, "Pas Stop Delay (ms)");
+			ValidateLimits(PasStopDelayMilliseconds, 50, 1000, "Pas Stop Delay (ms)");
 
 			ValidateLimits(ThrottleStartMillivolts, 200, 2500, "Throttle Start (mV)");
 			ValidateLimits(ThrottleEndMillivolts, 2500, 5000, "Throttle End (mV)");
@@ -306,7 +305,7 @@ namespace BBSFW.Model
 
 		private void ValidateLimits(uint value, uint min, uint max, string name)
 		{
-			if (value < min && value > max)
+			if (value < min || value > max)
 			{
 				throw new Exception(name + " must be in interval " + min + "-" + max + ".");
 			}

@@ -45,16 +45,16 @@
 			<TextBlock Grid.Row="0" Text="Global" FontSize="18" FontWeight="Bold" />
 
 			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 10 0 0" Text="Max Current (A):" />
-			<TextBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxCurrentAmps}" />
+			<TextBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxCurrentAmps, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Low Voltage Cutoff (V):" />
-			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.LowCutoffVolts}" />
+			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.LowCutoffVolts, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 10 0 0" Text="Max Speed (km/h):" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
-			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedKph}" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
+			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedKph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 10 0 0" Text="Max Speed (mph):" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
-			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedMph}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
+			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedMph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
 		</Grid>
 
 
@@ -75,13 +75,13 @@
 			<TextBlock Grid.Row="0" Text="Throttle" FontSize="18" FontWeight="Bold" />
 
 			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 10 0 0" Text="Start Voltage (mV):" />
-			<TextBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ThrottleStartVoltageMillivolts}" />
+			<TextBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ThrottleStartVoltageMillivolts, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="End Voltage (mV):" />
-			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ThrottleEndVoltageMillivolts}" />
+			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ThrottleEndVoltageMillivolts, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Start Current (%):" />
-			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ThrottleStartCurrentPercent}" />
+			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ThrottleStartCurrentPercent, UpdateSourceTrigger=PropertyChanged}" />
 
 		</Grid>
 
@@ -102,10 +102,10 @@
 			<TextBlock Grid.Row="0" Text="Pedal Assist" FontSize="18" FontWeight="Bold" />
 
 			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 10 0 0" Text="Start Delay (°):" />
-			<ComboBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" Width="60" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.PasStartDelayOptions}" SelectedItem="{Binding ConfigVm.PasStartDelayDegrees}" />
+			<ComboBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" Width="60" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.PasStartDelayOptions, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding ConfigVm.PasStartDelayDegrees}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Stop Delay (ms):" />
-			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PasStopDelayMilliseconds}" />
+			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PasStopDelayMilliseconds, UpdateSourceTrigger=PropertyChanged}" />
 
 		</Grid>
 
@@ -129,13 +129,13 @@
 			<TextBlock Grid.Row="0" Text="Features" FontSize="18" FontWeight="Bold" />
 
 			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 10 0 0" Text="Display:" />
-			<CheckBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" HorizontalAlignment="Right" IsChecked="{Binding ConfigVm.UseDisplay}" />
+			<CheckBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" HorizontalAlignment="Right" IsChecked="{Binding ConfigVm.UseDisplay, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Speed Sensor:" />
-			<CheckBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseSpeedSensor}" />
+			<CheckBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseSpeedSensor, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Push Walk:" />
-			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePushWalk}" />
+			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePushWalk, UpdateSourceTrigger=PropertyChanged}" />
 
 		</Grid>
 
@@ -158,10 +158,10 @@
 
 
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Wheel Size (inch):" />
-			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.WheelSizeInch}" />
+			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.WheelSizeInch, UpdateSourceTrigger=LostFocus}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Signals (per rotation):" />
-			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.SpeedSensorSignals}" />
+			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.SpeedSensorSignals, UpdateSourceTrigger=PropertyChanged}" />
 
 		</Grid>
 		

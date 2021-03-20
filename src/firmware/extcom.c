@@ -44,6 +44,7 @@
 
 #define OPCODE_WRITE_EVTLOG_ENABLE				0xf0
 #define OPCODE_WRITE_CONFIG						0xf1
+#define OPCODE_WRITE_RESET_CONFIG				0xf2
 
 
 // Bafang display communication
@@ -95,6 +96,7 @@ static uint8_t process_read_config();
 
 static uint8_t process_write_evtlog_enable();
 static uint8_t process_write_config();
+static uint8_t process_write_reset_config();
 
 
 static uint8_t process_bafang_display_read_status();
@@ -238,6 +240,8 @@ static uint8_t try_process_write_request()
 		return process_write_evtlog_enable();
 	case OPCODE_WRITE_CONFIG:
 		return process_write_config();
+	case OPCODE_WRITE_RESET_CONFIG:
+		return process_write_reset_config();
 	}
 
 	return DISCARD;
@@ -429,6 +433,29 @@ static uint8_t process_write_config()
 	write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
 	write_uart1_and_increment_checksum(OPCODE_WRITE_CONFIG, &checksum);
 	write_uart1_and_increment_checksum(result, &checksum);
+	uart1_write(checksum);
+
+	return COMPLETE;
+}
+
+static uint8_t process_write_reset_config()
+{
+	if (msg_len < 3)
+	{
+		return KEEP;
+	}
+
+	if (compute_checksum(msgbuf, 2) != msgbuf[2])
+	{
+		return DISCARD;
+	}
+
+	bool res = cfgstore_reset();
+
+	uint8_t checksum = 0;
+	write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
+	write_uart1_and_increment_checksum(OPCODE_WRITE_RESET_CONFIG, &checksum);
+	write_uart1_and_increment_checksum((uint8_t)res, &checksum);
 	uart1_write(checksum);
 
 	return COMPLETE;

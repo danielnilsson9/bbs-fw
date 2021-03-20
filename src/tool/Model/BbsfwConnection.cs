@@ -41,6 +41,7 @@ namespace BBSFW.Model
 
 		private const int OPCODE_WRITE_EVTLOG_ENABLE =	0xf0;
 		private const int OPCODE_WRITE_CONFIG =			0xf1;
+		private const int OPCODE_WRITE_RESET_CONFIG =	0xf2;
 
 
 		private enum ParseResult
@@ -60,6 +61,7 @@ namespace BBSFW.Model
 
 		private CompletionQueue<Configuration> _readConfigCq = new CompletionQueue<Configuration>();
 		private CompletionQueue<bool> _writeConfigCq = new CompletionQueue<bool>();
+		private CompletionQueue<bool> _writeResetConfigCq = new CompletionQueue<bool>();
 
 
 		public bool IsConnected
@@ -153,6 +155,11 @@ namespace BBSFW.Model
 			return await _writeConfigCq.WaitResponse(timeout);
 		}
 
+		public async Task<RequestResult<bool>> ResetConfiguration(TimeSpan timeout)
+		{
+			SendWriteResetConfigRequest();
+			return await _writeResetConfigCq.WaitResponse(timeout);
+		}
 
 
 		private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -268,6 +275,8 @@ namespace BBSFW.Model
 					_isConnecting = false;
 					_isConnected = true;
 					Connected?.Invoke(String.Format("{0}.{1}.{2}", major, minor, patch), config);
+
+					SendEventLogEnableRequest(true);
 				}
 			}
 			else
@@ -337,6 +346,8 @@ namespace BBSFW.Model
 					return ProcessWriteResponseEvtlogEnable();
 				case OPCODE_WRITE_CONFIG:
 					return ProcessWriteResponseConfig();
+				case OPCODE_WRITE_RESET_CONFIG:
+					return ProcessWriteResponseResetConfig();
 			}
 
 			return ParseResult.Discard;
@@ -366,6 +377,18 @@ namespace BBSFW.Model
 			return ParseResult.Complete;
 		}
 
+		private ParseResult ProcessWriteResponseResetConfig()
+		{
+			if (_rxBuffer.Count < 4)
+			{
+				return ParseResult.Keep;
+			}
+
+			_writeResetConfigCq.Complete(_rxBuffer[2] != 0);
+
+			return ParseResult.Complete;
+		}
+
 
 		private ParseResult ProcessEventLogEntry()
 		{
@@ -373,10 +396,10 @@ namespace BBSFW.Model
 			{
 				if (_rxBuffer.Count < 2)
 				{
-					return ParseResult.Discard;
+					return ParseResult.Keep;
 				}
 
-				EventLog?.Invoke(new EventLogEntry(_rxBuffer[1]));
+				EventLog?.Invoke(new EventLogEntry(_rxBuffer[1], null));
 			}
 			else if (_rxBuffer[0] == EVENT_LOG_DATA_ENTRY)
 			{
@@ -424,6 +447,16 @@ namespace BBSFW.Model
 			buf.Add((byte)Configuration.Version);
 			buf.Add((byte)cfgarr.Length);
 			buf.AddRange(cfgarr);
+			buf.Add(ComputeChecksum(buf, buf.Count));
+
+			_port.Write(buf.ToArray(), 0, buf.Count);
+		}
+
+		private void SendWriteResetConfigRequest()
+		{
+			var buf = new List<byte>();
+			buf.Add(REQUEST_TYPE_WRITE);
+			buf.Add(OPCODE_WRITE_RESET_CONFIG);
 			buf.Add(ComputeChecksum(buf, buf.Count));
 
 			_port.Write(buf.ToArray(), 0, buf.Count);

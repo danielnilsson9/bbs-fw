@@ -26,11 +26,15 @@
 				<MenuItem Header="Open..." Command="{Binding OpenConfigCommand}" />
 				<MenuItem Header="Save As..." Command="{Binding SaveConfigCommand}" />
 				<Separator />
+				<MenuItem Header="Save Log..." Command="{Binding SaveLogCommand}" />
+				<Separator />
 				<MenuItem Header="Exit" Command="{Binding ExitCommand}" />
 			</MenuItem>
 			<MenuItem Header="Flash" Height="22" VerticalContentAlignment="Center">
 				<MenuItem Header="Read" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ReadFlashCommand}" />
 				<MenuItem Header="Write" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding WriteFlashCommand}" />
+				<Separator />
+				<MenuItem Header="Reset" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ResetFlashCommand}" />
 			</MenuItem>
 			<MenuItem Header="Options" Height="22" VerticalContentAlignment="Center">
 				<MenuItem Header="Units">
@@ -51,9 +55,9 @@
 				<vw:SystemView Margin="10" />
 			</TabItem>
 			<TabItem Header="Assist Levels">
-				<vw:AssistLevelsView Margin="10" DataContext="{Binding AssistLevelsVm}"/>
+				<vw:AssistLevelsView Margin="10" DataContext="{Binding AssistLevelsVm}" />
 			</TabItem>
-			<TabItem Header="Event Log">
+			<TabItem Header="Event Log" DataContext="{Binding EventLogVm}">
 				<vw:EventLogView Margin="10" />
 			</TabItem>
 		</TabControl>

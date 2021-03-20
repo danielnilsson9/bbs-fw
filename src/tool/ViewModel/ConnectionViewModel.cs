@@ -112,6 +112,9 @@ namespace BBSFW.ViewModel
 		}
 
 
+		public event Action<EventLogEntry> EventLogReceived;
+
+
 		public ICommand ConnectCommand
 		{
 			get
@@ -134,6 +137,10 @@ namespace BBSFW.ViewModel
 
 			_connection.Connected += OnConnected;
 			_connection.Disconnected += OnDisconnected;
+			_connection.EventLog += (e) =>
+			{
+				EventLogReceived?.Invoke(e);
+			};
 
 
 			ComPorts = BbsfwConnection.GetComPorts();
