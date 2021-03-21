@@ -366,7 +366,7 @@ static uint8_t process_read_config()
 	write_uart1_and_increment_checksum(CONFIG_VERSION, &checksum);
 	write_uart1_and_increment_checksum(sizeof(config_t), &checksum);
 	
-	uint8_t* cfg = (uint8_t*)cfgstore_get();
+	uint8_t* cfg = (uint8_t*)&g_config;
 	for (uint8_t i = 0; i < sizeof(config_t); ++i)
 	{
 		write_uart1_and_increment_checksum(*(cfg + i), &checksum);
@@ -426,7 +426,7 @@ static uint8_t process_write_config()
 		return DISCARD;
 	}
 
-	memcpy(cfgstore_get(), msgbuf + 4, sizeof(config_t));
+	memcpy(&g_config, msgbuf + 4, sizeof(config_t));
 	bool result = cfgstore_save();
 
 	uint8_t checksum = 0;

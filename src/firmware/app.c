@@ -12,6 +12,7 @@
 #include "motor.h"
 #include "sensors.h"
 #include "throttle.h"
+#include "lights.h"
 #include "uart.h"
 #include "eventlog.h"
 #include "util.h"
@@ -26,6 +27,9 @@ static int32_t __xdata assist_max_wheel_speed_rpm_x10;
 static bool __xdata last_light_state;
 static bool __xdata cruise_paused;
 static bool __xdata cruise_just_engaged;
+
+static uint8_t __xdata last_temperature;
+
 
 void apply_pas(uint8_t* target_current);
 void apply_cruise(uint8_t* target_current, uint8_t throtle_percent);
@@ -42,26 +46,23 @@ void app_init()
 	motor_disable();
 
 	last_light_state = false;
-
-	config_t* cfg = cfgstore_get();
+	last_temperature = 0;
 
 	cruise_paused = true;
 	cruise_just_engaged = false;
 	operation_mode = OPERATION_MODE_DEFAULT;
-	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(cfg->max_speed_kph));
-	app_set_assist_level(cfg->assist_startup_level);
+	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(g_config.max_speed_kph));
+	app_set_assist_level(g_config.assist_startup_level);
 	reload_assist_params();
 }
 
 void app_process()
 {
-	config_t* cfg = cfgstore_get();
-
 	uint8_t target_current = 0;
 
 	if (assist_level == ASSIST_PUSH)
 	{
-		if (cfg->use_push_walk)
+		if (g_config.use_push_walk)
 		{
 			target_current = 10;
 			motor_set_target_speed(40);
@@ -111,10 +112,8 @@ void app_set_lights(bool on)
 	{
 		last_light_state = on;
 
-		config_t* cfg = cfgstore_get();
-
-		if ((cfg->assist_mode_select & ASSIST_MODE_SELECT_LIGHTS) ||
-			(assist_level == ASSIST_0 && cfg->assist_mode_select & ASSIST_MODE_SELECT_PAS0_LIGHT))
+		if ((g_config.assist_mode_select & ASSIST_MODE_SELECT_LIGHTS) ||
+			(assist_level == ASSIST_0 && g_config.assist_mode_select & ASSIST_MODE_SELECT_PAS0_LIGHT))
 		{
 			if (on)
 			{
@@ -132,7 +131,7 @@ void app_set_lights(bool on)
 		else
 		{
 			eventlog_write_data(EVT_DATA_LIGHTS, on);
-			// :TODO: set lights on/off
+			lights_set(on);
 		}
 	}
 }
@@ -160,11 +159,9 @@ void app_set_wheel_max_speed_rpm(uint16_t value)
 
 void apply_pas(uint8_t* target_current)
 {
-	config_t* cfg = cfgstore_get();
-
 	if (assist_level_data.flags & ASSIST_FLAG_PAS)
 	{
-		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > cfg->pas_start_delay_pulses)
+		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
 		{
 			if (assist_level_data.target_current_percent > *target_current)
 			{
@@ -176,12 +173,10 @@ void apply_pas(uint8_t* target_current)
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 {
-	config_t* cfg = cfgstore_get();
-
 	if (assist_level_data.flags & ASSIST_FLAG_CRUISE)
 	{
 		// pause cruise if started pedaling backwards
-		if (pas_is_pedaling_backwards() && pas_get_pulse_counter() > cfg->pas_start_delay_pulses)
+		if (pas_is_pedaling_backwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
 		{
 			cruise_paused = true;
 			cruise_just_engaged = false;
@@ -195,7 +190,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 		}
 
 		// unpause cruise if pedaling forward while engaging throttle > 50%
-		else if (cruise_paused && throttle_percent > 50 && pas_is_pedaling_forwards() && pas_get_pulse_counter() > cfg->pas_start_delay_pulses)
+		else if (cruise_paused && throttle_percent > 50 && pas_is_pedaling_forwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
 		{
 			cruise_paused = false;
 			cruise_just_engaged = true;
@@ -223,11 +218,9 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
-	config_t* cfg = cfgstore_get();
-
 	if (assist_level_data.flags & ASSIST_FLAG_THROTTLE && throttle_percent > 0)
 	{
-		uint8_t current = (uint8_t)MAP(throttle_percent, 0, 100, cfg->throttle_start_percent, assist_level_data.max_throttle_current_percent);
+		uint8_t current = (uint8_t)MAP(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.max_throttle_current_percent);
 		if (current > *target_current)
 		{
 			*target_current = current;
@@ -237,8 +230,7 @@ void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 
 void apply_speed_limit(uint8_t* target_current)
 {
-	config_t* cfg = cfgstore_get();
-	if (cfg->use_speed_sensor)
+	if (g_config.use_speed_sensor)
 	{
 		int16_t current_speed_x10 = speed_sensor_get_rpm_x10();
 
@@ -263,9 +255,29 @@ void apply_speed_limit(uint8_t* target_current)
 
 void apply_thermal_limit(uint8_t* target_current)
 {
-	if (temperature_read() > 80)
+	uint8_t temp = temperature_read();
+
+	if (temp != last_temperature)
 	{
+		last_temperature = temp;
+		eventlog_write_data(EVT_DATA_TEMPERATURE, temp);
+	}
+
+	if (temp > 80)
+	{
+		if (last_temperature < 80)
+		{
+			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 1);
+		}
+
 		*target_current = *target_current / 2;
+	}
+	else
+	{
+		if (last_temperature > 80)
+		{
+			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 0);
+		}
 	}
 }
 
@@ -274,7 +286,7 @@ void reload_assist_params()
 {
 	if (assist_level < ASSIST_PUSH)
 	{
-		assist_level_data = cfgstore_get()->assist_levels[operation_mode][assist_level];
+		assist_level_data = g_config.assist_levels[operation_mode][assist_level];
 		assist_max_wheel_speed_rpm_x10 = ((uint32_t)global_max_speed_rpm * assist_level_data.max_speed_percent / 10);
 
 		// pause cruise if swiching level
@@ -293,8 +305,7 @@ void reload_assist_params()
 
 uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)
 {
-	config_t* cfg = cfgstore_get();
-	float radius_mm = cfg->wheel_size_inch_x10 * 2.54f;
+	float radius_mm = g_config.wheel_size_inch_x10 * 2.54f;
 	return (uint16_t)(25000.f / (3 * 3.14159f * radius_mm) * speed_kph);
 }
 

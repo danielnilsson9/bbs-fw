@@ -29,6 +29,7 @@ EXTRASRCS = \
 	eeprom.c \
 	eventlog.c \
 	extcom.c \
+	lights.c \
 	motor.c \
 	uart.c \
 	system.c \
@@ -42,6 +43,7 @@ HEADERS = \
 	eventlog.h \
 	eeprom.h \
 	extcom.h \
+	lights.h \
 	motor.h \
 	uart.h \
 	system.h \

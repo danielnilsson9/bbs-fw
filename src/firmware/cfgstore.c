@@ -7,7 +7,6 @@
  */
 
 #include "cfgstore.h"
-#include "stc15.h"
 #include "eeprom.h"
 #include "eventlog.h"
 #include "uart.h"
@@ -26,7 +25,8 @@ typedef struct
 } config_header_t;
 
 
-static config_t __xdata config;
+static config_header_t __xdata header;
+config_t __xdata g_config;
 
 
 static bool read_config();
@@ -58,11 +58,6 @@ bool cfgstore_reset()
 	return false;
 }
 
-config_t* cfgstore_get()
-{
-	return &config;
-}
-
 bool cfgstore_save()
 {
 	return write_config();
@@ -71,7 +66,6 @@ bool cfgstore_save()
 
 static bool read_config()
 {
-	config_header_t header;
 	uint8_t read_offset = 0;
 	uint8_t* ptr = 0;
 	uint8_t i = 0;
@@ -112,7 +106,7 @@ static bool read_config()
 
 	uint8_t checksum = 0;
 
-	ptr = (uint8_t*)&config;
+	ptr = (uint8_t*)&g_config;
 	for (i = 0; i < sizeof(config_t); ++i)
 	{
 		data = eeprom_read_byte(read_offset);
@@ -139,7 +133,6 @@ static bool read_config()
 
 static bool write_config()
 {
-	config_header_t header;
 	uint8_t write_offset = 0;
 	uint8_t* ptr = 0;
 	uint8_t i = 0;
@@ -162,7 +155,7 @@ static bool write_config()
 
 	write_offset += sizeof(config_header_t);
 
-	ptr = (uint8_t*)&config;
+	ptr = (uint8_t*)&g_config;
 	for (i = 0; i < sizeof(config_t); ++i)
 	{
 		if (!eeprom_write_byte(write_offset, *ptr))
@@ -197,37 +190,37 @@ static bool write_config()
 
 static void load_default_config()
 {
-	config.use_freedom_units = 0;
+	g_config.use_freedom_units = 0;
 
-	config.max_current_amps = 30;
-	config.low_cut_off_V = 42;
+	g_config.max_current_amps = 30;
+	g_config.low_cut_off_V = 42;
 
-	config.use_speed_sensor = 1;
-	config.use_display = 1;
-	config.use_push_walk = 1;
+	g_config.use_speed_sensor = 1;
+	g_config.use_display = 1;
+	g_config.use_push_walk = 1;
 
-	config.wheel_size_inch_x10 = 280;
-	config.speed_sensor_signals = 1;
-	config.max_speed_kph = 60;
+	g_config.wheel_size_inch_x10 = 280;
+	g_config.speed_sensor_signals = 1;
+	g_config.max_speed_kph = 60;
 
-	config.pas_start_delay_pulses = 5;
-	config.pas_stop_delay_ms_x10 = 20;
+	g_config.pas_start_delay_pulses = 5;
+	g_config.pas_stop_delay_ms_x10 = 20;
 
-	config.throttle_start_voltage_mv = 900;
-	config.throttle_end_voltage_mv = 3600;
-	config.throttle_start_percent = 10;
+	g_config.throttle_start_voltage_mv = 900;
+	g_config.throttle_end_voltage_mv = 3600;
+	g_config.throttle_start_percent = 10;
 
-	config.assist_mode_select = ASSIST_MODE_SELECT_OFF;
-	config.assist_startup_level = 3;
+	g_config.assist_mode_select = ASSIST_MODE_SELECT_OFF;
+	g_config.assist_startup_level = 3;
 
-	memset(&config.assist_levels, 0, 20 * sizeof(assist_level_t));
+	memset(&g_config.assist_levels, 0, 20 * sizeof(assist_level_t));
 
 	uint8_t current_limits[9] = { 25, 34, 43, 51, 60, 68, 74, 82, 90 };
 	for (uint8_t i = 0; i < 9; ++i)
 	{
-		config.assist_levels[0][i+1].flags = ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE;
-		config.assist_levels[0][i+1].target_current_percent = current_limits[i];
-		config.assist_levels[0][i+1].max_speed_percent = 100;
-		config.assist_levels[0][i+1].max_throttle_current_percent = 100;
+		g_config.assist_levels[0][i+1].flags = ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE;
+		g_config.assist_levels[0][i+1].target_current_percent = current_limits[i];
+		g_config.assist_levels[0][i+1].max_speed_percent = 100;
+		g_config.assist_levels[0][i+1].max_throttle_current_percent = 100;
 	}
 }

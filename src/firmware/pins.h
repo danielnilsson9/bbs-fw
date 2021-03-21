@@ -30,6 +30,7 @@
 #define PIN_SPEED_SENSOR				2, 2
 #define PIN_BRAKE						2, 4
 #define PIN_THROTTLE					1, 3
+#define PIN_LIGHTS						2, 3
 
 #define PIN_EXTERNAL_RX					3, 0
 #define PIN_EXTERNAL_TX					3, 1

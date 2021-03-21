@@ -31,6 +31,8 @@ namespace BBSFW.Model
 		private const int EVT_DATA_OPERATION_MODE =				132;
 		private const int EVT_DATA_WHEEL_SPEED_PPM =			133;
 		private const int EVT_DATA_LIGHTS =						134;
+		private const int EVT_DATA_TEMPERATURE =				135;
+		private const int EVT_DATA_THERMAL_LIMITING =			136;
 
 
 		public enum LogLevel
@@ -112,6 +114,18 @@ namespace BBSFW.Model
 					return $"Max wheel speed changed to {_data} rpm.";
 				case EVT_DATA_LIGHTS:
 					return $"Lights status changed to {_data}.";
+				case EVT_DATA_TEMPERATURE:
+					return $"Motor controller temperature changed to {_data}C.";
+				case EVT_DATA_THERMAL_LIMITING:
+					if (_data.Value != 0)
+					{
+						Level = LogLevel.Warning;
+						return "Thermal limit reached, power reduced to 50%.";
+					}
+					else
+					{
+						return "Thermal limiting removed.";
+					}
 			}
 
 			if (_data.HasValue)

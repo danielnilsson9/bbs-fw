@@ -48,6 +48,9 @@
     <ClCompile Include="eeprom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lights.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="motor.h">
@@ -99,6 +102,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

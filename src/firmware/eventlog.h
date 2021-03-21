@@ -35,6 +35,8 @@
 #define EVT_DATA_OPERATION_MODE				132
 #define EVT_DATA_WHEEL_SPEED_PPM			133
 #define EVT_DATA_LIGHTS						134
+#define EVT_DATA_TEMPERATURE				135
+#define EVT_DATA_THERMAL_LIMITING			136
 
 
 void eventlog_init(bool enabled);

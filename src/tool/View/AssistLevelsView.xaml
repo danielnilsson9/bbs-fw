@@ -133,13 +133,49 @@
 				<ComboBox Grid.Column="1" Grid.Row="1" Margin="10 10 0 0" ItemsSource="{Binding SelectedAssistLevel.AssistTypeOptions}" SelectedValue="{Binding SelectedAssistLevel.Type, UpdateSourceTrigger=PropertyChanged}" />
 
 				<TextBlock Grid.Column="0" Grid.Row="2" Text="Target Current (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
-				<TextBox Grid.Column="1" Grid.Row="2" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.TargetCurrentPercent, UpdateSourceTrigger=PropertyChanged}" />
+				<TextBox Grid.Column="1" Grid.Row="2" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.TargetCurrentPercent, UpdateSourceTrigger=PropertyChanged}">
+					<TextBox.Style>
+						<Style TargetType="{x:Type TextBox}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Throttle">
+									<Setter Property="IsEnabled" Value="False" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
+									<Setter Property="IsEnabled" Value="False" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBox.Style>
+				</TextBox>
 
 				<TextBlock Grid.Column="0" Grid.Row="3" Text="Max Throttle (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
-				<TextBox Grid.Column="1" Grid.Row="3" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxThrottlePercent, UpdateSourceTrigger=PropertyChanged}" />
+				<TextBox Grid.Column="1" Grid.Row="3" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxThrottlePercent, UpdateSourceTrigger=PropertyChanged}">
+					<TextBox.Style>
+						<Style TargetType="{x:Type TextBox}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Pas">
+									<Setter Property="IsEnabled" Value="False" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
+									<Setter Property="IsEnabled" Value="False" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBox.Style>
+				</TextBox>
 
 				<TextBlock Grid.Column="0" Grid.Row="4" Text="Max Speed (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
-				<TextBox Grid.Column="1" Grid.Row="4" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxSpeedPercent, UpdateSourceTrigger=PropertyChanged}" />
+				<TextBox Grid.Column="1" Grid.Row="4" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxSpeedPercent, UpdateSourceTrigger=PropertyChanged}">
+					<TextBox.Style>
+						<Style TargetType="{x:Type TextBox}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
+									<Setter Property="IsEnabled" Value="False" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBox.Style>
+				</TextBox>
 
 			</Grid>
 

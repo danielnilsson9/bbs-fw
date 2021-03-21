@@ -37,6 +37,21 @@ namespace BBSFW.ViewModel
 				{
 					_level.Type = value;
 					OnPropertyChanged(nameof(Type));
+
+					switch (value.Value)
+					{
+						case Configuration.AssistType.Disabled:
+							TargetCurrentPercent = 0;
+							MaxThrottlePercent = 0;
+							MaxSpeedPercent = 0;
+							break;
+						case Configuration.AssistType.Throttle:
+							TargetCurrentPercent = 0;
+							break;
+						case Configuration.AssistType.Pas:
+							MaxThrottlePercent = 0;
+							break;
+					}
 				}
 			}
 		}

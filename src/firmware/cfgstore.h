@@ -8,6 +8,7 @@
 #ifndef _CFGSTORE_H_
 #define _CFGSTORE_H_
 
+#include "stc15.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -66,10 +67,11 @@ typedef struct
 } config_t;
 
 
+extern config_t __xdata g_config;
+
 void cfgstore_init();
 
 bool cfgstore_reset();
-config_t* cfgstore_get();
 bool cfgstore_save();
 
 #endif

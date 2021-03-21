@@ -16,6 +16,7 @@
 #include "extcom.h"
 #include "sensors.h"
 #include "throttle.h"
+#include "lights.h"
 #include "pins.h"
 #include "uart.h"
 
@@ -29,13 +30,14 @@ void main(void)
 	extcom_init();
 
 	cfgstore_init();
-	config_t* cfg = cfgstore_get();
 
 	sensors_init();
-	speed_sensor_set_signals_per_rpm(cfg->speed_sensor_signals);
+	speed_sensor_set_signals_per_rpm(g_config.speed_sensor_signals);
+	pas_set_stop_delay(g_config.pas_stop_delay_ms_x10);
 
-	throttle_init(cfg->throttle_start_voltage_mv, cfg->throttle_end_voltage_mv);
-	motor_init(cfg->max_current_amps * 1000, cfg->low_cut_off_V);
+	throttle_init(g_config.throttle_start_voltage_mv, g_config.throttle_end_voltage_mv);
+	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_V);
+	lights_init();
 
 	app_init();
 
@@ -46,7 +48,6 @@ void main(void)
 		app_process();
 
 		system_delay_ms(10);
-
 		watchdog_yeild();
 	}
 }

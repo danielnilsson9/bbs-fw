@@ -23,10 +23,11 @@
 
 static volatile __xdata uint16_t pas_period_counter;
 static volatile __xdata uint16_t pas_pulse_counter;
-static volatile __xdata bool direction_backward;
+static volatile __xdata bool pas_direction_backward;
 static volatile __xdata uint8_t pas_rpm;
 static bool __xdata pas_prev1;
 static bool __xdata pas_prev2;
+static uint16_t __xdata pas_stop_delay_periods;
 
 static volatile uint16_t __xdata speed_period_counter;
 static volatile uint16_t __xdata speed_ticks_minute_x10;
@@ -38,8 +39,9 @@ void sensors_init()
 {
 	pas_period_counter = 0;
 	pas_pulse_counter = 0;
-	direction_backward = false;
+	pas_direction_backward = false;
 	pas_rpm = 0;
+	pas_stop_delay_periods = 1500;
 	speed_period_counter = 0;
 	speed_ticks_minute_x10 = 0;
 	speed_prev_state = false;
@@ -74,6 +76,11 @@ void sensors_init()
 }
 
 
+void pas_set_stop_delay(uint8_t delay_x100us)
+{
+	pas_stop_delay_periods = delay_x100us;
+}
+
 uint8_t pas_get_cadence_rpm()
 {
 	return pas_rpm;
@@ -86,12 +93,12 @@ uint16_t pas_get_pulse_counter()
 
 bool pas_is_pedaling_forwards()
 {
-	return pas_rpm > 0 && !direction_backward;
+	return pas_rpm > 0 && !pas_direction_backward;
 }
 
 bool pas_is_pedaling_backwards()
 {
-	return pas_rpm > 0 && direction_backward;
+	return pas_rpm > 0 && pas_direction_backward;
 }
 
 void speed_sensor_set_signals_per_rpm(uint8_t num_signals)
@@ -157,7 +164,7 @@ INTERRUPT(isr_timer4, IRQ_TIMER4)
 		if (pas1 && !pas_prev1)
 		{
 			++pas_pulse_counter;
-			direction_backward = pas2;
+			pas_direction_backward = pas2;
 
 			if (pas_period_counter > 0)
 			{
@@ -169,11 +176,11 @@ INTERRUPT(isr_timer4, IRQ_TIMER4)
 		{
 			++pas_period_counter;
 
-			if (pas_rpm > 0 && pas_period_counter > 1500)
+			if (pas_rpm > 0 && pas_period_counter > pas_stop_delay_periods)
 			{
 				pas_rpm = 0;
 				pas_pulse_counter = 0;
-				direction_backward = false;
+				pas_direction_backward = false;
 			}
 		}
 
