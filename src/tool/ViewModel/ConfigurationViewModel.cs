@@ -31,7 +31,7 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Off, "Off"),
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Standard, "Sport Button"),
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Lights, "Lights Button"),
-				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas0AndLights, "PAS 0 + Lights Buttons")
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas0AndLights, "PAS 0 + Lights Button")
 			};
 
 		public bool UseMetricUnits
