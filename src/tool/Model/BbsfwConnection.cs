@@ -43,13 +43,8 @@ namespace BBSFW.Model
 		private const int OPCODE_WRITE_CONFIG =			0xf1;
 		private const int OPCODE_WRITE_RESET_CONFIG =	0xf2;
 
-
-		private enum ParseResult
-		{
-			Keep,
-			Discard,
-			Complete
-		}
+		private const int Keep = 0;
+		private const int Discard = -1;
 
 		private SerialPort _port = null;
 		private volatile bool _isConnecting = false;
@@ -206,19 +201,31 @@ namespace BBSFW.Model
 			lock(_rxBuffer)
 			{
 				var result = ProcessMessage();
-				if (result == ParseResult.Discard || result == ParseResult.Complete)
+				if (result == Discard)
 				{
+					System.Diagnostics.Debug.WriteLine("Discarding: " + BitConverter.ToString(_rxBuffer.ToArray()).Replace("-", " "));
 					_rxBuffer.Clear();
+				}
+				else if (result > 0)
+				{
+					if (_rxBuffer.Count > result)
+					{
+						_rxBuffer.RemoveRange(0, result);
+					}
+					else
+					{
+						_rxBuffer.Clear();
+					}
 				}
 			}
 		}
 
 
-		private ParseResult ProcessMessage()
+		private int ProcessMessage()
 		{
 			if (_rxBuffer.Count < 1)
 			{
-				return ParseResult.Keep;
+				return 0;
 			}
 
 			switch(_rxBuffer[0])
@@ -232,15 +239,15 @@ namespace BBSFW.Model
 					return ProcessEventLogEntry();
 			}
 
-			return ParseResult.Discard;
+			return Discard;
 		}
 
 
-		private ParseResult ProcessReadResponse()
+		private int ProcessReadResponse()
 		{
 			if (_rxBuffer.Count < 2)
 			{
-				return ParseResult.Keep;
+				return 0;
 			}
 
 			switch(_rxBuffer[1])
@@ -253,17 +260,19 @@ namespace BBSFW.Model
 				return ProcessReadResponseConfig();
 			}
 
-			return ParseResult.Discard;
+			return -1;
 		}
 
-		private ParseResult ProcessReadResponseFwVersion()
+		private int ProcessReadResponseFwVersion()
 		{
-			if (_rxBuffer.Count < 7)
+			const int MessageSize = 7;
+
+			if (_rxBuffer.Count < MessageSize)
 			{
-				return ParseResult.Keep;
+				return Keep;
 			}
 
-			if (ComputeChecksum(_rxBuffer, 6) == _rxBuffer[6])
+			if (ComputeChecksum(_rxBuffer, MessageSize - 1) == _rxBuffer[MessageSize - 1])
 			{
 				int major = _rxBuffer[2];
 				int minor = _rxBuffer[3];
@@ -279,28 +288,28 @@ namespace BBSFW.Model
 					SendEventLogEnableRequest(true);
 				}
 			}
-			else
-			{
-				return ParseResult.Discard;
-			}
 
-			return ParseResult.Complete;
+			return MessageSize;
 		}
 
-		private ParseResult ProcessReadResponseEvtlogEnable()
+		private int ProcessReadResponseEvtlogEnable()
 		{
-			if (_rxBuffer.Count < 4)
+			const int MessageSize = 4;
+
+			if (_rxBuffer.Count < MessageSize)
 			{
-				return ParseResult.Keep;
+				return Keep;
 			}
 
 			// not used
 
-			return ParseResult.Complete;
+			return 4;
 		}
 
-		private ParseResult ProcessReadResponseConfig()
+		private int ProcessReadResponseConfig()
 		{
+			const int MessageSize = (4 + Configuration.ByteSize + 1);
+
 			if (_rxBuffer.Count > 3)
 			{
 				var version = _rxBuffer[2];
@@ -308,36 +317,32 @@ namespace BBSFW.Model
 
 				if (version != Configuration.Version || size != Configuration.ByteSize)
 				{
-					return ParseResult.Discard;
+					return Discard;
 				}
 			}
 
-			if (_rxBuffer.Count < (4 + Configuration.ByteSize + 1))
+			if (_rxBuffer.Count < MessageSize)
 			{
-				return ParseResult.Keep;
+				return Keep;
 			}
 
-			if (ComputeChecksum(_rxBuffer, 4 + Configuration.ByteSize) == _rxBuffer[4 + Configuration.ByteSize])
+			if (ComputeChecksum(_rxBuffer, MessageSize - 1) == _rxBuffer[MessageSize - 1])
 			{
 				var cfg = new Configuration();
 				cfg.ParseFromBuffer(_rxBuffer.Skip(4).Take(Configuration.ByteSize).ToArray());
 
 				_readConfigCq.Complete(cfg);
 			}
-			else
-			{
-				return ParseResult.Discard;
-			}
 
-			return ParseResult.Complete;
+			return MessageSize;
 		}
 
 
-		private ParseResult ProcessWriteResponse()
+		private int ProcessWriteResponse()
 		{
 			if (_rxBuffer.Count < 2)
 			{
-				return ParseResult.Keep;
+				return Keep;
 			}
 
 			switch (_rxBuffer[1])
@@ -350,69 +355,83 @@ namespace BBSFW.Model
 					return ProcessWriteResponseResetConfig();
 			}
 
-			return ParseResult.Discard;
+			return Discard;
 		}
 
-		private ParseResult ProcessWriteResponseEvtlogEnable()
+		private int ProcessWriteResponseEvtlogEnable()
 		{
-			if (_rxBuffer.Count < 4)
+			const int MessageSize = 4;
+
+			if (_rxBuffer.Count < MessageSize)
 			{
-				return ParseResult.Keep;
+				return Keep;
 			}
 
 			// don't care
 
-			return ParseResult.Complete;
+			return MessageSize;
 		}
 
-		private ParseResult ProcessWriteResponseConfig()
+		private int ProcessWriteResponseConfig()
 		{
-			if (_rxBuffer.Count < 4)
+			const int MessageSize = 4;
+
+			if (_rxBuffer.Count < MessageSize)
 			{
-				return ParseResult.Keep;
+				return Keep;
 			}
 
 			_writeConfigCq.Complete(_rxBuffer[2] != 0);
 
-			return ParseResult.Complete;
+			return MessageSize;
 		}
 
-		private ParseResult ProcessWriteResponseResetConfig()
+		private int ProcessWriteResponseResetConfig()
 		{
-			if (_rxBuffer.Count < 4)
+			const int MessageSize = 4;
+
+			if (_rxBuffer.Count < MessageSize)
 			{
-				return ParseResult.Keep;
+				return Keep;
 			}
 
 			_writeResetConfigCq.Complete(_rxBuffer[2] != 0);
 
-			return ParseResult.Complete;
+			return MessageSize;
 		}
 
 
-		private ParseResult ProcessEventLogEntry()
+		private int ProcessEventLogEntry()
 		{
 			if (_rxBuffer[0] == EVENT_LOG_ENTRY)
 			{
-				if (_rxBuffer.Count < 2)
+				const int MessageSize = 2;
+
+				if (_rxBuffer.Count < MessageSize)
 				{
-					return ParseResult.Keep;
+					return Keep;
 				}
 
 				EventLog?.Invoke(new EventLogEntry(_rxBuffer[1], null));
+
+				return MessageSize;
 			}
 			else if (_rxBuffer[0] == EVENT_LOG_DATA_ENTRY)
 			{
-				if (_rxBuffer.Count < 4)
+				const int MessageSize = 4;
+
+				if (_rxBuffer.Count < MessageSize)
 				{
-					return ParseResult.Keep;
+					return Keep;
 				}
 
 				int data = _rxBuffer[2] << 8 | _rxBuffer[3];
 				EventLog?.Invoke(new EventLogEntry(_rxBuffer[1], data));
+
+				return MessageSize;
 			}
 
-			return ParseResult.Complete;
+			return Discard;
 		}
 
 

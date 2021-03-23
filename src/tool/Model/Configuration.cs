@@ -279,7 +279,7 @@ namespace BBSFW.Model
 
 		public void Validate()
 		{
-			ValidateLimits(MaxCurrentAmps, 5, 33, "Max Current (A)");
+			ValidateLimits(MaxCurrentAmps, 5, 36, "Max Current (A)");
 			ValidateLimits(LowCutoffVolts, 1, 100, "Low Volage Cut Off (V)");
 
 			ValidateLimits((uint)WheelSizeInch, 10, 40, "Wheel Size (inch)");

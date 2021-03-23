@@ -318,6 +318,8 @@ static int connect()
 
 static int configure(uint16_t max_current_mA, uint8_t lvc_V)
 {
+	uint16_t tmp = 0;
+
 	send_request(OPCODE_UNKNOWN1, 0x5a);
 	if (!read_response(OPCODE_UNKNOWN1, 0))
 	{
@@ -366,10 +368,20 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V)
 		return 0;
 	}
 
-	send_request(OPCODE_MAX_CURRENT, (uint16_t)((max_current_mA * 69UL) / 10000UL));
-	if (!read_response(OPCODE_MAX_CURRENT, 0))
+	tmp = (uint16_t)((max_current_mA * 69UL) / 10000UL);
+	if (tmp > 255)
+	{
+		tmp = 255;
+	}
+	eventlog_write_data(EVT_DATA_MAX_CURRENT_ADC_REQUEST, tmp);
+	send_request(OPCODE_MAX_CURRENT, tmp);
+	if (!read_response(OPCODE_MAX_CURRENT, &tmp))
 	{
 		return 0;
+	}
+	else
+	{
+		eventlog_write_data(EVT_DATA_MAX_CURRENT_ADC_RESPONSE, tmp);
 	}
 
 	return 1;
@@ -380,10 +392,13 @@ static void read_status()
 	uint16_t value = 0;
 
 	send_request(OPCODE_READ_STATUS, 0);
-	if (read_response(OPCODE_READ_STATUS, &value) && value != status_flags)
+	if (read_response(OPCODE_READ_STATUS, &value))
 	{
-		status_flags = value;
-		eventlog_write_data(EVT_DATA_MOTOR_STATUS, status_flags);
+		if (value != status_flags)
+		{
+			status_flags = value;
+			eventlog_write_data(EVT_DATA_MOTOR_STATUS, status_flags);
+		}	
 	}
 
 	send_request(OPCODE_READ_CURRENT, 0);

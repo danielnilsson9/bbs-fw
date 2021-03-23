@@ -29,6 +29,7 @@ static bool __xdata cruise_paused;
 static bool __xdata cruise_just_engaged;
 
 static uint8_t __xdata last_temperature;
+static bool __xdata speed_limiting;
 
 
 void apply_pas(uint8_t* target_current);
@@ -47,6 +48,7 @@ void app_init()
 
 	last_light_state = false;
 	last_temperature = 0;
+	speed_limiting = false;
 
 	cruise_paused = true;
 	cruise_just_engaged = false;
@@ -175,8 +177,15 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 {
 	if (assist_level_data.flags & ASSIST_FLAG_CRUISE)
 	{
+		// pause cruise if brake activated
+		if (brake_is_activated())
+		{
+			cruise_paused = true;
+			cruise_just_engaged = false;
+		}
+
 		// pause cruise if started pedaling backwards
-		if (pas_is_pedaling_backwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
+		else if (pas_is_pedaling_backwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
 		{
 			cruise_paused = true;
 			cruise_just_engaged = false;
@@ -236,19 +245,33 @@ void apply_speed_limit(uint8_t* target_current)
 
 		int16_t high_limit = assist_max_wheel_speed_rpm_x10 + 20;
 		int16_t low_limit = assist_max_wheel_speed_rpm_x10 - 20;
-
-		if (current_speed_x10 > high_limit)
-		{
-			*target_current = 0;
-		}
-		else if (current_speed_x10 < low_limit)
+	
+		if (current_speed_x10 < low_limit)
 		{
 			// no limiting
-		}
+			if (speed_limiting)
+			{
+				speed_limiting = false;
+				eventlog_write_data(EVT_DATA_SPEED_LIMITING, 0);
+			}
+		}		
 		else
 		{
-			// linear ramp down when approaching max speed.
-			*target_current = (uint8_t)MAP(current_speed_x10, low_limit, high_limit, *target_current, 2);
+			if (current_speed_x10 > high_limit)
+			{
+				*target_current = 2;
+			}
+			else
+			{
+				// linear ramp down when approaching max speed.
+				*target_current = (uint8_t)MAP(current_speed_x10, low_limit, high_limit, *target_current, 2);
+			}
+
+			if (!speed_limiting)
+			{
+				speed_limiting = true;
+				eventlog_write_data(EVT_DATA_SPEED_LIMITING, 1);
+			}
 		}
 	}
 }

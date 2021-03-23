@@ -53,7 +53,7 @@ typedef struct
 
 	// pas options
 	uint8_t pas_start_delay_pulses;
-	uint8_t pas_stop_delay_ms_x10;
+	uint8_t pas_stop_delay_x10ms;
 
 	// throttle options
 	uint16_t throttle_start_voltage_mv;

@@ -33,6 +33,9 @@ namespace BBSFW.Model
 		private const int EVT_DATA_LIGHTS =						134;
 		private const int EVT_DATA_TEMPERATURE =				135;
 		private const int EVT_DATA_THERMAL_LIMITING =			136;
+		private const int EVT_DATA_SPEED_LIMITING =				137;
+		private const int EVT_DATA_MAX_CURRENT_ADC_REQUEST =	138;
+		private const int EVT_DATA_MAX_CURRENT_ADC_RESPONSE =	139;
 
 
 		public enum LogLevel
@@ -126,6 +129,19 @@ namespace BBSFW.Model
 					{
 						return "Thermal limiting removed.";
 					}
+				case EVT_DATA_SPEED_LIMITING:
+					if (_data.Value != 0)
+					{
+						return "Speed limiting activated.";
+					}
+					else
+					{
+						return "Speed limiting deactivated.";
+					}
+				case EVT_DATA_MAX_CURRENT_ADC_REQUEST:
+					return $"Requesting to configure max current on motor controller mcu, adc={_data}.";
+				case EVT_DATA_MAX_CURRENT_ADC_RESPONSE:
+					return $"Max current configured on motor controller mcu, response was adc={_data}.";
 			}
 
 			if (_data.HasValue)

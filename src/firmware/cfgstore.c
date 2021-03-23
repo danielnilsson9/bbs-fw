@@ -204,7 +204,7 @@ static void load_default_config()
 	g_config.max_speed_kph = 60;
 
 	g_config.pas_start_delay_pulses = 5;
-	g_config.pas_stop_delay_ms_x10 = 20;
+	g_config.pas_stop_delay_x10ms = 20;
 
 	g_config.throttle_start_voltage_mv = 900;
 	g_config.throttle_end_voltage_mv = 3600;

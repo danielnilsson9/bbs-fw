@@ -21,16 +21,16 @@
 #define NUM_SIGNALS		24
 
 
-static volatile __xdata uint16_t pas_period_counter;
-static volatile __xdata uint16_t pas_pulse_counter;
-static volatile __xdata bool pas_direction_backward;
-static volatile __xdata uint8_t pas_rpm;
+static volatile uint16_t pas_pulse_counter;
+static volatile bool pas_direction_backward;
+static volatile uint8_t pas_rpm;
+static uint16_t __xdata pas_period_counter;
 static bool __xdata pas_prev1;
 static bool __xdata pas_prev2;
 static uint16_t __xdata pas_stop_delay_periods;
 
-static volatile uint16_t __xdata speed_period_counter;
-static volatile uint16_t __xdata speed_ticks_minute_x10;
+static volatile uint16_t speed_ticks_minute_x10;
+static uint16_t __xdata speed_period_counter;
 static bool __xdata speed_prev_state;
 static uint8_t __xdata speed_ticks_per_rpm;
 
@@ -76,9 +76,9 @@ void sensors_init()
 }
 
 
-void pas_set_stop_delay(uint8_t delay_x100us)
+void pas_set_stop_delay(uint16_t delay_ms)
 {
-	pas_stop_delay_periods = delay_x100us;
+	pas_stop_delay_periods = delay_ms * 10;
 }
 
 uint8_t pas_get_cadence_rpm()
@@ -113,7 +113,7 @@ bool speed_sensor_is_moving()
 
 uint16_t speed_sensor_get_rpm_x10()
 {
-	return speed_ticks_minute_x10 / speed_ticks_per_rpm;;
+	return speed_ticks_minute_x10 / speed_ticks_per_rpm;
 }
 
 uint8_t temperature_read()
