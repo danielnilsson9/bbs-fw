@@ -32,6 +32,8 @@ static uint8_t __xdata last_temperature;
 static bool __xdata speed_limiting;
 
 
+#define MAX_TEMPERATURE		80
+
 void apply_pas(uint8_t* target_current);
 void apply_cruise(uint8_t* target_current, uint8_t throtle_percent);
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percen);
@@ -156,6 +158,45 @@ void app_set_wheel_max_speed_rpm(uint16_t value)
 		eventlog_write_data(EVT_DATA_WHEEL_SPEED_PPM, value);
 		reload_assist_params();
 	}
+}
+
+uint8_t app_get_status_code()
+{
+	uint16_t motor = motor_status();
+
+	// TODO: figure out current sense error code from motor controller
+
+	if (motor & 0x10)
+	{
+		return STATUS_ERROR_HALL_SENSOR;
+	}
+
+	if (!throttle_ok())
+	{
+		return STATUS_ERROR_THROTTLE;
+	}
+
+	if (last_temperature > MAX_TEMPERATURE)
+	{
+		return STATUS_ERROR_OVER_TEMP;
+	}
+
+	if (motor & 0x04)
+	{
+		return STATUS_ERROR_LVC;
+	}
+
+	if (brake_is_activated())
+	{
+		return STATUS_BRAKING;
+	}
+
+	if (pas_is_pedaling_forwards())
+	{
+		return STATUS_PEDALING;
+	}
+
+	return STATUS_IDLE;
 }
 
 
@@ -288,7 +329,7 @@ void apply_thermal_limit(uint8_t* target_current)
 
 	if (temp > 80)
 	{
-		if (last_temperature < 80)
+		if (last_temperature < MAX_TEMPERATURE)
 		{
 			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 1);
 		}
@@ -297,7 +338,7 @@ void apply_thermal_limit(uint8_t* target_current)
 	}
 	else
 	{
-		if (last_temperature > 80)
+		if (last_temperature > MAX_TEMPERATURE)
 		{
 			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 0);
 		}

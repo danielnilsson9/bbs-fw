@@ -167,6 +167,11 @@ void motor_disable()
 	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
 }
 
+uint16_t motor_status()
+{
+	return status_flags;
+}
+
 
 void motor_set_target_speed(uint8_t value)
 {

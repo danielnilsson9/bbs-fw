@@ -30,6 +30,19 @@
 #define OPERATION_MODE_DEFAULT	0x00
 #define OPERATION_MODE_SPORT	0x01
 
+// Matches status codes used by Bafang
+#define STATUS_IDLE						0x00
+#define STATUS_PEDALING					0x01
+#define STATUS_BRAKING					0x03
+
+#define STATUS_ERROR_THROTTLE			0x04
+#define STATUS_ERROR_LVC				0x06
+#define STATUS_ERROR_HALL_SENSOR		0x08
+#define STATUS_ERROR_PHASE_LINE			0x09
+#define STATUS_ERROR_OVER_TEMP			0x10
+#define STATUS_ERROR_CURRENT_SENSE		0x12
+
+
 void app_init();
 
 void app_process();
@@ -39,5 +52,6 @@ void app_set_lights(bool on);
 void app_set_operation_mode(uint8_t mode);
 void app_set_wheel_max_speed_rpm(uint16_t value);
 
+uint8_t app_get_status_code();
 
 #endif

@@ -467,10 +467,7 @@ static int8_t process_bafang_display_read_status()
 		return KEEP;
 	}
 
-	uart1_write(0x00); // All ok :TODO: implement bafang error codes
-	// 0x01 = pedaling
-	// 0x03 = braking
-	// error codes...
+	uart1_write(app_get_status_code());
 
 	return 2;
 }

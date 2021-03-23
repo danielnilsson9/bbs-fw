@@ -19,7 +19,7 @@ static uint16_t __xdata min_voltage_x1000;
 static uint16_t __xdata max_voltage_x1000;
 static uint8_t __xdata start_percent;
 
-static bool __xdata throttle_ok;
+static bool __xdata throttle_is_ok;
 
 
 void throttle_init(uint16_t min_mv, uint16_t max_mv)
@@ -27,7 +27,7 @@ void throttle_init(uint16_t min_mv, uint16_t max_mv)
 	min_voltage_x1000 = min_mv;
 	max_voltage_x1000 = max_mv;
 	start_percent = 0;
-	throttle_ok = false;
+	throttle_is_ok = false;
 
 	// Setup pin 3 as adc input
 	SET_PIN_INPUT(PIN_THROTTLE);
@@ -35,6 +35,11 @@ void throttle_init(uint16_t min_mv, uint16_t max_mv)
 	SET_BIT(P1ASF, GET_PIN_NUM(PIN_THROTTLE));
 
 	SET_BIT(ADC_CONTR, 7);	// enable adc power
+}
+
+bool throttle_ok()
+{
+	return throttle_is_ok;
 }
 
 uint8_t throttle_read()
@@ -60,7 +65,8 @@ uint8_t throttle_read()
 
 	if (volt_x1000 < min_voltage_x1000)
 	{
-		throttle_ok = true;
+		// throttle is considered not working until it has given a signal below minimum value
+		throttle_is_ok = true;
 		return 0;
 	}
 
