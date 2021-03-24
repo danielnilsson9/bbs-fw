@@ -19,6 +19,9 @@ tested with the motor mounted on a bike.
 * Use of speed sensor is optional.
 * Use of display is optional.
 
+
+![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
+
 For a complete overview of what can be configured, read the configuration tool documentation:  
 https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
