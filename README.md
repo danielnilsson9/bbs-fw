@@ -36,4 +36,4 @@ Different firmware required due to small change in eeprom layout.
 
 ## Legal
 * Installing this firmware will void your warranty.
-* I cannot be held responsable for any injuries caused by the use of this firmware, use at your own risk.
+* I cannot be held responsible for any injuries caused by the use of this firmware, use at your own risk.
