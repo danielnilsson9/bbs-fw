@@ -10,8 +10,8 @@ tested with the motor mounted on a bike.
 
 
 ## Main Benefits
-* More power (max 32A).
-* No high voltage limit, can by default run up to 63V (maximum rating of components).
+* More power wihout hardware modifications! (max 32A).
+* No upper voltage limit, can by default run up to 63V (maximum rating of components).
 * No issue with PAS/Throttle override.
 * Optional separate set of street legal & offroad assist levels.
 * Possible to set road speed limit per assist level.
