@@ -8,6 +8,7 @@ https://github.com/danielnilsson9/bbshd-fw/wiki
 Be careful if you build from source and flash this firmware, it has not yet been  
 tested with the motor mounted on a bike.
 
+The firmware can be flashed using a standard bafang programming cable (TTL level usb to serial converter).
 
 ## Main Benefits
 * More power without hardware modifications! (max 32A).
