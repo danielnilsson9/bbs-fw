@@ -10,14 +10,14 @@ tested with the motor mounted on a bike.
 
 
 ## Main Benefits
-* More power (max 32A)
-* No high voltage limit, can by default run up to 63V (maximum rating of components)
-* No issue with PAS/Throttle ovveride
+* More power (max 32A).
+* No high voltage limit, can by default run up to 63V (maximum rating of components).
+* No issue with PAS/Throttle override.
 * Optional separate set of street legal & offroad assist levels.
-* Possible to set road speed limit per assist level
-* Support cruise assist level (i.e. motor power without pedal or throttle input)
-* Optional use of speed sensor
-* Optional use of display
+* Possible to set road speed limit per assist level.
+* Support cruise assist levels (i.e. motor power without pedal or throttle input).
+* Optional use of speed sensor.
+* Optional use of display.
 
 For a complete overview of what can be configured, read the configuration tool documentation:  
 https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
