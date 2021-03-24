@@ -32,3 +32,8 @@ V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB
 
 Nothing noticeable changed on PCB:s, pin compataible MCU.  
 Different firmware required due to small change in eeprom layout.
+
+
+## Legal
+* Installing this firmware will void your warranty.
+* I cannot be held responsable for any injuries caused by the use of this firmware, use at your own risk.
