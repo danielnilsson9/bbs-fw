@@ -23,7 +23,7 @@ For a complete overview of what can be configured, read the configuration tool d
 https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
 
-## Hardware Revisions
+## Supported Hardware Revisions
 
 Revision | MCU          | Released    | Comment
 -------- | ------------ | ----------- | --------------------
