@@ -16,8 +16,8 @@ tested with the motor mounted on a bike.
 * Optional separate set of street legal & offroad assist levels.
 * Possible to set road speed limit per assist level.
 * Support cruise assist levels (i.e. motor power without pedal or throttle input).
-* Optional use of speed sensor.
-* Optional use of display.
+* Use of speed sensor is optional.
+* Use of display is optional.
 
 For a complete overview of what can be configured, read the configuration tool documentation:  
 https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
