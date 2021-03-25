@@ -14,10 +14,10 @@ namespace BBSFW.Model
 
 		public enum AssistModeSelect
 		{
-			Off,
-			Standard,
-			Lights,
-			Pas0AndLights
+			Off = 0,
+			Standard = 1,
+			Lights = 2,
+			Pas0AndLights = 3
 		}
 
 		public enum AssistType

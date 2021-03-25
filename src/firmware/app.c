@@ -112,28 +112,25 @@ void app_set_assist_level(uint8_t level)
 
 void app_set_lights(bool on)
 {
-	if (last_light_state != on)
+	if (
+		(g_config.assist_mode_select == ASSIST_MODE_SELECT_LIGHTS) ||
+		(assist_level == ASSIST_0 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS0_LIGHT)
+	)
 	{
-		last_light_state = on;
-
-		if ((g_config.assist_mode_select & ASSIST_MODE_SELECT_LIGHTS) ||
-			(assist_level == ASSIST_0 && g_config.assist_mode_select & ASSIST_MODE_SELECT_PAS0_LIGHT))
+		if (on)
 		{
-			if (on)
-			{
-				operation_mode = OPERATION_MODE_SPORT;
-			}
-			else
-			{
-				operation_mode = OPERATION_MODE_DEFAULT;
-			}
-
-			eventlog_write_data(EVT_DATA_OPERATION_MODE, operation_mode);
-
-			reload_assist_params();
+			app_set_operation_mode(OPERATION_MODE_SPORT);
 		}
 		else
 		{
+			app_set_operation_mode(OPERATION_MODE_DEFAULT);
+		}
+	}
+	else
+	{
+		if (last_light_state != on)
+		{
+			last_light_state = on;
 			eventlog_write_data(EVT_DATA_LIGHTS, on);
 			lights_set(on);
 		}
@@ -280,7 +277,7 @@ void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 
 void apply_speed_limit(uint8_t* target_current)
 {
-	if (g_config.use_speed_sensor)
+	if (g_config.use_speed_sensor && assist_max_wheel_speed_rpm_x10 > 0)
 	{
 		int16_t current_speed_x10 = speed_sensor_get_rpm_x10();
 

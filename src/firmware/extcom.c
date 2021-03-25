@@ -642,8 +642,6 @@ static int8_t process_bafang_display_write_pas()
 	case 0x06:
 		level = ASSIST_PUSH;
 		break;
-	default:
-		return DISCARD;
 	}
 
 	app_set_assist_level(level);

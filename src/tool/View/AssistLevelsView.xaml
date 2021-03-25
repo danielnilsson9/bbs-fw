@@ -156,6 +156,9 @@
 								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Pas">
 									<Setter Property="IsEnabled" Value="False" />
 								</DataTrigger>
+								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Cruise">
+									<Setter Property="IsEnabled" Value="False" />
+								</DataTrigger>
 								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
 									<Setter Property="IsEnabled" Value="False" />
 								</DataTrigger>
