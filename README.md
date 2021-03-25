@@ -8,16 +8,20 @@ https://github.com/danielnilsson9/bbshd-fw/wiki
 Be careful if you build from source and flash this firmware, it has not yet been  
 tested with the motor mounted on a bike.
 
+**The firmware can be flashed using a standard bafang programming cable (TTL level usb to serial converter).**
 
 ## Main Benefits
 * More power without hardware modifications! (max 32A).
-* No upper voltage limit, can by default run up to 63V (maximum rating of components).
+* No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
 * No issue with PAS/Throttle override.
 * Optional separate set of street legal & offroad assist levels.
 * Possible to set road speed limit per assist level.
 * Support cruise assist levels (i.e. motor power without pedal or throttle input).
-* Optional use of speed sensor.
-* Optional use of display.
+* Use of speed sensor is optional.
+* Use of display is optional.
+
+
+![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
 
 For a complete overview of what can be configured, read the configuration tool documentation:  
 https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
