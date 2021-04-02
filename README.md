@@ -26,6 +26,8 @@ tested with the motor mounted on a bike.
 For a complete overview of what can be configured, read the configuration tool documentation:  
 https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
+## Limitations
+* No battery SOC calculation, set display to show battery voltage instead.
 
 ## Supported Hardware Revisions
 
