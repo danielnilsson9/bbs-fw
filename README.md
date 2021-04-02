@@ -28,6 +28,7 @@ https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
 ## Limitations
 * No battery SOC calculation, set display to show battery voltage instead.
+* No way to limit PAS cadence at the moment.
 
 ## Supported Hardware Revisions
 
