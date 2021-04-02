@@ -208,7 +208,7 @@ static void load_default_config()
 
 	g_config.throttle_start_voltage_mv = 900;
 	g_config.throttle_end_voltage_mv = 3600;
-	g_config.throttle_start_percent = 10;
+	g_config.throttle_start_percent = 0;
 
 	g_config.assist_mode_select = ASSIST_MODE_SELECT_OFF;
 	g_config.assist_startup_level = 3;

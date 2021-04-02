@@ -44,24 +44,35 @@ bool throttle_ok()
 
 uint8_t throttle_read()
 {
-	ADC_RES = 0;
+	uint16_t sum = 0;
 
-	// Arrange adc result for 8bit reading
-	CLEAR_BIT(PCON2, 5);
+	for (uint8_t i = 0; i < 5; ++i)
+	{
+		ADC_RES = 0;
+		// Arrange adc result for 8bit reading
+		CLEAR_BIT(PCON2, 5);
 
-	// Sample ADC on pin 3.
-	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 3) | (GET_PIN_NUM(PIN_THROTTLE) & 0x07));
+		// Sample ADC on pin 3.
+		ADC_CONTR = (uint8_t)((1 << 7) | (1 << 3) | (GET_PIN_NUM(PIN_THROTTLE) & 0x07));
 
-	// as per specification
-	NOP();
-	NOP();
-	NOP();
-	NOP();
+		// as per specification
+		NOP();
+		NOP();
+		NOP();
+		NOP();
 
-	while (!IS_BIT_SET(ADC_CONTR, 4));
-	CLEAR_BIT(ADC_CONTR, 4);
+		while (!IS_BIT_SET(ADC_CONTR, 4));
+		CLEAR_BIT(ADC_CONTR, 4);
 
-	uint16_t volt_x1000 = (uint16_t)((ADC_RES * 4300UL) / 256);
+		sum += ADC_RES;
+
+		// some delay between samples
+		for (uint16_t t = 0; t < 2000; ++t) NOP();
+	}
+
+	sum /= 5;
+
+	uint16_t volt_x1000 = (uint16_t)((sum * 4300UL) / 256);
 
 	if (volt_x1000 < min_voltage_x1000)
 	{

@@ -494,18 +494,12 @@ static int8_t process_bafang_display_read_battery()
 		return KEEP;
 	}
 
-	// Some stupid estimation based on configured lvc (unusable, but similar stuff in original firmware)
-	uint16_t max_volt_x10 = (7 * motor_get_battery_lvc_x10()) / 4;
-	uint16_t volt_x10 = motor_get_battery_voltage_x10();
-	if (volt_x10 > max_volt_x10)
-	{
-		volt_x10 = max_volt_x10;
-	}
+	uint8_t volt = motor_get_battery_voltage_x10() / 10;
 
-	uint8_t percent = (uint8_t)MAP(volt_x10, motor_get_battery_lvc_x10(), max_volt_x10, 0, 100);
-
-	uart1_write(percent);
-	uart1_write(percent); // checksum
+	// should be in percent but can't be bottered to do SOC calculation.
+	// return in volts instead, i.e. 57% on display will correspond to 57V.
+	uart1_write(volt);
+	uart1_write(volt); // checksum
 
 	return 2;
 }
