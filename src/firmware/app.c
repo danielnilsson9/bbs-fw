@@ -196,6 +196,10 @@ uint8_t app_get_status_code()
 	return STATUS_IDLE;
 }
 
+uint8_t app_get_motor_temperature()
+{
+	return last_temperature;
+}
 
 void apply_pas(uint8_t* target_current)
 {

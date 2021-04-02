@@ -209,7 +209,7 @@ uint16_t motor_get_battery_current_x10()
 
 uint16_t motor_get_battery_voltage_x10()
 {
-	return battery_amp_x10;
+	return battery_volt_x10;
 }
 
 
@@ -259,12 +259,12 @@ static void send_request(uint8_t opcode, uint16_t data)
 static int read_response(uint8_t opcode, uint16_t* out_data)
 {
 	uint8_t read = 0;
-	uint32_t start = system_ms();
+	uint32_t end = system_ms() + READ_TIMEOUT;
 
 	uint8_t len = (opcode == OPCODE_LVC || opcode == OPCODE_READ_STATUS || opcode == OPCODE_READ_VOLTAGE) ? 5 : 4;
 
 	uint8_t i = 0;
-	while (i < len && system_ms() < start + READ_TIMEOUT)
+	while (i < len && system_ms() < end)
 	{
 		if (uart2_available())
 		{
@@ -272,9 +272,10 @@ static int read_response(uint8_t opcode, uint16_t* out_data)
 		}
 	}
 
+	// :TODO: delay between subsequent requests, handle in som other way...
 	system_delay_ms(4);
 
-	if (i > 1 && msgbuf[1] == opcode)
+	if (i == len && msgbuf[1] == opcode)
 	{
 		uint8_t checksum = compute_checksum(&msgbuf[1], (uint8_t)(i - 2));
 		if (checksum == msgbuf[i - 1])

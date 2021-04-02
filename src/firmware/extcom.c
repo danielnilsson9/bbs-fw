@@ -540,9 +540,11 @@ static int8_t process_bafang_display_read_range()
 		return KEEP;
 	}
 
+	uint8_t temp = app_get_motor_temperature();
+
 	uart1_write(0x00);
-	uart1_write(0x00);
-	uart1_write(0x00); // checksum
+	uart1_write(temp);
+	uart1_write(temp); // checksum
 
 	return 3;
 }
