@@ -28,7 +28,7 @@
 #define IAP_ENABLE			0x82		// Wait time, CPU_FREQ < 20MHz
 
 
-static uint16_t __xdata selected_sector_offset = 0;
+static __xdata uint16_t selected_sector_offset = 0;
 
 
 static void eeprom_begin(uint8_t cmd, int offset)

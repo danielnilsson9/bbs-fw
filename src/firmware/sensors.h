@@ -27,7 +27,7 @@ void speed_sensor_set_signals_per_rpm(uint8_t num_signals);
 bool speed_sensor_is_moving();
 uint16_t speed_sensor_get_rpm_x10();
 
-uint8_t temperature_read();
+int8_t temperature_read();
 
 bool brake_is_activated();
 

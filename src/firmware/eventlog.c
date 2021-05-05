@@ -11,8 +11,8 @@
 #include "uart.h"
 
 
-static bool __xdata is_enabled;
-static char __xdata buffer[256];
+static bool is_enabled;
+static __xdata char buffer[256];
 
 
 void eventlog_init(bool enabled)

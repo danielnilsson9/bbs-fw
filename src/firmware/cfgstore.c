@@ -25,8 +25,8 @@ typedef struct
 } config_header_t;
 
 
-static config_header_t __xdata header;
-config_t __xdata g_config;
+static __xdata config_header_t header;
+__xdata config_t g_config;
 
 
 static bool read_config();
@@ -66,8 +66,8 @@ bool cfgstore_save()
 
 static bool read_config()
 {
-	uint8_t read_offset = 0;
-	uint8_t* ptr = 0;
+	uint8_t __xdata read_offset = 0;
+	__xdata uint8_t* ptr = 0;
 	uint8_t i = 0;
 	int data;
 
@@ -134,7 +134,7 @@ static bool read_config()
 static bool write_config()
 {
 	uint8_t write_offset = 0;
-	uint8_t* ptr = 0;
+	__xdata uint8_t* ptr = 0;
 	uint8_t i = 0;
 
 	header.version = CONFIG_VERSION;

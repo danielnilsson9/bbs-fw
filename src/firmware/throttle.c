@@ -11,18 +11,17 @@
 #include "pins.h"
 #include "system.h"
 #include "util.h"
+#include "filter.h"
 
 #include <stdbool.h>
 
+static __xdata uint16_t min_voltage_x1000;
+static __xdata uint16_t max_voltage_x1000;
+static __xdata uint8_t start_percent;
 
-static uint16_t __xdata min_voltage_x1000;
-static uint16_t __xdata max_voltage_x1000;
-static uint8_t __xdata start_percent;
+static __xdata bool throttle_is_ok;
 
-static bool __xdata throttle_is_ok;
-
-
-void throttle_init(uint16_t min_mv, uint16_t max_mv)
+void throttle_init(__xdata uint16_t min_mv, __xdata uint16_t max_mv)
 {
 	min_voltage_x1000 = min_mv;
 	max_voltage_x1000 = max_mv;
@@ -34,7 +33,12 @@ void throttle_init(uint16_t min_mv, uint16_t max_mv)
 	SET_PIN_LOW(PIN_THROTTLE);
 	SET_BIT(P1ASF, GET_PIN_NUM(PIN_THROTTLE));
 
-	SET_BIT(ADC_CONTR, 7);	// enable adc power
+	ADC_RES = 0;
+	// enable adc power, set adc speed
+	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5));
+
+	// Arrange adc result for 8bit reading
+	CLEAR_BIT(PCON2, 5);
 }
 
 bool throttle_ok()
@@ -44,16 +48,12 @@ bool throttle_ok()
 
 uint8_t throttle_read()
 {
-	uint16_t sum = 0;
+	int16_t value = 0;
 
-	for (uint8_t i = 0; i < 5; ++i)
+	for (uint8_t i = 0; i < 4; ++i)
 	{
-		ADC_RES = 0;
-		// Arrange adc result for 8bit reading
-		CLEAR_BIT(PCON2, 5);
-
 		// Sample ADC on pin 3.
-		ADC_CONTR = (uint8_t)((1 << 7) | (1 << 3) | (GET_PIN_NUM(PIN_THROTTLE) & 0x07));
+		ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5) | (1 << 3) | (GET_PIN_NUM(PIN_THROTTLE) & 0x07));
 
 		// as per specification
 		NOP();
@@ -64,28 +64,28 @@ uint8_t throttle_read()
 		while (!IS_BIT_SET(ADC_CONTR, 4));
 		CLEAR_BIT(ADC_CONTR, 4);
 
-		sum += ADC_RES;
+		value += ADC_RES;
 
 		// some delay between samples
-		for (uint16_t t = 0; t < 2000; ++t) NOP();
+		for (uint16_t t = 0; t < 4000; ++t) NOP();
 	}
 
-	sum /= 5;
+	value /= 4;
 
-	uint16_t volt_x1000 = (uint16_t)((sum * 4300UL) / 256);
+	value = (int16_t)((value * 4300UL) / 256);
 
-	if (volt_x1000 < min_voltage_x1000)
+	if (value < min_voltage_x1000)
 	{
 		// throttle is considered not working until it has given a signal below minimum value
 		throttle_is_ok = true;
 		return 0;
 	}
 
-	if (volt_x1000 > max_voltage_x1000)
+	if (value > max_voltage_x1000)
 	{
-		volt_x1000 = max_voltage_x1000;
+		value = max_voltage_x1000;
 	}
 
-	return (uint8_t)MAP(volt_x1000, min_voltage_x1000, max_voltage_x1000, 0, 100);
+	return (uint8_t)MAP(value, min_voltage_x1000, max_voltage_x1000, 0, 100);
 }
 

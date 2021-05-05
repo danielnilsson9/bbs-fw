@@ -35,24 +35,23 @@
 #define READ_TIMEOUT			100
 
 
-static uint8_t __xdata is_connected;
-static uint8_t __xdata msgbuf[8];
+static __xdata uint8_t is_connected;
+static __xdata uint8_t msgbuf[8];
 
-static uint32_t __xdata next_send_ms;
-static uint32_t __xdata next_read_ms;
+static __xdata uint32_t next_send_ms;
+static __xdata uint32_t next_read_ms;
 
-static bool __xdata target_speed_changed;
-static uint8_t __xdata target_speed;
+static __xdata bool target_speed_changed;
+static __xdata uint8_t target_speed;
 
-static bool __xdata target_current_changed;
-static uint8_t __xdata target_current;
+static __xdata bool target_current_changed;
+static __xdata uint8_t target_current;
 
-static uint8_t __xdata lvc_volt_x10;
+static __xdata uint8_t lvc_volt_x10;
 
-static uint16_t __xdata status_flags;
-static uint16_t __xdata battery_volt_x10;
-static uint16_t __xdata battery_amp_x10;
-
+static __xdata uint16_t status_flags;
+static __xdata uint16_t battery_volt_x10;
+static __xdata uint16_t battery_amp_x10;
 
 
 static uint8_t compute_checksum(uint8_t* msg, uint8_t len);
@@ -63,7 +62,7 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V);
 static void read_status();
 
 
-void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
+void motor_init(__xdata uint16_t max_current_mA, __xdata uint8_t lvc_V)
 {
 	is_connected = 0;
 	next_send_ms = 0;
@@ -167,7 +166,7 @@ void motor_disable()
 	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
 }
 
-uint16_t motor_status()
+__xdata uint16_t motor_status()
 {
 	return status_flags;
 }
@@ -197,17 +196,17 @@ void motor_set_target_current(uint8_t percent)
 }
 
 
-uint16_t motor_get_battery_lvc_x10()
+__xdata uint16_t motor_get_battery_lvc_x10()
 {
 	return lvc_volt_x10;
 }
 
-uint16_t motor_get_battery_current_x10()
+__xdata uint16_t motor_get_battery_current_x10()
 {
 	return battery_amp_x10;
 }
 
-uint16_t motor_get_battery_voltage_x10()
+__xdata uint16_t motor_get_battery_voltage_x10()
 {
 	return battery_volt_x10;
 }

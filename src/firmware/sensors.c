@@ -24,15 +24,15 @@
 static volatile uint16_t pas_pulse_counter;
 static volatile bool pas_direction_backward;
 static volatile uint8_t pas_rpm;
-static uint16_t __xdata pas_period_counter;
-static bool __xdata pas_prev1;
-static bool __xdata pas_prev2;
-static uint16_t __xdata pas_stop_delay_periods;
+static __xdata uint16_t pas_period_counter;
+static __xdata bool pas_prev1;
+static __xdata bool pas_prev2;
+static __xdata uint16_t pas_stop_delay_periods;
 
 static volatile uint16_t speed_ticks_minute_x10;
-static uint16_t __xdata speed_period_counter;
-static bool __xdata speed_prev_state;
-static uint8_t __xdata speed_ticks_per_rpm;
+static __xdata uint16_t speed_period_counter;
+static __xdata bool speed_prev_state;
+static __xdata uint8_t speed_ticks_per_rpm;
 
 
 void sensors_init()
@@ -62,7 +62,12 @@ void sensors_init()
 	SET_PIN_LOW(PIN_TEMPERATURE);
 	SET_BIT(P1ASF, GET_PIN_NUM(PIN_TEMPERATURE));
 
-	SET_BIT(ADC_CONTR, 7);	// enable adc power
+	ADC_RES = 0;
+	// enable adc power, set adc speed
+	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5));
+
+	// Arrange adc result for 8bit reading
+	CLEAR_BIT(PCON2, 5);
 
 
 	CLEAR_BIT(T4T3M, 6); // use as timer
@@ -116,15 +121,10 @@ uint16_t speed_sensor_get_rpm_x10()
 	return speed_ticks_minute_x10 / speed_ticks_per_rpm;
 }
 
-uint8_t temperature_read()
+int8_t temperature_read()
 {
-	ADC_RES = 0;
-
-	// Arrange adc result for 8bit reading
-	CLEAR_BIT(PCON2, 5);
-
 	// Sample ADC
-	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 3) | (GET_PIN_NUM(PIN_TEMPERATURE) & 0x07));
+	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5) | (1 << 3) | (GET_PIN_NUM(PIN_TEMPERATURE) & 0x07));
 
 	// as per specification
 	NOP();
@@ -136,15 +136,15 @@ uint8_t temperature_read()
 	CLEAR_BIT(ADC_CONTR, 4);
 
 	// :TODO: Measure and calculate beta value for range 25 - 80 degrees
-	const float invBeta = 1.00 / 3600.00;
-	const float invT0 = 1.00 / 298.15;
+	const float invBeta = 1.f / 3600.f;
+	const float invT0 = 1.f / 298.15f;
 
 	float R = 5100.f * ((255.f / (255.f - ADC_RES)) - 1.f);
 
 	float K = 1.f / (invT0 + invBeta * (logf(R / 10000.f)));
-	float C = K - 273.15;
+	float C = K - 273.15f;
 
-	return (uint8_t)(C + 0.5f);
+	return (int8_t)(C + 0.5f);
 }
 
 

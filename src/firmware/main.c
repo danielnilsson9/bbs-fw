@@ -47,7 +47,7 @@ void main(void)
 		extcom_process();
 		app_process();
 
-		system_delay_ms(10);
+		system_delay_ms(4);
 		watchdog_yeild();
 	}
 }

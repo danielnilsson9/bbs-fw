@@ -17,22 +17,23 @@
 #include "eventlog.h"
 #include "util.h"
 
-static uint8_t __xdata assist_level;
-static uint8_t __xdata operation_mode;
-static uint16_t __xdata global_max_speed_rpm;
+static __xdata uint8_t assist_level;
+static __xdata uint8_t operation_mode;
+static __xdata uint16_t global_max_speed_rpm;
 
-static assist_level_t __xdata assist_level_data;
-static int32_t __xdata assist_max_wheel_speed_rpm_x10;
+static __xdata assist_level_t assist_level_data;
+static __xdata int32_t assist_max_wheel_speed_rpm_x10;
 
-static bool __xdata last_light_state;
-static bool __xdata cruise_paused;
-static bool __xdata cruise_just_engaged;
+static __xdata bool last_light_state;
+static __xdata bool cruise_paused;
+static __xdata bool cruise_block_throttle_return;
 
-static uint8_t __xdata last_temperature;
-static bool __xdata speed_limiting;
+static __xdata uint8_t last_temperature;
+static __xdata bool speed_limiting;
 
 
-#define MAX_TEMPERATURE		80
+#define MAX_TEMPERATURE					80
+#define CRUISE_ENGAGE_PAS_PULSES		12
 
 void apply_pas(uint8_t* target_current);
 void apply_cruise(uint8_t* target_current, uint8_t throtle_percent);
@@ -53,7 +54,7 @@ void app_init()
 	speed_limiting = false;
 
 	cruise_paused = true;
-	cruise_just_engaged = false;
+	cruise_block_throttle_return = false;
 	operation_mode = OPERATION_MODE_DEFAULT;
 	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(g_config.max_speed_kph));
 	app_set_assist_level(g_config.assist_startup_level);
@@ -201,6 +202,7 @@ uint8_t app_get_motor_temperature()
 	return last_temperature;
 }
 
+
 void apply_pas(uint8_t* target_current)
 {
 	if (assist_level_data.flags & ASSIST_FLAG_PAS)
@@ -223,34 +225,34 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 		if (brake_is_activated())
 		{
 			cruise_paused = true;
-			cruise_just_engaged = false;
+			cruise_block_throttle_return = true;
 		}
 
 		// pause cruise if started pedaling backwards
-		else if (pas_is_pedaling_backwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
+		else if (pas_is_pedaling_backwards() && pas_get_pulse_counter() > CRUISE_ENGAGE_PAS_PULSES)
 		{
 			cruise_paused = true;
-			cruise_just_engaged = false;
+			cruise_block_throttle_return = true;
 		}
 
 		// pause cruise if throttle touched while cruise active
-		else if (!cruise_paused && !cruise_just_engaged && throttle_percent > 0)
+		else if (!cruise_paused && !cruise_block_throttle_return && throttle_percent > 0)
 		{
 			cruise_paused = true;
-			cruise_just_engaged = false;
+			cruise_block_throttle_return = true;
 		}
 
 		// unpause cruise if pedaling forward while engaging throttle > 50%
-		else if (cruise_paused && throttle_percent > 50 && pas_is_pedaling_forwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
+		else if (cruise_paused && !cruise_block_throttle_return && throttle_percent > 50 && pas_is_pedaling_forwards() && pas_get_pulse_counter() > CRUISE_ENGAGE_PAS_PULSES)
 		{
 			cruise_paused = false;
-			cruise_just_engaged = true;
+			cruise_block_throttle_return = true;
 		}
 
-		// reset flag tracking throttle to make sure throttle returns to idle position before disabling cruise with throttle touch
-		else if (cruise_just_engaged && throttle_percent == 0)
+		// reset flag tracking throttle to make sure throttle returns to idle position before engage/disenage cruise with throttle touch
+		else if (cruise_block_throttle_return && throttle_percent == 0)
 		{
-			cruise_just_engaged = false;
+			cruise_block_throttle_return = false;
 		}
 
 		if (cruise_paused)
@@ -269,7 +271,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if (assist_level_data.flags & ASSIST_FLAG_THROTTLE && throttle_percent > 0)
+	if ((assist_level_data.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0)
 	{
 		uint8_t current = (uint8_t)MAP(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.max_throttle_current_percent);
 		if (current > *target_current)
@@ -301,12 +303,19 @@ void apply_speed_limit(uint8_t* target_current)
 		{
 			if (current_speed_x10 > high_limit)
 			{
-				*target_current = 2;
+				if (*target_current > 2)
+				{
+					*target_current = 2;
+				}
 			}
 			else
 			{
 				// linear ramp down when approaching max speed.
-				*target_current = (uint8_t)MAP(current_speed_x10, low_limit, high_limit, *target_current, 2);
+				uint8_t tmp = (uint8_t)MAP(current_speed_x10, low_limit, high_limit, *target_current, 2);
+				if (*target_current > tmp)
+				{
+					*target_current = tmp;
+				}
 			}
 
 			if (!speed_limiting)
@@ -320,7 +329,7 @@ void apply_speed_limit(uint8_t* target_current)
 
 void apply_thermal_limit(uint8_t* target_current)
 {
-	uint8_t temp = temperature_read();
+	int8_t temp = temperature_read();
 
 	if (temp != last_temperature)
 	{
