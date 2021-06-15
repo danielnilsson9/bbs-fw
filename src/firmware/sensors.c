@@ -63,12 +63,12 @@ void sensors_init()
 	SET_BIT(P1ASF, GET_PIN_NUM(PIN_TEMPERATURE));
 
 	ADC_RES = 0;
-	// enable adc power, set adc speed
-	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5));
 
 	// Arrange adc result for 8bit reading
 	CLEAR_BIT(PCON2, 5);
 
+	// enable adc power, set adc speed
+	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5));
 
 	CLEAR_BIT(T4T3M, 6); // use as timer
 	SET_BIT(T4T3M, 5); // Run at CPU_FREQ

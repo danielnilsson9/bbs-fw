@@ -32,7 +32,7 @@ static __xdata uint8_t last_temperature;
 static __xdata bool speed_limiting;
 
 
-#define MAX_TEMPERATURE					80
+#define MAX_TEMPERATURE					70
 #define CRUISE_ENGAGE_PAS_PULSES		12
 
 void apply_pas(uint8_t* target_current);
@@ -219,7 +219,7 @@ void apply_pas(uint8_t* target_current)
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if (assist_level_data.flags & ASSIST_FLAG_CRUISE)
+	if ((assist_level_data.flags & ASSIST_FLAG_CRUISE) && throttle_ok())
 	{
 		// pause cruise if brake activated
 		if (brake_is_activated())
@@ -271,7 +271,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if ((assist_level_data.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0)
+	if ((assist_level_data.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
 	{
 		uint8_t current = (uint8_t)MAP(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.max_throttle_current_percent);
 		if (current > *target_current)
@@ -337,7 +337,7 @@ void apply_thermal_limit(uint8_t* target_current)
 		eventlog_write_data(EVT_DATA_TEMPERATURE, temp);
 	}
 
-	if (temp > 80)
+	if (temp > MAX_TEMPERATURE)
 	{
 		if (last_temperature < MAX_TEMPERATURE)
 		{
