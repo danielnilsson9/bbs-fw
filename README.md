@@ -1,5 +1,8 @@
 # BBSHD Open Source Firmware
 
+**NOT READY FOR EVERYDAY USE**
+
+
 Work in progress for bringing life to an open source firmware for the BBSHD motor controller.
 
 Soon to be released. Check wiki for more documentation.  
