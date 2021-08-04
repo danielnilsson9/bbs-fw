@@ -11,6 +11,7 @@
 #include "stc15.h"
 #include "uart.h"
 #include "system.h"
+#include "adc.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -55,20 +56,6 @@ void sensors_init()
 
 	pas_prev1 = GET_PIN_STATE(PIN_PAS1);
 	pas_prev2 = GET_PIN_STATE(PIN_PAS2);
-
-
-	// Setup pin temperature pin as adc input
-	SET_PIN_INPUT(PIN_TEMPERATURE);
-	SET_PIN_LOW(PIN_TEMPERATURE);
-	SET_BIT(P1ASF, GET_PIN_NUM(PIN_TEMPERATURE));
-
-	ADC_RES = 0;
-
-	// Arrange adc result for 8bit reading
-	CLEAR_BIT(PCON2, 5);
-
-	// enable adc power, set adc speed
-	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5));
 
 	CLEAR_BIT(T4T3M, 6); // use as timer
 	SET_BIT(T4T3M, 5); // Run at CPU_FREQ
@@ -123,28 +110,23 @@ uint16_t speed_sensor_get_rpm_x10()
 
 int8_t temperature_read()
 {
-	// Sample ADC
-	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5) | (1 << 3) | (GET_PIN_NUM(PIN_TEMPERATURE) & 0x07));
+	uint8_t adc = adc_get_temperature();
 
-	// as per specification
-	NOP();
-	NOP();
-	NOP();
-	NOP();
+	if (adc != 0)
+	{
+		// :TODO: Measure and calculate beta value for range 25 - 80 degrees
+		const float invBeta = 1.f / 3600.f;
+		const float invT0 = 1.f / 298.15f;
 
-	while (!IS_BIT_SET(ADC_CONTR, 4));
-	CLEAR_BIT(ADC_CONTR, 4);
+		float R = 5100.f * ((255.f / (255.f - adc)) - 1.f);
 
-	// :TODO: Measure and calculate beta value for range 25 - 80 degrees
-	const float invBeta = 1.f / 3600.f;
-	const float invT0 = 1.f / 298.15f;
+		float K = 1.f / (invT0 + invBeta * (logf(R / 10000.f)));
+		float C = K - 273.15f;
 
-	float R = 5100.f * ((255.f / (255.f - ADC_RES)) - 1.f);
+		return (int8_t)(C + 0.5f);
+	}
 
-	float K = 1.f / (invT0 + invBeta * (logf(R / 10000.f)));
-	float C = K - 273.15f;
-
-	return (int8_t)(C + 0.5f);
+	return 0.f;
 }
 
 

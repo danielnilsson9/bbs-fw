@@ -63,6 +63,7 @@ make all</NMakeReBuildCommandLine>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="adc.c" />
     <ClCompile Include="app.c" />
     <ClCompile Include="cfgstore.c" />
     <ClCompile Include="eeprom.c" />
@@ -78,6 +79,7 @@ make all</NMakeReBuildCommandLine>
     <ClCompile Include="watchdog.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="adc.h" />
     <ClInclude Include="app.h" />
     <ClInclude Include="cfgstore.h" />
     <ClInclude Include="eeprom.h" />

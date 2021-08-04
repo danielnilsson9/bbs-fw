@@ -24,6 +24,7 @@ SDIR =
 MAINSRC = main.c
 
 EXTRASRCS = \
+	adc.c \
 	app.c \
 	cfgstore.c \
 	eeprom.c \
@@ -39,6 +40,7 @@ EXTRASRCS = \
 	sensors.c
 	
 HEADERS = \
+	adc.h \
 	app.h \
 	cfgstore.h \
 	eventlog.h \

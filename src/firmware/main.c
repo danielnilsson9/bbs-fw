@@ -12,6 +12,7 @@
 #include "eventlog.h"
 #include "app.h"
 #include "watchdog.h"
+#include "adc.h"
 #include "motor.h"
 #include "extcom.h"
 #include "sensors.h"
@@ -31,6 +32,7 @@ void main(void)
 
 	cfgstore_init();
 
+	adc_init();
 	sensors_init();
 	speed_sensor_set_signals_per_rpm(g_config.speed_sensor_signals);
 	pas_set_stop_delay(g_config.pas_stop_delay_x10ms * 10);
@@ -43,6 +45,7 @@ void main(void)
 
 	while (1)
 	{
+		adc_process();
 		motor_process();
 		extcom_process();
 		app_process();

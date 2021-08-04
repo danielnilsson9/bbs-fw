@@ -11,7 +11,7 @@
 #include "pins.h"
 #include "system.h"
 #include "util.h"
-#include "filter.h"
+#include "adc.h"
 
 #include <stdbool.h>
 
@@ -62,31 +62,7 @@ bool throttle_ok()
 
 uint8_t throttle_read()
 {
-	int16_t value = 0;
-
-	for (uint8_t i = 0; i < 4; ++i)
-	{
-		// Sample ADC on pin 3.
-		ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5) | (1 << 3) | (GET_PIN_NUM(PIN_THROTTLE) & 0x07));
-
-		// as per specification
-		NOP();
-		NOP();
-		NOP();
-		NOP();
-
-		while (!IS_BIT_SET(ADC_CONTR, 4));
-		CLEAR_BIT(ADC_CONTR, 4);
-
-		value += ADC_RES;
-
-		// some delay between samples
-		for (uint16_t t = 0; t < 4000; ++t) NOP();
-	}
-
-	value /= 4;
-
-	value = (int16_t)((value * (uint32_t)ADC_VOLTAGE_MV) / 256);
+	int16_t value = (int16_t)((adc_get_throttle() * (uint32_t)ADC_VOLTAGE_MV) / 256);
 
 	if (value < THROTTLE_HARD_LOW_LIMIT_MV || value > THROTTLE_HARD_HIGH_LIMIT_MV)
 	{

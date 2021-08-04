@@ -28,7 +28,7 @@ static __xdata bool last_light_state;
 static __xdata bool cruise_paused;
 static __xdata bool cruise_block_throttle_return;
 
-static __xdata uint8_t last_temperature;
+static __xdata int8_t last_temperature;
 static __xdata bool speed_limiting;
 
 
