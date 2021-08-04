@@ -23,6 +23,7 @@ static __xdata uint16_t global_max_speed_rpm;
 
 static __xdata assist_level_t assist_level_data;
 static __xdata int32_t assist_max_wheel_speed_rpm_x10;
+static __xdata uint16_t speed_limit_ramp_interval_rpm_x10;
 
 static __xdata bool last_light_state;
 static __xdata bool cruise_paused;
@@ -32,8 +33,9 @@ static __xdata int8_t last_temperature;
 static __xdata bool speed_limiting;
 
 
-#define MAX_TEMPERATURE					70
-#define CRUISE_ENGAGE_PAS_PULSES		12
+#define MAX_TEMPERATURE						70
+#define CRUISE_ENGAGE_PAS_PULSES			12
+#define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	2
 
 void apply_pas(uint8_t* target_current);
 void apply_cruise(uint8_t* target_current, uint8_t throtle_percent);
@@ -49,6 +51,7 @@ void app_init()
 {
 	motor_disable();
 
+	global_max_speed_rpm = 0;
 	last_light_state = false;
 	last_temperature = 0;
 	speed_limiting = false;
@@ -285,12 +288,12 @@ void apply_speed_limit(uint8_t* target_current)
 {
 	if (g_config.use_speed_sensor && assist_max_wheel_speed_rpm_x10 > 0)
 	{
-		int16_t current_speed_x10 = speed_sensor_get_rpm_x10();
+		int16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
 
-		int16_t high_limit = assist_max_wheel_speed_rpm_x10 + 20;
-		int16_t low_limit = assist_max_wheel_speed_rpm_x10 - 20;
+		int16_t high_limit_rpm = assist_max_wheel_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
+		int16_t low_limit_rpm = assist_max_wheel_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
 	
-		if (current_speed_x10 < low_limit)
+		if (current_speed_rpm_x10 < low_limit_rpm)
 		{
 			// no limiting
 			if (speed_limiting)
@@ -301,17 +304,17 @@ void apply_speed_limit(uint8_t* target_current)
 		}		
 		else
 		{
-			if (current_speed_x10 > high_limit)
+			if (current_speed_rpm_x10 > high_limit_rpm)
 			{
-				if (*target_current > 2)
+				if (*target_current > 1)
 				{
-					*target_current = 2;
+					*target_current = 1;
 				}
 			}
 			else
 			{
 				// linear ramp down when approaching max speed.
-				uint8_t tmp = (uint8_t)MAP(current_speed_x10, low_limit, high_limit, *target_current, 2);
+				uint8_t tmp = (uint8_t)MAP(current_speed_rpm_x10, low_limit_rpm, high_limit_rpm, *target_current, 1);
 				if (*target_current > tmp)
 				{
 					*target_current = tmp;
@@ -361,7 +364,7 @@ void reload_assist_params()
 	if (assist_level < ASSIST_PUSH)
 	{
 		assist_level_data = g_config.assist_levels[operation_mode][assist_level];
-		assist_max_wheel_speed_rpm_x10 = ((uint32_t)global_max_speed_rpm * assist_level_data.max_speed_percent / 10);
+		assist_max_wheel_speed_rpm_x10 = ((uint32_t)((uint32_t)global_max_speed_rpm * assist_level_data.max_speed_percent) / 10);
 
 		// pause cruise if swiching level
 		cruise_paused = true;
@@ -375,11 +378,13 @@ void reload_assist_params()
 
 		assist_max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(6) * 10;
 	}
+
+	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
 }
 
 uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)
 {
-	float radius_mm = g_config.wheel_size_inch_x10 * 2.54f;
+	float radius_mm = g_config.wheel_size_inch_x10 * 1.27f; // g_config.wheel_size_inch_x10 / 2.f * 2.54f;
 	return (uint16_t)(25000.f / (3 * 3.14159f * radius_mm) * speed_kph);
 }
 
