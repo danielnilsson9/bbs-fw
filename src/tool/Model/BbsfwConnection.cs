@@ -92,6 +92,10 @@ namespace BBSFW.Model
 					{
 						result.Add(new ComPort(name, port["Caption"].ToString()));
 					}
+					else
+					{
+						result.Add(new ComPort(name, name));
+					}
 				}
 			}
 
@@ -317,6 +321,7 @@ namespace BBSFW.Model
 
 				if (version != Configuration.Version || size != Configuration.ByteSize)
 				{
+					System.Diagnostics.Debug.WriteLine("Config read from flash has wrong version, discarding.");
 					return Discard;
 				}
 			}
@@ -332,6 +337,10 @@ namespace BBSFW.Model
 				cfg.ParseFromBuffer(_rxBuffer.Skip(4).Take(Configuration.ByteSize).ToArray());
 
 				_readConfigCq.Complete(cfg);
+			}
+			else
+			{
+				System.Diagnostics.Debug.WriteLine("Config read from flash has mismatching checksum, discarding.");
 			}
 
 			return MessageSize;
