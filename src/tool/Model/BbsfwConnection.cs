@@ -204,23 +204,32 @@ namespace BBSFW.Model
 		{
 			lock(_rxBuffer)
 			{
-				var result = ProcessMessage();
-				if (result == Discard)
+				while(true)
 				{
-					System.Diagnostics.Debug.WriteLine("Discarding: " + BitConverter.ToString(_rxBuffer.ToArray()).Replace("-", " "));
-					_rxBuffer.Clear();
-				}
-				else if (result > 0)
-				{
-					if (_rxBuffer.Count > result)
+					var result = ProcessMessage();
+					if (result == Discard)
 					{
-						_rxBuffer.RemoveRange(0, result);
+						System.Diagnostics.Debug.WriteLine("Discarding: " + BitConverter.ToString(_rxBuffer.ToArray()).Replace("-", " "));
+						_rxBuffer.Clear();
+					}
+					else if (result > 0)
+					{
+						if (_rxBuffer.Count > result)
+						{
+							_rxBuffer.RemoveRange(0, result);
+						}
+						else
+						{
+							_rxBuffer.Clear();
+						}
 					}
 					else
 					{
-						_rxBuffer.Clear();
+						// no data, done
+						break;
 					}
 				}
+				
 			}
 		}
 
