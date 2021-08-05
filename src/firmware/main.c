@@ -22,6 +22,9 @@
 #include "uart.h"
 
 
+//#define DEBUG_LOOP_TIME
+
+
 void main(void)
 {
 	watchdog_init();
@@ -43,12 +46,23 @@ void main(void)
 
 	app_init();
 
+
+#ifdef DEBUG_LOOP_TIME
+	SET_PIN_OUTPUT(PIN_GEAR_SENSOR);
+#endif
+
 	while (1)
 	{
+#ifdef DEBUG_LOOP_TIME
+		SET_PIN_HIGH(PIN_GEAR_SENSOR);
+#endif
 		adc_process();
 		motor_process();
 		extcom_process();
 		app_process();
+#ifdef DEBUG_LOOP_TIME
+		SET_PIN_LOW(PIN_GEAR_SENSOR);
+#endif
 
 		system_delay_ms(4);
 		watchdog_yeild();
