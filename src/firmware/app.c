@@ -16,6 +16,7 @@
 #include "uart.h"
 #include "eventlog.h"
 #include "util.h"
+#include "system.h"
 
 static __xdata uint8_t assist_level;
 static __xdata uint8_t operation_mode;
@@ -32,14 +33,21 @@ static __xdata bool cruise_block_throttle_return;
 static __xdata int8_t last_temperature;
 static __xdata bool speed_limiting;
 
+static __xdata uint8_t ramp_up_target_current;
+static __xdata uint32_t last_ramp_up_increment_ms;
+static __xdata uint16_t ramp_up_current_interval_ms;
 
 #define MAX_TEMPERATURE						70
 #define CRUISE_ENGAGE_PAS_PULSES			12
 #define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	2
 
+#define CURRENT_RAMP_UP_AMPS_SECOND_X10		150
+
+
 void apply_pas(uint8_t* target_current);
 void apply_cruise(uint8_t* target_current, uint8_t throtle_percent);
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percen);
+void apply_current_ramp(uint8_t* target_current);
 void apply_speed_limit(uint8_t* target_current);
 void apply_thermal_limit(uint8_t* target_current);
 
@@ -56,6 +64,10 @@ void app_init()
 	last_light_state = false;
 	last_temperature = 0;
 	speed_limiting = false;
+
+	ramp_up_target_current = 0;
+	ramp_up_current_interval_ms = (g_config.max_current_amps * 100u) / CURRENT_RAMP_UP_AMPS_SECOND_X10;
+	last_ramp_up_increment_ms = 0;
 
 	cruise_paused = true;
 	cruise_block_throttle_return = false;
@@ -82,7 +94,9 @@ void app_process()
 
 		apply_pas(&target_current);
 		apply_cruise(&target_current, throttle);
-		apply_throttle(&target_current, throttle);	
+		apply_current_ramp(&target_current);	// order important, shall not affect throttle
+
+		apply_throttle(&target_current, throttle);
 	}
 
 	apply_speed_limit(&target_current);
@@ -98,6 +112,10 @@ void app_process()
 	else
 	{
 		motor_disable();
+
+		// force reset current ramp
+		ramp_up_target_current = 0;
+		last_ramp_up_increment_ms = 0;
 	}
 
 	if (motor_status() & MOTOR_ERROR_LVC)
@@ -276,6 +294,36 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 				*target_current = assist_level_data.target_current_percent;
 			}
 		}
+	}
+}
+
+void apply_current_ramp(uint8_t* target_current)
+{
+	if (*target_current > ramp_up_target_current)
+	{
+		__xdata uint32_t now = system_ms();
+		__xdata uint16_t time_diff = now - last_ramp_up_increment_ms;
+
+		if (time_diff >= ramp_up_current_interval_ms)
+		{
+			++ramp_up_target_current;
+		
+			if (last_ramp_up_increment_ms == 0)
+			{
+				last_ramp_up_increment_ms = now;
+			}
+			else
+			{
+				// offset for time overshoot to not accumulate large ramp error
+				last_ramp_up_increment_ms = now - (uint8_t)(time_diff - ramp_up_current_interval_ms);
+			}		
+		}
+
+		*target_current = ramp_up_target_current;
+	}
+	else
+	{
+		ramp_up_target_current = *target_current;
 	}
 }
 

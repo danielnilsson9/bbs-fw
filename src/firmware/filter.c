@@ -1,11 +1,11 @@
 #include "filter.h"
 #include <math.h>
 
-int16_t filter_exponential_update(int16_t value, __xdata exponential_filter_t* __xdata filter)
-{
-	filter->current = (100 * filter->weight * (int32_t)value + (100 - filter->weight) * filter->current + 50) / 100;
-	return (int16_t)((filter->current + 50) / 100);
-}
+//int16_t filter_exponential_update(int16_t value, __xdata exponential_filter_t* __xdata filter)
+//{
+//	filter->current = (100 * filter->weight * (int32_t)value + (100 - filter->weight) * filter->current + 50) / 100;
+//	return (int16_t)((filter->current + 50) / 100);
+//}
 
 //float filter_kalman_update(__xdata float value, __xdata kalman_filter_t* __xdata filter)
 //{
