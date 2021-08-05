@@ -82,6 +82,19 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public uint MaxCadencePercent
+		{
+			get { return _level.MaxCadencePercent; }
+			set
+			{
+				if (_level.MaxCadencePercent != value)
+				{
+					_level.MaxCadencePercent = value;
+					OnPropertyChanged(nameof(MaxCadencePercent));
+				}
+			}
+		}
+
 		public uint MaxSpeedPercent
 		{
 			get { return _level.MaxSpeedPercent; }

@@ -120,6 +120,7 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 
 
@@ -167,8 +168,21 @@
 					</TextBox.Style>
 				</TextBox>
 
-				<TextBlock Grid.Column="0" Grid.Row="4" Text="Max Speed (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
-				<TextBox Grid.Column="1" Grid.Row="4" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxSpeedPercent, UpdateSourceTrigger=PropertyChanged}">
+				<TextBlock Grid.Column="0" Grid.Row="4" Text="Max Cadence (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
+				<TextBox Grid.Column="1" Grid.Row="4" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxCadencePercent, UpdateSourceTrigger=PropertyChanged}">
+					<TextBox.Style>
+						<Style TargetType="{x:Type TextBox}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
+									<Setter Property="IsEnabled" Value="False" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBox.Style>
+				</TextBox>
+
+				<TextBlock Grid.Column="0" Grid.Row="5" Text="Max Speed (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
+				<TextBox Grid.Column="1" Grid.Row="5" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxSpeedPercent, UpdateSourceTrigger=PropertyChanged}">
 					<TextBox.Style>
 						<Style TargetType="{x:Type TextBox}">
 							<Style.Triggers>

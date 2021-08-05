@@ -9,7 +9,7 @@ namespace BBSFW.Model
 	public class Configuration
 	{
 		public const int Version = 1;
-		public const int ByteSize = 99;
+		public const int ByteSize = 119;
 
 
 		public enum AssistModeSelect
@@ -40,6 +40,9 @@ namespace BBSFW.Model
 
 			[XmlAttribute]
 			public uint MaxThrottlePercent;
+
+			[XmlAttribute]
+			public uint MaxCadencePercent;
 
 			[XmlAttribute]
 			public uint MaxSpeedPercent;
@@ -155,6 +158,7 @@ namespace BBSFW.Model
 					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
 					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
 					StandardAssistLevels[i].MaxThrottlePercent = br.ReadByte();
+					StandardAssistLevels[i].MaxCadencePercent = br.ReadByte();
 					StandardAssistLevels[i].MaxSpeedPercent = br.ReadByte();
 				}
 
@@ -163,6 +167,7 @@ namespace BBSFW.Model
 					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
 					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
 					SportAssistLevels[i].MaxThrottlePercent = br.ReadByte();
+					SportAssistLevels[i].MaxCadencePercent = br.ReadByte();
 					SportAssistLevels[i].MaxSpeedPercent = br.ReadByte();
 				}
 			}
@@ -205,6 +210,7 @@ namespace BBSFW.Model
 					bw.Write((byte)StandardAssistLevels[i].Type);
 					bw.Write((byte)StandardAssistLevels[i].MaxCurrentPercent);
 					bw.Write((byte)StandardAssistLevels[i].MaxThrottlePercent);
+					bw.Write((byte)StandardAssistLevels[i].MaxCadencePercent);
 					bw.Write((byte)StandardAssistLevels[i].MaxSpeedPercent);
 				}
 
@@ -213,6 +219,7 @@ namespace BBSFW.Model
 					bw.Write((byte)SportAssistLevels[i].Type);
 					bw.Write((byte)SportAssistLevels[i].MaxCurrentPercent);
 					bw.Write((byte)SportAssistLevels[i].MaxThrottlePercent);
+					bw.Write((byte)SportAssistLevels[i].MaxCadencePercent);
 					bw.Write((byte)SportAssistLevels[i].MaxSpeedPercent);
 				}
 
@@ -244,6 +251,7 @@ namespace BBSFW.Model
 				StandardAssistLevels[i].Type = cfg.StandardAssistLevels[i].Type;
 				StandardAssistLevels[i].MaxCurrentPercent = cfg.StandardAssistLevels[i].MaxCurrentPercent;
 				StandardAssistLevels[i].MaxThrottlePercent = cfg.StandardAssistLevels[i].MaxThrottlePercent;
+				StandardAssistLevels[i].MaxCadencePercent = cfg.StandardAssistLevels[i].MaxCadencePercent;
 				StandardAssistLevels[i].MaxSpeedPercent = cfg.StandardAssistLevels[i].MaxSpeedPercent;
 			}
 
@@ -252,6 +260,7 @@ namespace BBSFW.Model
 				SportAssistLevels[i].Type = cfg.SportAssistLevels[i].Type;
 				SportAssistLevels[i].MaxCurrentPercent = cfg.SportAssistLevels[i].MaxCurrentPercent;
 				SportAssistLevels[i].MaxThrottlePercent = cfg.SportAssistLevels[i].MaxThrottlePercent;
+				SportAssistLevels[i].MaxCadencePercent = cfg.SportAssistLevels[i].MaxCadencePercent;
 				SportAssistLevels[i].MaxSpeedPercent = cfg.SportAssistLevels[i].MaxSpeedPercent;
 			}
 		}

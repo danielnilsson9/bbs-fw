@@ -344,6 +344,7 @@ static int connect()
 
 		if (read_response(OPCODE_HELLO, 0))
 		{
+			system_delay_ms(4);
 			return 1;
 		}
 		else

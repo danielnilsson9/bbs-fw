@@ -73,14 +73,10 @@ void app_process()
 		if (g_config.use_push_walk)
 		{
 			target_current = 10;
-			motor_set_target_speed(40);
 		}		
 	}
 	else
 	{
-		// never limit motor rotation speed
-		motor_set_target_speed(0xff);
-
 		uint8_t throttle = throttle_read();
 
 		apply_pas(&target_current);
@@ -91,6 +87,7 @@ void app_process()
 	apply_speed_limit(&target_current);
 	apply_thermal_limit(&target_current);
 
+	motor_set_target_speed(255u * assist_level_data.max_cadence_percent / 100u);
 	motor_set_target_current(target_current);
 	
 	if (target_current > 0 && !brake_is_activated() && !gear_sensor_is_activated())
@@ -374,8 +371,9 @@ void reload_assist_params()
 		assist_level_data.flags = 0;
 		assist_level_data.target_current_percent = 0;
 		assist_level_data.max_speed_percent = 0;
+		assist_level_data.max_cadence_percent = 15;
 		assist_level_data.max_throttle_current_percent = 0;
-
+		
 		assist_max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(6) * 10;
 	}
 

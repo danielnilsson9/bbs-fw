@@ -29,6 +29,7 @@ typedef struct
 	uint8_t flags;
 	uint8_t target_current_percent;
 	uint8_t max_throttle_current_percent;
+	uint8_t max_cadence_percent;
 	uint8_t max_speed_percent;
 }  assist_level_t;
 
