@@ -80,14 +80,14 @@ namespace BBSFW.Model
 		{
 			var result = new List<ComPort>();
 
-			using (var searcher = new ManagementObjectSearcher("SELECT * FROM WIN32_SerialPort"))
+			using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%COM%'"))
 			{
 				var portNames = SerialPort.GetPortNames();
 				var ports = searcher.Get().Cast<ManagementBaseObject>().ToList();
 
 				foreach (var name in portNames)
 				{
-					var port = ports.FirstOrDefault(p => String.Equals(p["DeviceID"].ToString(), name));
+					var port = ports.FirstOrDefault(p => p["Name"].ToString().ToUpper().Contains(name.ToUpper()));
 					if (port != null)
 					{
 						result.Add(new ComPort(name, port["Caption"].ToString()));

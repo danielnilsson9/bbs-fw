@@ -93,7 +93,7 @@ void app_process()
 
 	motor_set_target_current(target_current);
 	
-	if (target_current > 0 && !brake_is_activated())
+	if (target_current > 0 && !brake_is_activated() && !gear_sensor_is_activated())
 	{
 		motor_enable();
 	}
@@ -187,7 +187,7 @@ uint8_t app_get_status_code()
 		return STATUS_ERROR_LVC;
 	}
 
-	if (brake_is_activated())
+	if (brake_is_activated() || gear_sensor_is_activated())
 	{
 		return STATUS_BRAKING;
 	}
