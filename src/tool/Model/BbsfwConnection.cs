@@ -164,7 +164,7 @@ namespace BBSFW.Model
 		private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
 			// check for communication error and reset
-			if (_rxBuffer.Any() && DateTime.Now - _lastRecv > TimeSpan.FromMilliseconds(100))
+			if (_rxBuffer.Any() && DateTime.Now - _lastRecv > TimeSpan.FromMilliseconds(1000))
 			{
 				_rxBuffer.Clear();
 			}
