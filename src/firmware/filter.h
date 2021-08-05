@@ -5,13 +5,13 @@
 
 #include <stdint.h>
 
-typedef struct
-{
-	int8_t weight;
-	int32_t current;
-} exponential_filter_t;
-
-int16_t filter_exponential_update(int16_t value, __xdata exponential_filter_t* __xdata filter);
+//typedef struct
+//{
+//	int8_t weight;
+//	int32_t current;
+//} exponential_filter_t;
+//
+//int16_t filter_exponential_update(int16_t value, __xdata exponential_filter_t* __xdata filter);
 
 //typedef struct
 //{
