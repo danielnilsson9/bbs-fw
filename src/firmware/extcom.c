@@ -73,9 +73,9 @@
 
 
 
-static uint8_t msg_len;
-static uint8_t __xdata msgbuf[128];
-static uint32_t __xdata last_recv;
+static __xdata uint8_t msg_len;
+static __xdata uint8_t msgbuf[128];
+static __xdata uint32_t last_recv;
 
 
 static uint8_t compute_checksum(uint8_t* buf, uint8_t length);
@@ -124,7 +124,7 @@ void extcom_init()
 	// Wait one second for config tool connection.
 	// This is here to that the config tool can enable
 	// the eventlog before system proceeds with initialization.
-	uint32_t end = system_ms() + 1000;
+	__xdata uint32_t end = system_ms() + 1000;
 	while (system_ms() < end)
 	{
 		extcom_process();
@@ -134,7 +134,7 @@ void extcom_init()
 
 void extcom_process()
 {
-	uint32_t now = system_ms();
+	__xdata uint32_t now = system_ms();
 
 	while (uart1_available())
 	{

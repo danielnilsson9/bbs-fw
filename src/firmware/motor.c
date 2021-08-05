@@ -460,7 +460,7 @@ static void process_com_state_machine_idle()
 	//
 	// Set target speed/current are prioritzed over status reading (shorter check interval).
 
-	uint32_t now = system_ms();
+	__xdata uint32_t now = system_ms();
 
 	if (target_current_changed && now - last_set_current_ms > 64)
 	{

@@ -11,7 +11,7 @@
 
 #define TIMER0_RELOAD	((65536 - CPU_FREQ / 1000) + 1)
 
-static volatile uint32_t	_ms;
+static volatile __xdata uint32_t	_ms;
 
 void system_init()
 {
@@ -52,7 +52,7 @@ void system_delay_ms(uint16_t ms)
 		return;
 	}
 
-	uint32_t end = system_ms() + ms;
+	__xdata uint32_t end = system_ms() + ms;
 	while (system_ms() != end)
 	{
 		watchdog_yeild();
