@@ -22,7 +22,8 @@
 #include "uart.h"
 
 
-//#define DEBUG_LOOP_TIME
+//#define DEBUG_LOOP_TIME_PIN
+//#define DEBUG_LOOP_TIME_EVENTLOG
 
 
 void main(void)
@@ -47,21 +48,36 @@ void main(void)
 	app_init();
 
 
-#ifdef DEBUG_LOOP_TIME
+#ifdef DEBUG_LOOP_TIME_PIN
 	SET_PIN_OUTPUT(PIN_GEAR_SENSOR);
 #endif
 
+#ifdef DEBUG_LOOP_TIME_EVENTLOG
+	__xdata uint16_t prev_loop_ms = (uint16_t)system_ms();
+	uint8_t loop_counter = 0;
+#endif
+
+
 	while (1)
 	{
-#ifdef DEBUG_LOOP_TIME
+#ifdef DEBUG_LOOP_TIME_PIN
 		SET_PIN_HIGH(PIN_GEAR_SENSOR);
 #endif
 		adc_process();
 		motor_process();
 		extcom_process();
 		app_process();
-#ifdef DEBUG_LOOP_TIME
+
+#ifdef DEBUG_LOOP_TIME_PIN
 		SET_PIN_LOW(PIN_GEAR_SENSOR);
+#endif
+
+#ifdef DEBUG_LOOP_TIME_EVENTLOG
+		if (++loop_counter == 0)
+		{
+			eventlog_write_data(EVT_DATA_MAIN_LOOP_TIME, (uint16_t)system_ms() - prev_loop_ms);	
+		}
+		prev_loop_ms = (uint16_t)system_ms();
 #endif
 
 		system_delay_ms(4);

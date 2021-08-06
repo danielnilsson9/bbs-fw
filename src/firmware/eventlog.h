@@ -43,6 +43,7 @@
 #define EVT_DATA_SPEED_LIMITING				137
 #define EVT_DATA_MAX_CURRENT_ADC_REQUEST	138
 #define EVT_DATA_MAX_CURRENT_ADC_RESPONSE	139
+#define EVT_DATA_MAIN_LOOP_TIME				140
 
 
 void eventlog_init(bool enabled);
