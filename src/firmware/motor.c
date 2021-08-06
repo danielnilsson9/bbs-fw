@@ -462,30 +462,38 @@ static void process_com_state_machine_idle()
 
 	__xdata uint32_t now = system_ms();
 
-	if (target_current_changed && now - last_set_current_ms > 64)
+	if (target_current_changed && (now - last_set_current_ms) > 64)
 	{
 		send_request_async(OPCODE_TARGET_CURRENT, target_current);
 		last_sent_opcode = OPCODE_TARGET_CURRENT;
 		last_request_write_ms = now;
 		com_state = COM_STATE_WAIT_RESPONSE;
+		target_current_changed = false;
+		last_set_current_ms = now;
 		return;
 	}
 
-	if (target_speed_changed && now - last_set_speed_ms > 64)
+	if (target_speed_changed && (now - last_set_speed_ms) > 64)
 	{
 		send_request_async(OPCODE_TARGET_SPEED, target_speed);
 		last_sent_opcode = OPCODE_TARGET_SPEED;
 		last_request_write_ms = now;
 		com_state = COM_STATE_WAIT_RESPONSE;
+		target_speed_changed = false;
+		last_set_speed_ms = now;
 		return;
 	}
 
-	if (now - last_status_read_ms > 168)
+	if ((now - last_status_read_ms) > 168)
 	{
 		send_request_async(next_status_read_opcode, 0);
 		last_sent_opcode = next_status_read_opcode;
 		last_request_write_ms = now;
 		com_state = COM_STATE_WAIT_RESPONSE;
+		if (next_status_read_opcode == OPCODE_READ_STATUS)
+		{
+			last_status_read_ms = now;
+		}
 		return;
 	}
 }
@@ -528,35 +536,34 @@ static void process_com_state_machine()
 	case COM_STATE_IDLE:
 		process_com_state_machine_idle();
 		break;
+
 	case COM_STATE_WAIT_RESPONSE:
 		process_com_state_machine_wait_response();
 		break;
+
 	case COM_STATE_SET_CURRENT:
-		if (try_read_response(OPCODE_TARGET_CURRENT, 0))
+		if (try_read_response(OPCODE_TARGET_CURRENT, &data))
 		{
-			target_current_changed = false;
-			eventlog_write_data(EVT_DATA_TARGET_CURRENT, target_current);
+			eventlog_write_data(EVT_DATA_TARGET_CURRENT, data);
 		}
 		else
 		{
 			eventlog_write(EVT_ERROR_CHANGE_TARGET_CURRENT);
 		}
 
-		last_set_current_ms = system_ms();
 		com_state = COM_STATE_IDLE;
 		break;
+
 	case COM_STATE_SET_SPEED:
-		if (try_read_response(OPCODE_TARGET_SPEED, 0))
+		if (try_read_response(OPCODE_TARGET_SPEED, &data))
 		{
-			target_speed_changed = false;
-			eventlog_write_data(EVT_DATA_TARGET_SPEED, target_speed);
+			eventlog_write_data(EVT_DATA_TARGET_SPEED, data);
 		}
 		else
 		{
 			eventlog_write(EVT_ERROR_CHANGE_TARGET_SPEED);
 		}
 
-		last_set_speed_ms = system_ms();
 		com_state = COM_STATE_IDLE;
 		break;
 
@@ -574,10 +581,10 @@ static void process_com_state_machine()
 			eventlog_write(EVT_ERROR_READ_MOTOR_STATUS);
 		}
 
-		last_status_read_ms = system_ms();
 		next_status_read_opcode = OPCODE_READ_CURRENT;
 		com_state = COM_STATE_IDLE;
 		break;
+
 	case COM_STATE_READ_CURRENT:
 		if (try_read_response(OPCODE_READ_CURRENT, &data))
 		{
@@ -591,6 +598,7 @@ static void process_com_state_machine()
 		next_status_read_opcode = OPCODE_READ_VOLTAGE;
 		com_state = COM_STATE_IDLE;
 		break;
+
 	case COM_STATE_READ_VOLTAGE:
 		if (try_read_response(OPCODE_READ_VOLTAGE, &data))
 		{
@@ -604,5 +612,6 @@ static void process_com_state_machine()
 		next_status_read_opcode = OPCODE_READ_STATUS;
 		com_state = COM_STATE_IDLE;
 		break;
+
 	}
 }
