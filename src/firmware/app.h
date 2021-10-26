@@ -31,16 +31,29 @@
 #define OPERATION_MODE_SPORT	0x01
 
 // Matches status codes used by Bafang
-#define STATUS_IDLE						0x00
-#define STATUS_PEDALING					0x01
-#define STATUS_BRAKING					0x03
+#define STATUS_IDLE							0x00
+#define STATUS_PEDALING						0x01
+#define STATUS_BRAKING						0x03
 
-#define STATUS_ERROR_THROTTLE			0x04
-#define STATUS_ERROR_LVC				0x06
-#define STATUS_ERROR_HALL_SENSOR		0x08
-#define STATUS_ERROR_PHASE_LINE			0x09
-#define STATUS_ERROR_OVER_TEMP			0x10
-#define STATUS_ERROR_CURRENT_SENSE		0x12
+#define STATUS_ERROR_THROTTLE_HIGH			0x04 // todo
+#define STATUS_ERROR_THROTTLE				0x05
+#define STATUS_ERROR_LVC					0x06
+#define STATUS_ERROR_HIGH_VOLTAGE			0x07 // not implemented
+#define STATUS_ERROR_HALL_SENSOR			0x08
+#define STATUS_ERROR_PHASE_LINE				0x09
+#define STATUS_ERROR_CONTROLLER_OVER_TEMP	0x10
+#define STATUS_ERROR_MOTOR_OVER_TEMP		0x11 // n/a to bbshd
+#define STATUS_ERROR_CURRENT_SENSE			0x12
+#define STATUS_ERROR_BATTERY_TEMP_SENSOR	0x13 // n/a
+#define STATUS_ERROR_MOTOR_TEMP_SENSOR		0x14 // n/a
+#define STATUS_ERROR_CONTROLLER_TEMP_SENSOR 0x15 // not implemented
+#define STATUS_ERROR_SPEED_SENSOR			0x21 // not implemented
+#define STATUS_ERROR_BMS_COMMUNICATION		0x22 // n/a
+#define STATUS_ERROR_HEAD_LIGHT				0x24 // not implemented
+#define STATUS_ERROR_HEAD_LIGHT_SENSOR		0x25 // not implemented
+#define STATUS_ERROR_TORQUE_SENSOR			0x25 // n/a
+#define STATUS_ERROR_TORQUE_SPEED			0x26 // n/a
+#define STATUS_ERROR_COMMUNICATION			0x30 // n/a
 
 
 void app_init();

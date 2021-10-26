@@ -671,7 +671,7 @@ static int8_t process_bafang_display_write_mode()
 
 static int8_t process_bafang_display_write_lights()
 {
-	if (msg_len < 2)
+	if (msg_len < 3)
 	{
 		return KEEP;
 	}
@@ -686,7 +686,7 @@ static int8_t process_bafang_display_write_lights()
 		break;
 	}
 
-	return 2;
+	return 3;
 }
 
 static int8_t process_bafang_display_write_speed_limit()
