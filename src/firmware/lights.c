@@ -5,15 +5,28 @@
 
 void lights_init()
 {
+	SET_PIN_OUTPUT(PIN_LIGHTS_POWER);
 	SET_PIN_OUTPUT(PIN_LIGHTS);
-	SET_PIN_LOW(PIN_LIGHTS);
+
+	lights_disable();
+	lights_set(false);
+}
+
+void lights_enable()
+{
+	SET_PIN_HIGH(PIN_LIGHTS_POWER);
+}
+
+void lights_disable()
+{
+	SET_PIN_LOW(PIN_LIGHTS_POWER);
 }
 
 void lights_set(bool on)
 {
 	if (on)
 	{
-		SET_PIN_HIGH(PIN_LIGHTS);
+		SET_PIN_LOW(PIN_LIGHTS);
 	}
 	else
 	{

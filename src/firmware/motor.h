@@ -12,6 +12,9 @@
 #include "stc15.h"
 #include <stdint.h>
 
+#define MOTOR_ERROR_LVC				0x0800
+#define MOTOR_ERROR_HALL_SENSOR		0x2000
+
 void motor_init(__xdata uint16_t max_current_mA, __xdata uint8_t lvc_V);
 void motor_process();
 

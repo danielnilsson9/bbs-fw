@@ -13,6 +13,9 @@
 
 void lights_init();
 
+void lights_enable();
+void lights_disable();
+
 void lights_set(bool on);
 
 #endif

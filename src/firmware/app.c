@@ -50,6 +50,7 @@ uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph);
 void app_init()
 {
 	motor_disable();
+	lights_disable();
 
 	global_max_speed_rpm = 0;
 	last_light_state = false;
@@ -73,7 +74,7 @@ void app_process()
 		if (g_config.use_push_walk)
 		{
 			target_current = 10;
-		}		
+		}
 	}
 	else
 	{
@@ -97,6 +98,15 @@ void app_process()
 	else
 	{
 		motor_disable();
+	}
+
+	if (motor_status() & MOTOR_ERROR_LVC)
+	{
+		lights_disable();
+	}
+	else
+	{
+		lights_enable();
 	}
 }
 
@@ -176,10 +186,10 @@ uint8_t app_get_status_code()
 
 	if (last_temperature > MAX_TEMPERATURE)
 	{
-		return STATUS_ERROR_OVER_TEMP;
+		return STATUS_ERROR_CONTROLLER_OVER_TEMP;
 	}
 
-	if (motor & 0x04)
+	if (motor & MOTOR_ERROR_LVC)
 	{
 		return STATUS_ERROR_LVC;
 	}
