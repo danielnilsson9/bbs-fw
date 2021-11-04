@@ -192,36 +192,55 @@ static void load_default_config()
 {
 	g_config.use_freedom_units = 0;
 
-	g_config.max_current_amps = 30;
+	g_config.max_current_amps = 25;
 	g_config.low_cut_off_V = 42;
+
+	g_config.use_gear_sensor = 1;
+	g_config.gear_sensor_delay = 350;
 
 	g_config.use_speed_sensor = 1;
 	g_config.use_display = 1;
 	g_config.use_push_walk = 1;
 
-	g_config.wheel_size_inch_x10 = 280;
+	g_config.wheel_size_inch_x10 = 263;
 	g_config.speed_sensor_signals = 1;
-	g_config.max_speed_kph = 60;
+	g_config.max_speed_kph = 100;
 
-	g_config.pas_start_delay_pulses = 5;
-	g_config.pas_stop_delay_x10ms = 20;
+	g_config.pas_start_delay_pulses = 6;
+	g_config.pas_stop_delay = 500;
 
-	g_config.throttle_start_voltage_mv = 900;
-	g_config.throttle_end_voltage_mv = 3600;
-	g_config.throttle_start_percent = 0;
+	g_config.throttle_start_voltage_mv = 1100;
+	g_config.throttle_end_voltage_mv = 3500;
+	g_config.throttle_start_percent = 10;
 
-	g_config.assist_mode_select = ASSIST_MODE_SELECT_OFF;
-	g_config.assist_startup_level = 3;
+	//g_config.assist_mode_select = ASSIST_MODE_SELECT_OFF;
+	//g_config.assist_mode_select = ASSIST_MODE_SELECT_STANDARD;
+	//g_config.assist_mode_select = ASSIST_MODE_SELECT_LIGHTS;
+	g_config.assist_mode_select = ASSIST_MODE_SELECT_PAS0_LIGHT;
+	g_config.assist_startup_level = 1;
 
 	memset(&g_config.assist_levels, 0, 20 * sizeof(assist_level_t));
 
-	__xdata uint8_t current_limits[9] = { 25, 34, 43, 51, 60, 68, 74, 82, 90 };
+	static __xdata uint8_t current_limits_standard[9] = { 15, 20, 30, 40, 50, 60, 70, 85, 100 };
+	static __xdata uint8_t cadence_limits_standard[9] = { 60, 60, 60, 60, 60, 70, 80, 90, 100 };
+	static __xdata uint8_t speed_limits_standard[9] = { 30, 30, 30, 30, 30, 35, 40, 45, 100 };
+
+	static __xdata uint8_t current_limits_sport[9] = { 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+	static __xdata uint8_t cadence_limits_sport[9] = { 100, 100, 100, 100, 100, 100, 100, 100, 100 };
+	static __xdata uint8_t speed_limits_sport[9] = { 100, 100, 100, 100, 100, 100, 100, 100, 100 };
+
 	for (uint8_t i = 0; i < 9; ++i)
 	{
-		g_config.assist_levels[0][i+1].flags = ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE;
-		g_config.assist_levels[0][i+1].target_current_percent = current_limits[i];
-		g_config.assist_levels[0][i+1].max_cadence_percent = 100;
-		g_config.assist_levels[0][i+1].max_speed_percent = 100;
-		g_config.assist_levels[0][i+1].max_throttle_current_percent = 100;
+		g_config.assist_levels[0][i+1].flags = ASSIST_FLAG_PAS;
+		g_config.assist_levels[0][i+1].target_current_percent = current_limits_standard[i];
+		g_config.assist_levels[0][i+1].max_cadence_percent = cadence_limits_standard[i];
+		g_config.assist_levels[0][i+1].max_speed_percent = speed_limits_standard[i];
+		g_config.assist_levels[0][i+1].max_throttle_current_percent = current_limits_standard[i];
+
+		g_config.assist_levels[1][i+1].flags = ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE;
+		g_config.assist_levels[1][i+1].target_current_percent = current_limits_sport[i];
+		g_config.assist_levels[1][i+1].max_cadence_percent = cadence_limits_sport[i];
+		g_config.assist_levels[1][i+1].max_speed_percent = speed_limits_sport[i];
+		g_config.assist_levels[1][i+1].max_throttle_current_percent = current_limits_sport[i];
 	}
 }
