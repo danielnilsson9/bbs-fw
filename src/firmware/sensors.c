@@ -17,7 +17,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define TIMER4_RELOAD	((65536 - CPU_FREQ / 10000) + 1)		// every 100us
+#define TIMER4_RELOAD	((65535 - CPU_FREQ / 10000) + 1)		// every 100us
 
 #define NUM_SIGNALS		24
 
