@@ -17,32 +17,44 @@ namespace BBSFW.Model
 
 		private const int EVT_ERROR_INIT_MOTOR =				64;
 		private const int EVT_ERROR_CHANGE_TARGET_SPEED =		65;
-		private const int EVT_ERROR_CHANGE_TARGET_CURRENT =		66;
-		private const int EVT_ERROR_READ_MOTOR_STATUS =			67;
-		private const int EVT_ERROR_READ_MOTOR_CURRENT =		68;
-		private const int EVT_ERROR_READ_MOTOR_VOLTAGE =		69;
+		private const int EVT_ERROR_CHANGE_TARGET_CADENCE =		66;
+		private const int EVT_ERROR_CHANGE_TARGET_CURRENT =		67;
+		private const int EVT_ERROR_READ_MOTOR_STATUS =			68;
+		private const int EVT_ERROR_READ_MOTOR_CURRENT =		69;
+		private const int EVT_ERROR_READ_MOTOR_VOLTAGE =		70;
 
-		private const int EVT_ERROR_CONFIG_READ_EEPROM =		70;
-		private const int EVT_ERROR_CONFIG_WRITE_EEPROM =		71;
-		private const int EVT_ERROR_CONFIG_ERASE_EEPROM =		72;
-		private const int EVT_ERROR_CONFIG_VERSION =			73;
-		private const int EVT_ERROR_CONFIG_CHECKSUM =			74;
+		private const int EVT_ERROR_CONFIG_READ_EEPROM =		71;
+		private const int EVT_ERROR_CONFIG_WRITE_EEPROM =		72;
+		private const int EVT_ERROR_CONFIG_ERASE_EEPROM =		73;
+		private const int EVT_ERROR_CONFIG_VERSION =			74;
+		private const int EVT_ERROR_CONFIG_CHECKSUM =			75;
 
 		private const int EVT_DATA_TARGET_CURRENT =				128;
 		private const int EVT_DATA_TARGET_SPEED =				129;
-		private const int EVT_DATA_MOTOR_STATUS =				130;
-		private const int EVT_DATA_ASSIST_LEVEL =				131;
-		private const int EVT_DATA_OPERATION_MODE =				132;
-		private const int EVT_DATA_WHEEL_SPEED_PPM =			133;
-		private const int EVT_DATA_LIGHTS =						134;
-		private const int EVT_DATA_TEMPERATURE =				135;
-		private const int EVT_DATA_THERMAL_LIMITING =			136;
-		private const int EVT_DATA_SPEED_LIMITING =				137;
-		private const int EVT_DATA_MAX_CURRENT_ADC_REQUEST =	138;
-		private const int EVT_DATA_MAX_CURRENT_ADC_RESPONSE =	139;
-		private const int EVT_DATA_MAIN_LOOP_TIME =				140;
-
-
+		private const int EVT_DATA_TARGET_CADENCE =				130;
+		private const int EVT_DATA_MOTOR_STATUS =				131;
+		private const int EVT_DATA_ASSIST_LEVEL =				132;
+		private const int EVT_DATA_OPERATION_MODE =				133;
+		private const int EVT_DATA_WHEEL_SPEED_PPM =			134;
+		private const int EVT_DATA_LIGHTS =						135;
+		private const int EVT_DATA_TEMPERATURE =				136;
+		private const int EVT_DATA_THERMAL_LIMITING =			137;
+		private const int EVT_DATA_SPEED_LIMITING =				138;
+		private const int EVT_DATA_MAX_CURRENT_ADC_REQUEST =	139;
+		private const int EVT_DATA_MAX_CURRENT_ADC_RESPONSE =	140;
+		private const int EVT_DATA_MAIN_LOOP_TIME =				141;
+		private const int EVT_DATA_LVC =						142;
+		private const int EVT_DATA_MAX_CURRENT =				143;
+		private const int EVT_DATA_UNKNOWN =					144;
+		private const int EVT_DATA_TEST1 =						151;
+		private const int EVT_DATA_TEST2 =						152;
+		private const int EVT_DATA_TEST3 =						153;
+		private const int EVT_DATA_TEST4 =						154;
+		private const int EVT_DATA_READ_CURRENT =				155;
+		private const int EVT_DATA_READ_VOLTAGE =				156;
+		private const int EVT_DATA_LVC_LIMITING =				157;
+		private const int EVT_DATA_MOTOR_SEND_TIME =			158;
+		private const int EVT_DATA_MOTOR_READ_TIME =			159;
 		public enum LogLevel
 		{
 			Info,
@@ -96,6 +108,8 @@ namespace BBSFW.Model
 					return "Failed to set motor target current on motor controller.";
 				case EVT_ERROR_CHANGE_TARGET_SPEED:
 					return "Failed to set motor target speed on motor controller.";
+				case EVT_ERROR_CHANGE_TARGET_CADENCE:
+					return "Failed to set motor target cadence on motor controller.";
 				case EVT_ERROR_READ_MOTOR_STATUS:
 					return "Failed to read status from motor controller.";
 				case EVT_ERROR_READ_MOTOR_CURRENT:
@@ -116,7 +130,9 @@ namespace BBSFW.Model
 				case EVT_DATA_TARGET_CURRENT:
 					return $"Motor target current changed to {_data}%.";
 				case EVT_DATA_TARGET_SPEED:
-					return $"Motor target speed changed to {_data * 100 / 256}%.";
+					return $"Motor target speed changed to {_data * 100 / 255}%.";
+				case EVT_DATA_TARGET_CADENCE:
+					return $"Motor target cadence changed to {_data * 100 / 255}%.";
 				case EVT_DATA_MOTOR_STATUS:
 					Level = _data != 0 ? LogLevel.Error : LogLevel.Info;
 					return $"Motor controller status changed to 0x{_data:X}.";
@@ -154,7 +170,30 @@ namespace BBSFW.Model
 				case EVT_DATA_MAX_CURRENT_ADC_RESPONSE:
 					return $"Max current configured on motor controller mcu, response was adc={_data}.";
 				case EVT_DATA_MAIN_LOOP_TIME:
-					return $"Main loop, interval={_data}ms."; 
+					return $"Main loop, interval={_data}ms.";
+				case EVT_DATA_LVC:
+					return $"LVC is {_data}";
+				case EVT_DATA_MAX_CURRENT:
+					return $"Max current is {_data}";
+				case EVT_DATA_UNKNOWN:
+					return $"Unknown1 is {_data}";
+				case EVT_DATA_READ_CURRENT:
+					return $"Current is {_data}";
+				case EVT_DATA_READ_VOLTAGE:
+					return $"Voltage is {_data}";
+				case EVT_DATA_LVC_LIMITING:
+					if (_data.Value != 0)
+					{
+						return "Speed limiting activated.";
+					}
+					else
+					{
+						return "Speed limiting deactivated.";
+					}
+				case EVT_DATA_MOTOR_SEND_TIME:
+					return $"Main loop, interval={_data}ms.";
+				case EVT_DATA_MOTOR_READ_TIME:
+					return $"Main loop, interval={_data}ms.";
 			}
 
 			if (_data.HasValue)

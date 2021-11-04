@@ -9,7 +9,7 @@ namespace BBSFW.Model
 	public class Configuration
 	{
 		public const int Version = 1;
-		public const int ByteSize = 119;
+		public const int ByteSize = 123;
 
 
 		public enum AssistModeSelect
@@ -58,6 +58,9 @@ namespace BBSFW.Model
 		public uint MaxSpeedKph;
 
 		// externals
+		public bool UseGearSensor;
+		public uint GearSensorDelay;
+
 		public bool UseSpeedSensor;
 		public bool UseDisplay;
 		public bool UsePushWalk;
@@ -89,6 +92,9 @@ namespace BBSFW.Model
 			UseFreedomUnits = Properties.Settings.Default.UseFreedomUnits;
 			MaxCurrentAmps = 0;
 			LowCutoffVolts = 0;
+
+			UseGearSensor = false;
+			GearSensorDelay = 0;
 
 			UseSpeedSensor = false;
 			UseDisplay = false;
@@ -136,15 +142,18 @@ namespace BBSFW.Model
 				LowCutoffVolts = br.ReadByte();
 				MaxSpeedKph = br.ReadByte();
 
+				UseGearSensor = br.ReadBoolean();
+				GearSensorDelay = br.ReadUInt16();
+
 				UseSpeedSensor = br.ReadBoolean();
 				UseDisplay = br.ReadBoolean();
 				UsePushWalk = br.ReadBoolean();
 
-				WheelSizeInch = br.ReadUInt16() / 10f;
+				WheelSizeInch = br.ReadUInt16() / 1f;
 				NumWheelSensorSignals = br.ReadByte();
 
 				PasStartDelayPulses = br.ReadByte();
-				PasStopDelayMilliseconds = br.ReadByte() * 10u;
+				PasStopDelayMilliseconds = br.ReadUInt16();
 
 				ThrottleStartMillivolts = br.ReadUInt16();
 				ThrottleEndMillivolts = br.ReadUInt16();
@@ -183,20 +192,22 @@ namespace BBSFW.Model
 
 				bw.Write(UseFreedomUnits);
 
-
 				bw.Write((byte)MaxCurrentAmps);
 				bw.Write((byte)LowCutoffVolts);
 				bw.Write((byte)MaxSpeedKph);
+
+				bw.Write(UseGearSensor);
+				bw.Write((UInt16)GearSensorDelay);
 
 				bw.Write(UseSpeedSensor);
 				bw.Write(UseDisplay);
 				bw.Write(UsePushWalk);
 
-				bw.Write((UInt16)(WheelSizeInch * 10));
+				bw.Write((UInt16)(WheelSizeInch * 1));
 				bw.Write((byte)NumWheelSensorSignals);
 
 				bw.Write((byte)PasStartDelayPulses);
-				bw.Write((byte)(PasStopDelayMilliseconds / 10u));
+				bw.Write((UInt16)PasStopDelayMilliseconds);
 
 				bw.Write((UInt16)ThrottleStartMillivolts);
 				bw.Write((UInt16)ThrottleEndMillivolts);
@@ -232,6 +243,8 @@ namespace BBSFW.Model
 			UseFreedomUnits = cfg.UseFreedomUnits;
 			MaxCurrentAmps = cfg.MaxCurrentAmps;
 			LowCutoffVolts = cfg.LowCutoffVolts;
+			UseGearSensor = cfg.UseGearSensor;
+			GearSensorDelay = cfg.GearSensorDelay;
 			UseSpeedSensor = cfg.UseSpeedSensor;
 			UseDisplay = cfg.UseDisplay;
 			UsePushWalk = cfg.UsePushWalk;
@@ -290,10 +303,12 @@ namespace BBSFW.Model
 		{
 			ValidateLimits(MaxCurrentAmps, 5, 36, "Max Current (A)");
 			ValidateLimits(LowCutoffVolts, 1, 100, "Low Volage Cut Off (V)");
-
-			ValidateLimits((uint)WheelSizeInch, 10, 40, "Wheel Size (inch)");
-			ValidateLimits(NumWheelSensorSignals, 1, 10, "Wheel Sensor Signals");
 			ValidateLimits(MaxSpeedKph, 0, 100, "Max Speed (km/h)");
+
+			ValidateLimits(GearSensorDelay, 50, 1000, "Gear Sensor Delay (ms)");
+
+			ValidateLimits((uint)WheelSizeInch, 10, 400, "Wheel Size (inch)");
+			ValidateLimits(NumWheelSensorSignals, 1, 10, "Wheel Sensor Signals");
 
 			ValidateLimits(PasStartDelayPulses, 0, 24, "Pas Delay (pulses)");
 			ValidateLimits(PasStopDelayMilliseconds, 50, 1000, "Pas Stop Delay (ms)");

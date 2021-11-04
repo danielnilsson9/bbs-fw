@@ -131,6 +131,31 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public bool UseGearSensor
+		{
+			get { return _config.UseGearSensor; }
+			set
+			{
+				if (_config.UseGearSensor != value)
+				{
+					_config.UseGearSensor = value;
+					OnPropertyChanged(nameof(UseGearSensor));
+				}
+			}
+		}
+
+		public uint GearSensorDelay
+		{
+			get { return _config.GearSensorDelay; }
+			set
+			{
+				if (_config.GearSensorDelay != value)
+				{
+					_config.GearSensorDelay = value;
+					OnPropertyChanged(nameof(GearSensorDelay));
+				}
+			}
+		}
 		public bool UseDisplay
 		{
 			get { return _config.UseDisplay; }
@@ -375,9 +400,10 @@ namespace BBSFW.ViewModel
 			OnPropertyChanged(nameof(LowCutoffVolts));
 			OnPropertyChanged(nameof(MaxSpeedKph));
 			OnPropertyChanged(nameof(MaxSpeedMph));
+			OnPropertyChanged(nameof(UseGearSensor));
+			OnPropertyChanged(nameof(GearSensorDelay));
 			OnPropertyChanged(nameof(UseDisplay));
 			OnPropertyChanged(nameof(UseSpeedSensor));
-			OnPropertyChanged(nameof(UsePushWalk));
 			OnPropertyChanged(nameof(UsePushWalk));
 			OnPropertyChanged(nameof(ThrottleStartVoltageMillivolts));
 			OnPropertyChanged(nameof(ThrottleEndVoltageMillivolts));
