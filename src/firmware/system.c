@@ -9,7 +9,7 @@
 #include "system.h"
 #include "watchdog.h"
 
-#define TIMER0_RELOAD	((65536 - CPU_FREQ / 1000) + 1)
+#define TIMER0_RELOAD	((65535 - CPU_FREQ / 1000) + 1)
 
 static volatile __xdata uint32_t	_ms;
 
