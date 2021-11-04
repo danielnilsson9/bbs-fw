@@ -39,7 +39,8 @@ void main(void)
 	adc_init();
 	sensors_init();
 	speed_sensor_set_signals_per_rpm(g_config.speed_sensor_signals);
-	pas_set_stop_delay(g_config.pas_stop_delay_x10ms * 10);
+	pas_set_stop_delay(g_config.pas_stop_delay);
+	pas_set_gear_sensor_delay(g_config.gear_sensor_delay);
 
 	throttle_init(g_config.throttle_start_voltage_mv, g_config.throttle_end_voltage_mv);
 	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_V);
