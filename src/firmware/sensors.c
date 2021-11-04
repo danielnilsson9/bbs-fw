@@ -81,6 +81,11 @@ void pas_set_stop_delay(uint16_t delay_ms)
 	pas_stop_delay_periods = delay_ms * 10;
 }
 
+void pas_set_gear_sensor_delay(uint16_t delay_ms)
+{
+	pas_gear_sensor_periods = delay_ms * 10;
+}
+
 uint8_t pas_get_cadence_rpm()
 {
 	return pas_rpm;
