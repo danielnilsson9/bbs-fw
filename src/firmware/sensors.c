@@ -32,6 +32,7 @@ static __xdata uint16_t pas_period_counter;
 static __xdata bool pas_prev1;
 static __xdata bool pas_prev2;
 static __xdata uint16_t pas_stop_delay_periods;
+static __xdata uint16_t pas_gear_sensor_periods;
 
 static volatile uint16_t speed_ticks_minute_x10;
 static __xdata uint16_t speed_period_counter;
