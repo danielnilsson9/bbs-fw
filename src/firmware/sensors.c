@@ -21,6 +21,9 @@
 
 #define NUM_SIGNALS		24
 
+static volatile bool gear_changing;
+static __xdata bool gear_prev;
+static __xdata uint32_t gear_change_counter;
 
 static volatile uint16_t pas_pulse_counter;
 static volatile bool pas_direction_backward;
@@ -38,6 +41,10 @@ static __xdata uint8_t speed_ticks_per_rpm;
 
 void sensors_init()
 {
+	gear_changing = false;
+	gear_prev = true;
+	gear_change_counter = pas_gear_sensor_periods;
+
 	pas_period_counter = 0;
 	pas_pulse_counter = 0;
 	pas_direction_backward = false;
@@ -138,12 +145,38 @@ bool brake_is_activated()
 
 bool gear_sensor_is_activated()
 {
-	return !GET_PIN_STATE(PIN_GEAR_SENSOR);
+	return gear_changing;
 }
 
 
 INTERRUPT(isr_timer4, IRQ_TIMER4)
 {
+	// gear sensor
+	{
+		bool gear = GET_PIN_STATE(PIN_GEAR_SENSOR);
+
+		if (gear && !gear_prev)
+		{
+			gear_changing = true;
+			SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
+			gear_change_counter = 0;
+		}
+		else if (!gear && gear_prev)
+		{
+			gear_change_counter = 0;
+		}
+		else if (gear_change_counter < pas_gear_sensor_periods)
+		{
+			++gear_change_counter;
+		}
+		else
+		{
+			gear_changing = false;
+		}
+
+		gear_prev = gear;
+	}
+
 	// pas
 	{
 		bool pas1 = GET_PIN_STATE(PIN_PAS1);
