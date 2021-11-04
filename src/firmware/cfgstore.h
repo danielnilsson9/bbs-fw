@@ -44,6 +44,9 @@ typedef struct
 	uint8_t max_speed_kph;
 
 	// externals
+	uint8_t use_gear_sensor;
+	uint16_t gear_sensor_delay;
+
 	uint8_t use_speed_sensor;
 	uint8_t use_display;
 	uint8_t use_push_walk;
@@ -54,7 +57,7 @@ typedef struct
 
 	// pas options
 	uint8_t pas_start_delay_pulses;
-	uint8_t pas_stop_delay_x10ms;
+	uint16_t pas_stop_delay;
 
 	// throttle options
 	uint16_t throttle_start_voltage_mv;
