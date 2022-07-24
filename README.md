@@ -1,11 +1,11 @@
 # BBSHD Open Source Firmware
 
-**NOT READY FOR EVERYDAY USE**
+This project is currently not being worked on due to unforsen issues with adc reading of the throttle signal
+which produces unstable readings which I have been unable to resolve. If this changes in the future I will
+finish the work on this firmware. If you are not interested in use of a throttle this firmware should be in a working
+state in its current form, you will have to build it from souce, see wiki.
 
-
-Work in progress for bringing life to an open source firmware for the BBSHD motor controller.
-
-Soon to be released. Check wiki for more documentation.  
+Check wiki for more documentation.  
 https://github.com/danielnilsson9/bbshd-fw/wiki
 
 Be careful if you build from source and flash this firmware, it has not yet been  
