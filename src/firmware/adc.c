@@ -9,6 +9,8 @@
 #include "stc15.h"
 #include "pins.h"
 
+#include "eventlog.h"
+
 
 static __xdata uint8_t next_channel;
 static __xdata uint8_t no_adc_reading_counter;
@@ -53,6 +55,11 @@ void adc_process()
 		{
 		case GET_PIN_NUM(PIN_THROTTLE):
 		{
+			if (throttle_value != ADC_RES)
+			{
+				eventlog_write_data(EVT_DATA_THROTTLE_ADC, ADC_RES);
+			}
+
 			throttle_value = ADC_RES;
 			next_channel = GET_PIN_NUM(PIN_TEMPERATURE);
 			break;
