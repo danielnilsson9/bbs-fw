@@ -40,19 +40,6 @@ void throttle_init(__xdata uint16_t min_mv, __xdata uint16_t max_mv)
 	throttle_hard_ok = true;
 	throttle_hard_limit_hit_at = 0;
 	throttle_last_voltage_x1000 = 0;
-
-	// Setup pin 3 as adc input
-	SET_PIN_INPUT(PIN_THROTTLE);
-	SET_PIN_LOW(PIN_THROTTLE);
-	SET_BIT(P1ASF, GET_PIN_NUM(PIN_THROTTLE));
-
-	ADC_RES = 0;
-
-	// Arrange adc result for 8bit reading
-	CLEAR_BIT(PCON2, 5);
-
-	// enable adc power, set adc speed
-	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 5));
 }
 
 bool throttle_ok()

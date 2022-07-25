@@ -41,6 +41,7 @@ namespace BBSFW.Model
 		private const int EVT_DATA_MAX_CURRENT_ADC_REQUEST =	138;
 		private const int EVT_DATA_MAX_CURRENT_ADC_RESPONSE =	139;
 		private const int EVT_DATA_MAIN_LOOP_TIME =				140;
+		private const int EVT_DATA_THROTTLE_ADC =				141;
 
 
 		public enum LogLevel
@@ -154,7 +155,9 @@ namespace BBSFW.Model
 				case EVT_DATA_MAX_CURRENT_ADC_RESPONSE:
 					return $"Max current configured on motor controller mcu, response was adc={_data}.";
 				case EVT_DATA_MAIN_LOOP_TIME:
-					return $"Main loop, interval={_data}ms."; 
+					return $"Main loop, interval={_data}ms.";
+				case EVT_DATA_THROTTLE_ADC:
+					return $"Throttle adc, value={_data}.";
 			}
 
 			if (_data.HasValue)
