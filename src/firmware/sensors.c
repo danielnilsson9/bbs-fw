@@ -21,6 +21,9 @@
 
 #define NUM_SIGNALS		24
 
+#define SPEED_SENSOR_MIN_PULSE_MS_X10	10
+#define SPEED_SENSOR_TIMEOUT_MS_X10		25000
+
 
 static volatile uint16_t pas_pulse_counter;
 static volatile bool pas_direction_backward;
@@ -205,14 +208,26 @@ INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2)
 
 			if (pas_period_counter > 0)
 			{
-				pas_period_length = pas_period_counter; // save in order to be able to calculate rpm when needed
+				if (pas_period_counter <= pas_stop_delay_periods)
+				{
+					pas_period_length = pas_period_counter; // save in order to be able to calculate rpm when needed
+				}
+				else
+				{
+					pas_period_length = 0;
+				}
+
 				pas_period_counter = 0;
 			}
 		}
 		else
 		{
-			pas_period_counter++;
-
+			// Do not allow wraparound or computed pedaling cadence will wrong after pedals has been still.
+			if (pas_period_counter < 65535)
+			{
+				pas_period_counter++;
+			}
+			
 			if (pas_period_length > 0 && pas_period_counter > pas_stop_delay_periods)
 			{
 				pas_period_length = 0;
@@ -232,17 +247,29 @@ INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2)
 
 		if (spd && !speed_prev_state)
 		{
-			if (speed_period_counter > 0)
+			if (speed_period_counter > SPEED_SENSOR_MIN_PULSE_MS_X10)
 			{
-				speed_ticks_period_length = speed_period_counter;
+				if (speed_period_counter <= SPEED_SENSOR_TIMEOUT_MS_X10)
+				{
+					speed_ticks_period_length = speed_period_counter;
+				}
+				else
+				{
+					speed_ticks_period_length = 0;
+				}
+				
 				speed_period_counter = 0;
 			}
 		}
 		else
 		{
-			++speed_period_counter;
-
-			if (speed_ticks_period_length > 0 && speed_period_counter > 25000)
+			// Do not allow wraparound or computed speed will wrong after bike has been still.
+			if (speed_period_counter < 65535)
+			{
+				speed_period_counter++;
+			}
+			
+			if (speed_ticks_period_length > 0 && speed_period_counter > SPEED_SENSOR_TIMEOUT_MS_X10)
 			{
 				speed_ticks_period_length = 0;
 			}
