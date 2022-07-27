@@ -15,7 +15,7 @@ See https://github.com/danielnilsson9/bbshd-fw/wiki/Flashing-the-Firmware
 See https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
 
-If you like this project, consider sending a small donaton ([PayPal](https://www.paypal.com/donate/?business=LVAYFCMQYN8F4&no_recurring=0&item_name=BBSHD-FW&currency_code=USD)).
+If you find this project useful, consider sending a small [donation](https://www.paypal.com/donate/?business=LVAYFCMQYN8F4&no_recurring=0&item_name=BBSHD-FW&currency_code=USD) to fund further development.
 
 
 ## Highlights
