@@ -25,7 +25,7 @@ If you find this project useful, consider sending a small [donation](https://www
 * Smooth Throttle/PAS override.
 * Optional separate set of street legal & offroad assist levels.
 * Possible to set road speed limit per assist level.
-* Possible to limit cadence per assist level.
+* Possible to set cadence limit per assist level.
 * Support cruise assist levels (i.e. motor power without pedal or throttle input).
 * Display motor/controller temperature (shown in range field on display).
 * Use of speed sensor is optional.
