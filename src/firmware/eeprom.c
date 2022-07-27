@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -16,6 +16,9 @@
 #elif defined(IAP15W4K61)
 	#define EEPROM_ADDRESS_OFFSET		0xEC00
 	#define EEPROM_NUM_SECTORS			4
+#else
+	#define EEPROM_ADDRESS_OFFSET		0x0000
+	#define EEPROM_NUM_SECTORS			0
 #endif
 
 

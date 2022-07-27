@@ -1,12 +1,10 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
-
-
 
 #ifndef _APP_H_
 #define _APP_H_

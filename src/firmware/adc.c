@@ -1,16 +1,14 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
+
 #include "adc.h"
 #include "stc15.h"
 #include "pins.h"
-
-#include "eventlog.h"
-
 
 static __xdata uint8_t next_channel;
 static __xdata uint8_t no_adc_reading_counter;
@@ -51,15 +49,12 @@ void adc_process()
 	// adc reading available
 	if (IS_BIT_SET(ADC_CONTR, 4))
 	{
+		ADC_CONTR = (uint8_t)((1 << 7)); // Clear ADC_FLAG 
+
 		switch (next_channel)
 		{
 		case GET_PIN_NUM(PIN_THROTTLE):
 		{
-			if (throttle_value != ADC_RES)
-			{
-				eventlog_write_data(EVT_DATA_THROTTLE_ADC, ADC_RES);
-			}
-
 			throttle_value = ADC_RES;
 			next_channel = GET_PIN_NUM(PIN_TEMPERATURE);
 			break;
@@ -75,7 +70,6 @@ void adc_process()
 	{
 		// reinitialize adc
 		ADC_RES = 0;
-		ADC_RESL = 0;
 		ADC_CONTR = (uint8_t)(1 << 7);
 		no_adc_reading_counter = 0;
 		throttle_value = 0;
@@ -88,6 +82,7 @@ void adc_process()
 	}
 
 	// start next reading
+	ADC_RES = 0;
 	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 3) | next_channel);
 }
 

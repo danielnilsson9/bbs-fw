@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -124,7 +124,7 @@ void extcom_init()
 	// Wait one second for config tool connection.
 	// This is here to that the config tool can enable
 	// the eventlog before system proceeds with initialization.
-	__xdata uint32_t end = system_ms() + 1000;
+	uint32_t end = system_ms() + 1000;
 	while (system_ms() < end)
 	{
 		extcom_process();
@@ -134,7 +134,7 @@ void extcom_init()
 
 void extcom_process()
 {
-	__xdata uint32_t now = system_ms();
+	uint32_t now = system_ms();
 
 	while (uart1_available())
 	{

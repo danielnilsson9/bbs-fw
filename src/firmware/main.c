@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -54,7 +54,7 @@ void main(void)
 
 #ifdef DEBUG_LOOP_TIME_EVENTLOG
 	__xdata uint16_t prev_loop_ms = (uint16_t)system_ms();
-	uint8_t loop_counter = 0;
+	__xdata uint8_t loop_counter = 0;
 #endif
 
 

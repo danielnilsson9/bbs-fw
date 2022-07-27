@@ -14,8 +14,8 @@ PNAME = main
 #
 # V1.5 -> IAP15W4K61
 # V1.4 -> STC15W4K56
-#TARGET_MCU = IAP15W4K61
-TARGET_MCU = STC15W4K56
+TARGET_MCU = IAP15W4K61
+#TARGET_MCU = STC15W4K56
 
 # External libraries
 IDIR = 
@@ -30,7 +30,6 @@ EXTRASRCS = \
 	eeprom.c \
 	eventlog.c \
 	extcom.c \
-	filter.c \
 	lights.c \
 	motor.c \
 	uart.c \
@@ -46,7 +45,6 @@ HEADERS = \
 	eventlog.h \
 	eeprom.h \
 	extcom.h \
-	filter.h \
 	lights.h \
 	motor.h \
 	uart.h \

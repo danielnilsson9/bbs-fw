@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -12,7 +12,6 @@
 
 
 static __xdata bool is_enabled;
-static __xdata char buffer[256];
 
 
 void eventlog_init(bool enabled)
@@ -39,6 +38,7 @@ void eventlog_write(uint8_t evt)
 
 	uart1_write(0xee);
 	uart1_write(evt);
+	uart1_write((uint8_t)0xee + evt);
 }
 void eventlog_write_data(uint8_t evt, int16_t data)
 {
@@ -47,10 +47,13 @@ void eventlog_write_data(uint8_t evt, int16_t data)
 		return;
 	}
 
-	uart1_write(0xed);
-	uart1_write(evt);
-	uart1_write((uint8_t)(data >> 8));
-	uart1_write((uint8_t)data);
+	uint8_t checksum = 0;
+
+	uart1_write(0xed); checksum += (uint8_t)0xed;
+	uart1_write(evt); checksum += evt;
+	uart1_write((uint8_t)(data >> 8)); checksum += (uint8_t)(data >> 8);
+	uart1_write((uint8_t)data); checksum += (uint8_t)data;
+	uart1_write(checksum);
 }
 
 

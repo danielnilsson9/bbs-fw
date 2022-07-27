@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -44,9 +44,11 @@
 #define COM_STATE_READ_CURRENT		0x06
 #define COM_STATE_READ_VOLTAGE		0x07
 
+#define MSGBUF_SIZE					8
+
 
 static __xdata uint8_t is_connected;
-static __xdata uint8_t msgbuf[8];
+static __xdata uint8_t msgbuf[MSGBUF_SIZE];
 
 static __xdata bool target_speed_changed;
 static __xdata uint8_t target_speed;
@@ -66,8 +68,6 @@ static __xdata uint8_t last_sent_opcode;
 static __xdata uint32_t last_request_write_ms;
 static __xdata uint32_t last_status_read_ms;
 static __xdata uint8_t next_status_read_opcode;
-static __xdata uint32_t last_set_current_ms;
-static __xdata uint32_t last_set_speed_ms;
 
 
 static uint8_t compute_checksum(uint8_t* msg, uint8_t len);
@@ -82,7 +82,7 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V);
 static void process_com_state_machine();
 
 
-void motor_init(__xdata uint16_t max_current_mA, __xdata uint8_t lvc_V)
+void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 {
 	is_connected = 0;
 	target_speed_changed = false;
@@ -99,8 +99,6 @@ void motor_init(__xdata uint16_t max_current_mA, __xdata uint8_t lvc_V)
 	last_request_write_ms = 0;
 	last_status_read_ms = 0;
 	next_status_read_opcode = OPCODE_READ_STATUS;
-	last_set_current_ms = 0;
-	last_set_speed_ms = 0;
 
 	SET_PIN_OUTPUT(PIN_MOTOR_POWER_ENABLE);
 	SET_PIN_OUTPUT(PIN_MOTOR_CONTROL_ENABLE);
@@ -153,7 +151,7 @@ void motor_disable()
 	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
 }
 
-__xdata uint16_t motor_status()
+uint16_t motor_status()
 {
 	return status_flags;
 }
@@ -183,17 +181,17 @@ void motor_set_target_current(uint8_t percent)
 }
 
 
-__xdata uint16_t motor_get_battery_lvc_x10()
+uint16_t motor_get_battery_lvc_x10()
 {
 	return lvc_volt_x10;
 }
 
-__xdata uint16_t motor_get_battery_current_x10()
+uint16_t motor_get_battery_current_x10()
 {
 	return battery_amp_x10;
 }
 
-__xdata uint16_t motor_get_battery_voltage_x10()
+uint16_t motor_get_battery_voltage_x10()
 {
 	return battery_volt_x10;
 }
@@ -294,12 +292,12 @@ static int try_read_response(uint8_t opcode, uint16_t* out_data)
 	uint8_t len = (opcode == OPCODE_LVC || opcode == OPCODE_READ_STATUS || opcode == OPCODE_READ_VOLTAGE) ? 5 : 4;
 
 	uint8_t i = 0;
-	while (uart2_available() && i < sizeof(msgbuf))
+	while (uart2_available() && i < MSGBUF_SIZE)
 	{
 		msgbuf[i++] = uart2_read();
 	}
 
-	// clear anything that could be lest in rxbuffer in case of error.
+	// clear anything that could be left in rxbuffer in case of error.
 	while (uart2_available()) uart2_read();
 
 	if (i < len)
@@ -462,29 +460,33 @@ static void process_com_state_machine_idle()
 
 	__xdata uint32_t now = system_ms();
 
-	if (target_current_changed && (now - last_set_current_ms) > 64)
+	// make sure requests have some space between them
+	if (now - last_request_write_ms < 32)
+	{
+		return;
+	}
+
+	if (target_current_changed)
 	{
 		send_request_async(OPCODE_TARGET_CURRENT, target_current);
 		last_sent_opcode = OPCODE_TARGET_CURRENT;
 		last_request_write_ms = now;
 		com_state = COM_STATE_WAIT_RESPONSE;
 		target_current_changed = false;
-		last_set_current_ms = now;
 		return;
 	}
 
-	if (target_speed_changed && (now - last_set_speed_ms) > 64)
+	if (target_speed_changed)
 	{
 		send_request_async(OPCODE_TARGET_SPEED, target_speed);
 		last_sent_opcode = OPCODE_TARGET_SPEED;
 		last_request_write_ms = now;
 		com_state = COM_STATE_WAIT_RESPONSE;
 		target_speed_changed = false;
-		last_set_speed_ms = now;
 		return;
 	}
 
-	if ((now - last_status_read_ms) > 168)
+	if ((now - last_status_read_ms) > 200)
 	{
 		send_request_async(next_status_read_opcode, 0);
 		last_sent_opcode = next_status_read_opcode;
@@ -500,9 +502,22 @@ static void process_com_state_machine_idle()
 
 static void process_com_state_machine_wait_response()
 {
-	// :TODO: Check for complete response instead of relaying on fixed timing value...
+	uint8_t response_length = 0;
 
-	if ((system_ms() - last_request_write_ms) > 32)
+	switch (last_sent_opcode)
+	{
+	case OPCODE_TARGET_CURRENT:
+	case OPCODE_TARGET_SPEED:
+	case OPCODE_READ_CURRENT:
+		response_length = 4;
+		break;
+	case OPCODE_READ_VOLTAGE:
+	case OPCODE_READ_STATUS:
+		response_length = 5;
+		break;
+	}
+
+	if (uart2_available() >= response_length || (system_ms() - last_request_write_ms) > 32)
 	{
 		switch (last_sent_opcode)
 		{

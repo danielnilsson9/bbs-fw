@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -18,6 +18,7 @@
 #include "util.h"
 #include "system.h"
 
+
 static __xdata uint8_t assist_level;
 static __xdata uint8_t operation_mode;
 static __xdata uint16_t global_max_speed_rpm;
@@ -30,17 +31,20 @@ static __xdata bool last_light_state;
 static __xdata bool cruise_paused;
 static __xdata bool cruise_block_throttle_return;
 
-static __xdata int8_t last_temperature;
+static __xdata int8_t motor_temperature;
 static __xdata bool speed_limiting;
 
 static __xdata uint8_t ramp_up_target_current;
 static __xdata uint32_t last_ramp_up_increment_ms;
 static __xdata uint16_t ramp_up_current_interval_ms;
 
+static __xdata uint32_t motor_disable_ms;
+
 #define MAX_TEMPERATURE						70
 #define CRUISE_ENGAGE_PAS_PULSES			12
 #define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	2
 
+#define MOTOR_DISABLE_DELAY_MS				200
 #define CURRENT_RAMP_UP_AMPS_SECOND_X10		150
 
 
@@ -62,12 +66,14 @@ void app_init()
 
 	global_max_speed_rpm = 0;
 	last_light_state = false;
-	last_temperature = 0;
+	motor_temperature = 0;
 	speed_limiting = false;
 
 	ramp_up_target_current = 0;
-	ramp_up_current_interval_ms = (g_config.max_current_amps * 100u) / CURRENT_RAMP_UP_AMPS_SECOND_X10;
 	last_ramp_up_increment_ms = 0;
+	ramp_up_current_interval_ms = (g_config.max_current_amps * 100u) / CURRENT_RAMP_UP_AMPS_SECOND_X10;
+
+	motor_disable_ms = 0;
 
 	cruise_paused = true;
 	cruise_block_throttle_return = false;
@@ -94,7 +100,7 @@ void app_process()
 
 		apply_pas(&target_current);
 		apply_cruise(&target_current, throttle);
-		apply_current_ramp(&target_current);	// order important, shall not affect throttle
+		apply_current_ramp(&target_current);	// order is important, ramp shall not affect throttle
 
 		apply_throttle(&target_current, throttle);
 	}
@@ -102,16 +108,25 @@ void app_process()
 	apply_speed_limit(&target_current);
 	apply_thermal_limit(&target_current);
 
-	motor_set_target_speed(255u * assist_level_data.max_cadence_percent / 100u);
+	motor_set_target_speed((uint8_t)((255u * assist_level_data.max_cadence_percent) / 100u));
 	motor_set_target_current(target_current);
 	
 	if (target_current > 0 && !brake_is_activated() && !gear_sensor_is_activated())
 	{
 		motor_enable();
+		motor_disable_ms = 0;
 	}
 	else
 	{
-		motor_disable();
+		if (motor_disable_ms == 0)
+		{
+			motor_disable_ms = system_ms();
+		}
+
+		if (brake_is_activated() || gear_sensor_is_activated() || (system_ms() - motor_disable_ms) > MOTOR_DISABLE_DELAY_MS)
+		{
+			motor_disable();
+		}
 
 		// force reset current ramp
 		ramp_up_target_current = 0;
@@ -202,7 +217,7 @@ uint8_t app_get_status_code()
 		return STATUS_ERROR_THROTTLE;
 	}
 
-	if (last_temperature > MAX_TEMPERATURE)
+	if (motor_temperature > MAX_TEMPERATURE)
 	{
 		return STATUS_ERROR_CONTROLLER_OVER_TEMP;
 	}
@@ -227,7 +242,7 @@ uint8_t app_get_status_code()
 
 uint8_t app_get_motor_temperature()
 {
-	return last_temperature;
+	return motor_temperature;
 }
 
 
@@ -301,8 +316,8 @@ void apply_current_ramp(uint8_t* target_current)
 {
 	if (*target_current > ramp_up_target_current)
 	{
-		__xdata uint32_t now = system_ms();
-		__xdata uint16_t time_diff = now - last_ramp_up_increment_ms;
+		uint32_t now = system_ms();
+		uint16_t time_diff = now - last_ramp_up_increment_ms;
 
 		if (time_diff >= ramp_up_current_interval_ms)
 		{
@@ -331,7 +346,7 @@ void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
 	if ((assist_level_data.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
 	{
-		uint8_t current = (uint8_t)MAP(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.max_throttle_current_percent);
+		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.max_throttle_current_percent);
 		if (current > *target_current)
 		{
 			*target_current = current;
@@ -369,7 +384,7 @@ void apply_speed_limit(uint8_t* target_current)
 			else
 			{
 				// linear ramp down when approaching max speed.
-				uint8_t tmp = (uint8_t)MAP(current_speed_rpm_x10, low_limit_rpm, high_limit_rpm, *target_current, 1);
+				uint8_t tmp = (uint8_t)MAP32(current_speed_rpm_x10, low_limit_rpm, high_limit_rpm, *target_current, 1);
 				if (*target_current > tmp)
 				{
 					*target_current = tmp;
@@ -387,17 +402,20 @@ void apply_speed_limit(uint8_t* target_current)
 
 void apply_thermal_limit(uint8_t* target_current)
 {
+	__xdata static int8_t last_logged_temp = 0;
+
 	int8_t temp = temperature_read();
 
-	if (temp != last_temperature)
+	if (ABS(temp - last_logged_temp) > 1)
 	{
-		last_temperature = temp;
+		// avoid log spamming if alternating between to values
+		last_logged_temp = temp;
 		eventlog_write_data(EVT_DATA_TEMPERATURE, temp);
 	}
 
 	if (temp > MAX_TEMPERATURE)
 	{
-		if (last_temperature < MAX_TEMPERATURE)
+		if (motor_temperature <= MAX_TEMPERATURE)
 		{
 			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 1);
 		}
@@ -406,11 +424,13 @@ void apply_thermal_limit(uint8_t* target_current)
 	}
 	else
 	{
-		if (last_temperature > MAX_TEMPERATURE)
+		if (motor_temperature > MAX_TEMPERATURE)
 		{
 			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 0);
 		}
 	}
+
+	motor_temperature = temp;
 }
 
 
@@ -443,4 +463,3 @@ uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)
 	float radius_mm = g_config.wheel_size_inch_x10 * 1.27f; // g_config.wheel_size_inch_x10 / 2.f * 2.54f;
 	return (uint16_t)(25000.f / (3 * 3.14159f * radius_mm) * speed_kph);
 }
-

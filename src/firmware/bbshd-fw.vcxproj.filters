@@ -51,9 +51,6 @@
     <ClCompile Include="lights.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="filter.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="adc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -113,11 +110,11 @@
     <ClInclude Include="lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="filter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="adc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="makefile" />
   </ItemGroup>
 </Project>

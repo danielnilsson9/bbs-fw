@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -10,7 +10,7 @@
 #define _STC_15_H_
 
 // NOTE:
-// The defines below is here to keep IntelliSense 
+// The defines below are here to keep IntelliSense 
 // in Visual Studio happy and not throw incorrect errors.
 
 #if !defined (SDCC) && !defined (__SDCC)
@@ -26,6 +26,8 @@
 #define INTERRUPT_USING(name, vector,regnum)	void name()
 
 #define NOP()
+
+#define _Bool uint8_t
 
 #endif
 

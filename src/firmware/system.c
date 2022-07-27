@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -52,7 +52,7 @@ void system_delay_ms(uint16_t ms)
 		return;
 	}
 
-	__xdata uint32_t end = system_ms() + ms;
+	uint32_t end = system_ms() + ms;
 	while (system_ms() != end)
 	{
 		watchdog_yeild();
@@ -60,7 +60,7 @@ void system_delay_ms(uint16_t ms)
 }
 
 
-INTERRUPT_USING(isr_timer0, IRQ_TIMER0, 2)
+INTERRUPT_USING(isr_timer0, IRQ_TIMER0, 1)
 {
 	_ms++;
 }

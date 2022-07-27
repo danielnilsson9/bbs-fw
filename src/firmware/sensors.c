@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -24,13 +24,13 @@
 
 static volatile uint16_t pas_pulse_counter;
 static volatile bool pas_direction_backward;
-static volatile uint8_t pas_rpm;
+static volatile uint16_t pas_period_length;	// pulse length counted in interrupt frequency (100us)
 static __xdata uint16_t pas_period_counter;
 static __xdata bool pas_prev1;
 static __xdata bool pas_prev2;
 static __xdata uint16_t pas_stop_delay_periods;
 
-static volatile uint16_t speed_ticks_minute_x10;
+static volatile uint16_t speed_ticks_period_length; // pulse length counted in interrupt frequency (100us)
 static __xdata uint16_t speed_period_counter;
 static __xdata bool speed_prev_state;
 static __xdata uint8_t speed_ticks_per_rpm;
@@ -41,10 +41,11 @@ void sensors_init()
 	pas_period_counter = 0;
 	pas_pulse_counter = 0;
 	pas_direction_backward = false;
-	pas_rpm = 0;
+	pas_period_length = 0;
+	//pas_rpm = 0;
 	pas_stop_delay_periods = 1500;
 	speed_period_counter = 0;
-	speed_ticks_minute_x10 = 0;
+	speed_ticks_period_length = 0;
 	speed_prev_state = false;
 	speed_ticks_per_rpm = 1;
 
@@ -76,22 +77,51 @@ void pas_set_stop_delay(uint16_t delay_ms)
 
 uint8_t pas_get_cadence_rpm()
 {
-	return pas_rpm;
+	uint16_t tmp;
+	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	tmp = pas_period_length;
+	SET_BIT(IE2, 6);
+
+	if (tmp > 0)
+	{
+		return (uint8_t)((600000UL / NUM_SIGNALS) / tmp);
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 uint16_t pas_get_pulse_counter()
 {
-	return pas_pulse_counter;
+	uint16_t tmp;
+	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	tmp = pas_pulse_counter;
+	SET_BIT(IE2, 6);
+
+	return tmp;
 }
 
 bool pas_is_pedaling_forwards()
 {
-	return pas_rpm > 0 && !pas_direction_backward;
+	uint16_t tmp;
+	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	tmp = pas_period_length;
+	SET_BIT(IE2, 6);
+
+	// atomic read operation, no need to disable timer interrupt
+	return tmp > 0 && !pas_direction_backward;
 }
 
 bool pas_is_pedaling_backwards()
 {
-	return pas_rpm > 0 && pas_direction_backward;
+	uint16_t tmp;
+	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	tmp = pas_period_length;
+	SET_BIT(IE2, 6);
+
+	// atomic read operation, no need to disable timer interrupt
+	return tmp > 0 && pas_direction_backward;
 }
 
 void speed_sensor_set_signals_per_rpm(uint8_t num_signals)
@@ -101,12 +131,27 @@ void speed_sensor_set_signals_per_rpm(uint8_t num_signals)
 
 bool speed_sensor_is_moving()
 {
-	return speed_ticks_minute_x10 > 0;
+	uint16_t tmp;
+	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	tmp = speed_ticks_period_length;
+	SET_BIT(IE2, 6);
+
+	return tmp > 0;
 }
 
 uint16_t speed_sensor_get_rpm_x10()
 {
-	return speed_ticks_minute_x10 / speed_ticks_per_rpm;
+	uint16_t tmp;
+	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	tmp = speed_ticks_period_length;
+	SET_BIT(IE2, 6);
+
+	if (tmp > 0)
+	{
+		return 6000000UL / tmp / speed_ticks_per_rpm;
+	}
+
+	return 0;
 }
 
 int8_t temperature_read()
@@ -127,7 +172,7 @@ int8_t temperature_read()
 		return (int8_t)(C + 0.5f);
 	}
 
-	return 0.f;
+	return 0;
 }
 
 
@@ -142,8 +187,12 @@ bool gear_sensor_is_activated()
 }
 
 
-INTERRUPT(isr_timer4, IRQ_TIMER4)
+INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2)
 {
+	// WARNING:
+	// No 16/32 bit or float computations in ISR (multiply/divide/modulo).
+	// Read SDCC compiler manual for more info.
+
 	// pas
 	{
 		bool pas1 = GET_PIN_STATE(PIN_PAS1);
@@ -151,22 +200,22 @@ INTERRUPT(isr_timer4, IRQ_TIMER4)
 
 		if (pas1 && !pas_prev1)
 		{
-			++pas_pulse_counter;
+			pas_pulse_counter++;
 			pas_direction_backward = pas2;
 
 			if (pas_period_counter > 0)
 			{
-				pas_rpm = (uint8_t)((600000UL / NUM_SIGNALS) / pas_period_counter);
+				pas_period_length = pas_period_counter; // save in order to be able to calculate rpm when needed
 				pas_period_counter = 0;
 			}
 		}
 		else
 		{
-			++pas_period_counter;
+			pas_period_counter++;
 
-			if (pas_rpm > 0 && pas_period_counter > pas_stop_delay_periods)
+			if (pas_period_length > 0 && pas_period_counter > pas_stop_delay_periods)
 			{
-				pas_rpm = 0;
+				pas_period_length = 0;
 				pas_pulse_counter = 0;
 				pas_direction_backward = false;
 			}
@@ -185,7 +234,7 @@ INTERRUPT(isr_timer4, IRQ_TIMER4)
 		{
 			if (speed_period_counter > 0)
 			{
-				speed_ticks_minute_x10 = 6000000UL / speed_period_counter;
+				speed_ticks_period_length = speed_period_counter;
 				speed_period_counter = 0;
 			}
 		}
@@ -193,9 +242,9 @@ INTERRUPT(isr_timer4, IRQ_TIMER4)
 		{
 			++speed_period_counter;
 
-			if (speed_ticks_minute_x10 > 0 && speed_period_counter > 50000)
+			if (speed_ticks_period_length > 0 && speed_period_counter > 50000)
 			{
-				speed_ticks_minute_x10 = 0;
+				speed_ticks_period_length = 0;
 			}
 		}
 
@@ -203,5 +252,3 @@ INTERRUPT(isr_timer4, IRQ_TIMER4)
 	}
 	
 }
-
-

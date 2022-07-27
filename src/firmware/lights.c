@@ -1,3 +1,11 @@
+/*
+ * bbshd-fw
+ *
+ * Copyright (C) Daniel Nilsson, 2022.
+ *
+ * Released under the GPL License, Version 3
+ */
+
 #include "lights.h"
 #include "pins.h"
 #include "stc15.h"

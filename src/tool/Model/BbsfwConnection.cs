@@ -423,30 +423,45 @@ namespace BBSFW.Model
 		{
 			if (_rxBuffer[0] == EVENT_LOG_ENTRY)
 			{
-				const int MessageSize = 2;
+				const int MessageSize = 3;
 
 				if (_rxBuffer.Count < MessageSize)
 				{
 					return Keep;
 				}
 
-				EventLog?.Invoke(new EventLogEntry(_rxBuffer[1], null));
-
-				return MessageSize;
+				if (ComputeChecksum(_rxBuffer, MessageSize - 1) == _rxBuffer[MessageSize - 1])
+				{
+					EventLog?.Invoke(new EventLogEntry(_rxBuffer[1], null));
+					return MessageSize;
+				}
+				else
+				{
+					Console.WriteLine("Event log cheksum missmatch. Discarding.");
+					return Discard;
+				}			
 			}
 			else if (_rxBuffer[0] == EVENT_LOG_DATA_ENTRY)
 			{
-				const int MessageSize = 4;
+				const int MessageSize = 5;
 
 				if (_rxBuffer.Count < MessageSize)
 				{
 					return Keep;
 				}
 
-				int data = _rxBuffer[2] << 8 | _rxBuffer[3];
-				EventLog?.Invoke(new EventLogEntry(_rxBuffer[1], data));
+				if (ComputeChecksum(_rxBuffer, MessageSize - 1) == _rxBuffer[MessageSize - 1])
+				{
+					int data = _rxBuffer[2] << 8 | _rxBuffer[3];
+					EventLog?.Invoke(new EventLogEntry(_rxBuffer[1], data));
 
-				return MessageSize;
+					return MessageSize;
+				}
+				else
+				{
+					Console.WriteLine("Event log cheksum missmatch. Discarding.");
+					return Discard;
+				}				
 			}
 
 			return Discard;

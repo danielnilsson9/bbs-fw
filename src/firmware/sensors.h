@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -32,6 +32,6 @@ int8_t temperature_read();
 bool brake_is_activated();
 bool gear_sensor_is_activated();
 
-INTERRUPT(isr_timer4, IRQ_TIMER4);
+INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2);
 
 #endif

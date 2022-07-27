@@ -27,6 +27,8 @@ namespace BBSFW.Model
 		private const int EVT_ERROR_CONFIG_ERASE_EEPROM =		72;
 		private const int EVT_ERROR_CONFIG_VERSION =			73;
 		private const int EVT_ERROR_CONFIG_CHECKSUM =			74;
+		private const int EVT_ERROR_THROTTLE_LOW_LIMIT =		75;
+		private const int EVT_ERROR_THROTTLE_HIGH_LIMIT =		76;
 
 		private const int EVT_DATA_TARGET_CURRENT =				128;
 		private const int EVT_DATA_TARGET_SPEED =				129;
@@ -113,11 +115,15 @@ namespace BBSFW.Model
 					return "Configuration read from eeprom is of the wrong version.";
 				case EVT_ERROR_CONFIG_CHECKSUM:
 					return "Failed to verify checksum on configuration read from eeprom.";
+				case EVT_ERROR_THROTTLE_LOW_LIMIT:
+					return "Invalid throttle reading, below low limit, check throttle.";
+				case EVT_ERROR_THROTTLE_HIGH_LIMIT:
+					return "Invalid throttle reading, above high limit, check throttle.";
 
 				case EVT_DATA_TARGET_CURRENT:
 					return $"Motor target current changed to {_data}%.";
 				case EVT_DATA_TARGET_SPEED:
-					return $"Motor target speed changed to {_data * 100 / 256}%.";
+					return $"Motor target speed changed to {(_data * 100) / 255}%.";
 				case EVT_DATA_MOTOR_STATUS:
 					Level = _data != 0 ? LogLevel.Error : LogLevel.Info;
 					return $"Motor controller status changed to 0x{_data:X}.";

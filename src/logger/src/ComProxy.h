@@ -1,18 +1,6 @@
-/*
- * bbshd-fw
- *
- * Copyright (C) Daniel Nilsson, 2022.
- *
- * Released under the GPL License, Version 3
- */
 
-#ifndef _EVENTLOG_H_
-#define _EVENTLOG_H_
-
-#include "stc15.h"
-
-#include <stdbool.h>
-#include <stdint.h>
+#include <Arduino.h>
+#include <SoftwareSerial.h>
 
 #define EVT_MSG_MOTOR_INIT_OK				1
 #define EVT_MSG_CONFIG_READ					2
@@ -49,17 +37,50 @@
 #define EVT_DATA_MAX_CURRENT_ADC_RESPONSE	139
 #define EVT_DATA_MAIN_LOOP_TIME				140
 #define EVT_DATA_THROTTLE_ADC				141
-#define EVT_DATA_SET_TARGET_CURRENT			142
-#define EVT_DATA_SET_TARGET_SPEED			143
 
+class ComProxy
+{
+public:
+    struct Event
+    {
+        uint32_t timestamp;
+        uint8_t id;
+        int16_t data;
+    };
 
-void eventlog_init(bool enabled);
+    static void printFormat(Stream& stream, const Event& e);
 
-bool eventlog_is_enabled();
-void eventlog_set_enabled(bool enabled);
+    ComProxy(Stream& controller, Stream& display, Stream& log);
 
-void eventlog_write(uint8_t evt);
-void eventlog_write_data(uint8_t evt, int16_t data);
+    bool connect();
+    bool isConnected() const;
 
+    void process();
 
-#endif
+    bool hasLogEvent() const;
+    bool getLogEvent(Event& e);
+
+private:
+    void processControllerTx();
+    void processDisplayTx();
+
+    void flushInterceptbuffer();
+    bool interceptMessage();
+
+    int tryProcessControllerMessage();
+    int processReadRequestResponse();
+    int processWriteRequestResponse();
+    int processEventLogMessage();
+
+private:
+    Stream& _log;
+    Stream& _controller;
+    Stream& _display;
+    bool _connected;
+    uint8_t _msgLen;
+    uint8_t _msgBuf[128];
+    uint32_t _lastRecv;
+
+    bool _hasEvent;
+    Event _event;
+};

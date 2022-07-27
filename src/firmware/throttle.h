@@ -1,7 +1,7 @@
 /*
  * bbshd-fw
  *
- * Copyright (C) Daniel Nilsson, 2021.
+ * Copyright (C) Daniel Nilsson, 2022.
  *
  * Released under the GPL License, Version 3
  */
@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-void throttle_init(__xdata uint16_t min_mv, __xdata uint16_t max_mv);
+void throttle_init(uint16_t min_mv, uint16_t max_mv);
 
 bool throttle_ok();
 
