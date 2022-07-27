@@ -14,7 +14,9 @@ See https://github.com/danielnilsson9/bbshd-fw/wiki/Flashing-the-Firmware
 **Configure**  
 See https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
-**The firmware can be flashed using a standard bafang programming cable (TTL level usb to serial converter).**
+
+If you like this project, consider sending a small donaton ([PayPal](https://www.paypal.com/donate/?business=LVAYFCMQYN8F4&no_recurring=0&item_name=BBSHD-FW&currency_code=USD)).
+
 
 ## Highlights
 * More power without hardware modifications! (max 32A).
