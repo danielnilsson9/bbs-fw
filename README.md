@@ -39,10 +39,16 @@ When limit has been hit controller is disabled and needs to be restarted by powe
 
 ## Supported Hardware Revisions
 
+### BBSHD
+
 Revision | MCU          | Released    | Comment
 -------- | ------------ | ----------- | --------------------
 V1.4     | STC15W4K56S4 | ~2017       | V1.3 printed on PCB, sticker with 1.4.
 V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
+
+### BBS02
+
+Not yet.
 
 ## Legal
 * Installing this firmware will void your warranty.
