@@ -20,7 +20,7 @@ See https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 * More power without hardware modifications! (max 32A).
 * No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
 * Support lower voltage cutoff for use with e.g. 36V battery.
-* No issue with PAS/Throttle override.
+* Smooth Throttle/PAS override.
 * Optional separate set of street legal & offroad assist levels.
 * Possible to set road speed limit per assist level.
 * Possible to limit cadence per assist level.
