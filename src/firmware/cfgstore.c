@@ -199,20 +199,19 @@ static void load_default_config()
 	g_config.low_cut_off_V = 42;
 
 	g_config.use_speed_sensor = 1;
-	g_config.use_speed_sensor = 0;
 	g_config.use_display = 1;
 	g_config.use_push_walk = 1;
 
 	g_config.wheel_size_inch_x10 = 280;
 	g_config.speed_sensor_signals = 1;
-	g_config.max_speed_kph = 60;
+	g_config.max_speed_kph = 100;
 
 	g_config.pas_start_delay_pulses = 5;
 	g_config.pas_stop_delay_x10ms = 20;
 
 	g_config.throttle_start_voltage_mv = 900;
 	g_config.throttle_end_voltage_mv = 3600;
-	g_config.throttle_start_percent = 0;
+	g_config.throttle_start_percent = 1;
 
 	g_config.assist_mode_select = ASSIST_MODE_SELECT_OFF;
 	g_config.assist_startup_level = 3;

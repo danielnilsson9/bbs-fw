@@ -540,11 +540,23 @@ static int8_t process_bafang_display_read_range()
 		return KEEP;
 	}
 
-	uint8_t temp = app_get_motor_temperature();
+	uint16_t temp = app_get_motor_temperature();
 
-	uart1_write(0x00);
-	uart1_write(temp);
-	uart1_write(temp); // checksum
+	if (g_config.use_freedom_units)
+	{
+		// Convert to farenheit and compensate for the km -> miles conversion the diplay will do
+		// F_miles = (C * 9/5 + 32) * 161 / 100
+		// Approximistation:
+		// F_miles = 2.9C + 50.5
+
+		temp = ((290u * temp) + 5050u) / 100u;
+	}
+
+	uint8_t checksum = 0;
+
+	write_uart1_and_increment_checksum((uint8_t)(temp >> 8), &checksum);
+	write_uart1_and_increment_checksum((uint8_t)temp, &checksum);
+	uart1_write(checksum); // checksum
 
 	return 3;
 }

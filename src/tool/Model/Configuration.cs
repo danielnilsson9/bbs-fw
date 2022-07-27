@@ -293,7 +293,7 @@ namespace BBSFW.Model
 
 		public void Validate()
 		{
-			ValidateLimits(MaxCurrentAmps, 5, 32, "Max Current (A)");
+			ValidateLimits(MaxCurrentAmps, 5, 33, "Max Current (A)");
 			ValidateLimits(CurrentRampAmpsSecond, 1, 255, "Current Ramp (A/s)");
 			ValidateLimits(LowCutoffVolts, 1, 100, "Low Volage Cut Off (V)");
 
