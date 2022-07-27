@@ -1,9 +1,9 @@
 # BBSHD Open Source Firmware
 
-**Install**
+**Install**  
 See https://github.com/danielnilsson9/bbshd-fw/wiki/Flashing-the-Firmware
 
-**Configure**
+**Configure**  
 See https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
 **The firmware can be flashed using a standard bafang programming cable (TTL level usb to serial converter).**
