@@ -242,7 +242,7 @@ INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2)
 		{
 			++speed_period_counter;
 
-			if (speed_ticks_period_length > 0 && speed_period_counter > 50000)
+			if (speed_ticks_period_length > 0 && speed_period_counter > 25000)
 			{
 				speed_ticks_period_length = 0;
 			}
