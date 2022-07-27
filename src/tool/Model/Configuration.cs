@@ -9,7 +9,7 @@ namespace BBSFW.Model
 	public class Configuration
 	{
 		public const int Version = 1;
-		public const int ByteSize = 119;
+		public const int ByteSize = 120;
 
 
 		public enum AssistModeSelect
@@ -54,6 +54,7 @@ namespace BBSFW.Model
 
 		// global
 		public uint MaxCurrentAmps;
+		public uint CurrentRampAmpsSecond;
 		public uint LowCutoffVolts;
 		public uint MaxSpeedKph;
 
@@ -88,6 +89,7 @@ namespace BBSFW.Model
 		{
 			UseFreedomUnits = Properties.Settings.Default.UseFreedomUnits;
 			MaxCurrentAmps = 0;
+			CurrentRampAmpsSecond = 0;
 			LowCutoffVolts = 0;
 
 			UseSpeedSensor = false;
@@ -133,6 +135,7 @@ namespace BBSFW.Model
 				UseFreedomUnits = br.ReadBoolean();
 
 				MaxCurrentAmps = br.ReadByte();
+				CurrentRampAmpsSecond = br.ReadByte();
 				LowCutoffVolts = br.ReadByte();
 				MaxSpeedKph = br.ReadByte();
 
@@ -185,6 +188,7 @@ namespace BBSFW.Model
 
 
 				bw.Write((byte)MaxCurrentAmps);
+				bw.Write((byte)CurrentRampAmpsSecond);
 				bw.Write((byte)LowCutoffVolts);
 				bw.Write((byte)MaxSpeedKph);
 
@@ -231,6 +235,7 @@ namespace BBSFW.Model
 		{
 			UseFreedomUnits = cfg.UseFreedomUnits;
 			MaxCurrentAmps = cfg.MaxCurrentAmps;
+			CurrentRampAmpsSecond = cfg.CurrentRampAmpsSecond;
 			LowCutoffVolts = cfg.LowCutoffVolts;
 			UseSpeedSensor = cfg.UseSpeedSensor;
 			UseDisplay = cfg.UseDisplay;
@@ -288,7 +293,8 @@ namespace BBSFW.Model
 
 		public void Validate()
 		{
-			ValidateLimits(MaxCurrentAmps, 5, 36, "Max Current (A)");
+			ValidateLimits(MaxCurrentAmps, 5, 32, "Max Current (A)");
+			ValidateLimits(CurrentRampAmpsSecond, 1, 255, "Current Ramp (A/s)");
 			ValidateLimits(LowCutoffVolts, 1, 100, "Low Volage Cut Off (V)");
 
 			ValidateLimits((uint)WheelSizeInch, 10, 40, "Wheel Size (inch)");

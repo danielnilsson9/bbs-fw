@@ -40,6 +40,7 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 
 			<TextBlock Grid.Row="0" Text="Global" FontSize="18" FontWeight="Bold" />
@@ -47,14 +48,17 @@
 			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 10 0 0" Text="Max Current (A):" />
 			<TextBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxCurrentAmps, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Low Voltage Cutoff (V):" />
-			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.LowCutoffVolts, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 10 0 0" Text="Current Ramp (A/s):" />
+			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.CurrentRampAmpsSecond, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 10 0 0" Text="Max Speed (km/h):" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
-			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedKph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
+			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Low Voltage Cutoff (V):" />
+			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.LowCutoffVolts, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 10 0 0" Text="Max Speed (mph):" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
-			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedMph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
+			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 10 0 0" Text="Max Speed (km/h):" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
+			<TextBox Grid.Column="2" Grid.Row="4" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedKph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
+
+			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 10 0 0" Text="Max Speed (mph):" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
+			<TextBox Grid.Column="2" Grid.Row="4" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedMph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
 		</Grid>
 
 

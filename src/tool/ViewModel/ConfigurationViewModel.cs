@@ -90,6 +90,19 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public uint CurrentRampAmpsSecond
+		{
+			get { return _config.CurrentRampAmpsSecond; }
+			set
+			{
+				if (_config.CurrentRampAmpsSecond != value)
+				{
+					_config.CurrentRampAmpsSecond = value;
+					OnPropertyChanged(nameof(CurrentRampAmpsSecond));
+				}
+			}
+		}
+
 		public uint LowCutoffVolts
 		{
 			get { return _config.LowCutoffVolts; }

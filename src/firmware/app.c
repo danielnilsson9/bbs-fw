@@ -40,12 +40,11 @@ static __xdata uint16_t ramp_up_current_interval_ms;
 
 static __xdata uint32_t motor_disable_ms;
 
-#define MAX_TEMPERATURE						70
+#define MAX_TEMPERATURE						75
 #define CRUISE_ENGAGE_PAS_PULSES			12
 #define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	2
 
 #define MOTOR_DISABLE_DELAY_MS				200
-#define CURRENT_RAMP_UP_AMPS_SECOND_X10		150
 
 
 void apply_pas(uint8_t* target_current);
@@ -71,7 +70,7 @@ void app_init()
 
 	ramp_up_target_current = 0;
 	last_ramp_up_increment_ms = 0;
-	ramp_up_current_interval_ms = (g_config.max_current_amps * 100u) / CURRENT_RAMP_UP_AMPS_SECOND_X10;
+	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
 
 	motor_disable_ms = 0;
 

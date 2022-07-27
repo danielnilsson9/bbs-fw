@@ -195,6 +195,7 @@ static void load_default_config()
 	g_config.use_freedom_units = 0;
 
 	g_config.max_current_amps = 30;
+	g_config.current_ramp_amps_s = 15;
 	g_config.low_cut_off_V = 42;
 
 	g_config.use_speed_sensor = 1;

@@ -698,9 +698,11 @@ static int8_t process_bafang_display_write_speed_limit()
 
 	if (compute_checksum(msgbuf + 2, 2) == msgbuf[4])
 	{
-
-		uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
-		app_set_wheel_max_speed_rpm(value);
+		// Ignoring speed limit requested by display,
+		// global speed limit is configured in firmware config tool.
+		// 
+		// uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
+		// app_set_wheel_max_speed_rpm(value);
 	}
 
 	return 5;

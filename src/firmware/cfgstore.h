@@ -41,6 +41,7 @@ typedef struct
 
 	// global
 	uint8_t max_current_amps;
+	uint8_t current_ramp_amps_s;
 	uint8_t low_cut_off_V;
 	uint8_t max_speed_kph;
 
