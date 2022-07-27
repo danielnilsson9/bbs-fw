@@ -1,5 +1,13 @@
 # BBSHD Open Source Firmware
 
+This firmware is inteded to replace the original Bafang firmware on the BBSHD motor controller.  
+Almost all functionallity of original firmware has been implemented and more special features  
+has been added.
+
+This firmware is compatible with all displays that works with the original firmware.
+A custom configuration tool is provided since BafangConfigTool is not compatible  
+due to a different set of supported parameters.
+
 **Install**  
 See https://github.com/danielnilsson9/bbshd-fw/wiki/Flashing-the-Firmware
 
@@ -26,6 +34,8 @@ See https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 ## Limitations
 * No battery SOC calculation, set display to show battery voltage instead.
 * No range estimation, the range field on the display will show motor temperature instead.
+* Voltage cutoff is a bit crude, does not limit power. When limit has been hit controller  
+is disabled and needs to be restarted.
 
 ## Supported Hardware Revisions
 
