@@ -21,6 +21,7 @@ AltSoftSerial controllerSerial(8, 9);
 
 ComProxy proxy(controllerSerial, Serial, logSerial);
 
+
 void initProxy()
 {
     controllerSerial.begin(1200);
@@ -85,13 +86,5 @@ void loop()
                 printEvent(evt); 
             }          
         }
-    }
-
-    if (logSerial.available())
-    {
-        int val = logSerial.read();
-
-        logSerial.print("Recv: ");
-        logSerial.println(val, HEX);
     }
 }

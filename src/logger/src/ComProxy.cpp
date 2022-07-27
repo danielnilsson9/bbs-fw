@@ -59,9 +59,6 @@ int verifyControllerMessage(uint8_t* buf, uint8_t length, uint8_t requiredLength
 
 void ComProxy::printFormat(Stream& stream, const Event& evt)
 {
-	Serial.print(evt.timestamp / 1000.f, 2);
-    Serial.print("  ");
-
 	switch (evt.id)
 	{
 	case EVT_MSG_MOTOR_INIT_OK:
@@ -297,7 +294,7 @@ void ComProxy::processControllerTx()
 		}
 	}
 
-	if (_msgLen > 0 && millis() - _lastRecv > 64)
+	if (_msgLen > 0 && millis() - _lastRecv > 20)
 	{
 		flushInterceptbuffer();
 	}
