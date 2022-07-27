@@ -8,7 +8,7 @@ See https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
 **The firmware can be flashed using a standard bafang programming cable (TTL level usb to serial converter).**
 
-## Main Benefits
+## Highlights
 * More power without hardware modifications! (max 32A).
 * No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
 * Support lower voltage cutoff for use with e.g. 36V battery.
