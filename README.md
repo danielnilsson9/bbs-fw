@@ -50,7 +50,7 @@ V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
 
 ### BBS02
 
-Not yet.
+Not yet. Consider sending a [donation](https://www.paypal.com/donate/?business=LVAYFCMQYN8F4&no_recurring=0&item_name=BBSHD-FW&currency_code=USD) that will go towards obtaining a BBS02 controller for reverse engineering.
 
 ## Legal
 * Installing this firmware will void your warranty.
