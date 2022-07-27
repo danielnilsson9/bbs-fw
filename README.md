@@ -1,6 +1,6 @@
 # BBSHD Open Source Firmware
 
-This firmware is inteded to replace the original Bafang firmware on the BBSHD motor controller.  
+This firmware is intended to replace the original Bafang firmware on the BBSHD motor controller.  
 Almost all functionallity of original firmware has been implemented and more special features  
 has been added.
 
