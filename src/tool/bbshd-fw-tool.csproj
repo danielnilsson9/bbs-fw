@@ -2,10 +2,15 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <RootNamespace>BBSFW</RootNamespace>
+    <TargetFramework>net6.0-windows</TargetFramework>
+	<PublishSingleFile>true</PublishSingleFile>
+	<SelfContained>false</SelfContained>
+	<PublishReadyToRun>true</PublishReadyToRun>
+	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+	<RootNamespace>BBSFW</RootNamespace>
     <UseWPF>true</UseWPF>
-    <AssemblyName>BBS-FW Tool</AssemblyName>
+    <AssemblyName>BBSFWTool</AssemblyName>
     <Authors>Daniel Nilsson</Authors>
   </PropertyGroup>
 
