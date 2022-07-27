@@ -34,8 +34,8 @@ See https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 ## Limitations
 * No battery SOC calculation, set display to show battery voltage instead.
 * No range estimation, the range field on the display will show motor temperature instead.
-* Voltage cutoff is a bit crude, does not limit power. When limit has been hit controller  
-is disabled and needs to be restarted.
+* Voltage cutoff is a bit crude, it does not limit power when approaching limit.  
+When limit has been hit controller is disabled and needs to be restarted by power cycle.
 
 ## Supported Hardware Revisions
 
