@@ -9,13 +9,13 @@ A custom configuration tool is provided since BafangConfigTool is not compatible
 due to a different set of supported parameters.
 
 **Download**  
-See https://github.com/danielnilsson9/bbshd-fw/releases
+https://github.com/danielnilsson9/bbshd-fw/releases
 
 **Install**  
-See https://github.com/danielnilsson9/bbshd-fw/wiki/Flashing-the-Firmware
+https://github.com/danielnilsson9/bbshd-fw/wiki/Flashing-the-Firmware
 
 **Configure**  
-See https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
+https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
 
 If you find this project useful, consider sending a small [donation](https://www.paypal.com/donate/?business=LVAYFCMQYN8F4&no_recurring=0&item_name=BBSHD-FW&currency_code=USD) to fund further development.
