@@ -18,7 +18,7 @@ If you find this project useful, consider sending a small [donation](https://www
 
 
 ## Highlights
-* More power without hardware modifications! (max 32A).
+* A bit more power without hardware modifications! (max 32A).
 * No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
 * Support lower voltage cutoff for use with e.g. 36V battery.
 * Smooth Throttle/PAS override.
