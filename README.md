@@ -8,6 +8,9 @@ This firmware is compatible with all displays that works with the original firmw
 A custom configuration tool is provided since BafangConfigTool is not compatible  
 due to a different set of supported parameters.
 
+**Download**
+See https://github.com/danielnilsson9/bbshd-fw/releases
+
 **Install**  
 See https://github.com/danielnilsson9/bbshd-fw/wiki/Flashing-the-Firmware
 
