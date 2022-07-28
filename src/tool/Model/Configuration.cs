@@ -26,6 +26,7 @@ namespace BBSFW.Model
 			Pas = 0x01,
 			Throttle = 0x02,
 			PasAndThrottle = 0x03,
+			VariablePas = 0x09,
 			Cruise = 0x04
 		};
 

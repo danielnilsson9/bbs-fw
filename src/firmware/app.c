@@ -47,7 +47,7 @@ static uint32_t motor_disable_ms;
 #define MOTOR_DISABLE_DELAY_MS				200
 
 
-void apply_pas(uint8_t* target_current);
+void apply_pas(uint8_t* target_current, uint8_t throttle_percent);
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
 void apply_current_ramp(uint8_t* target_current);
@@ -96,7 +96,8 @@ void app_process()
 	else
 	{
 		uint8_t throttle_percent = throttle_read();
-		apply_pas(&target_current);
+
+		apply_pas(&target_current, throttle_percent);
 		apply_cruise(&target_current, throttle_percent);
 		apply_current_ramp(&target_current);	// order is important, ramp shall not affect throttle
 
@@ -244,15 +245,26 @@ uint8_t app_get_motor_temperature()
 }
 
 
-void apply_pas(uint8_t* target_current)
+void apply_pas(uint8_t* target_current, uint8_t throttle_percent)
 {
 	if (assist_level_data.flags & ASSIST_FLAG_PAS)
 	{
 		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
 		{
-			if (assist_level_data.target_current_percent > *target_current)
+			if (assist_level_data.flags & ASSIST_FLAG_VARPAS)
 			{
-				*target_current = assist_level_data.target_current_percent;			
+				uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, 0, assist_level_data.target_current_percent);
+				if (current > *target_current)
+				{
+					*target_current = current;
+				}
+			}
+			else
+			{
+				if (assist_level_data.target_current_percent > *target_current)
+				{
+					*target_current = assist_level_data.target_current_percent;
+				}
 			}	
 		}
 	}

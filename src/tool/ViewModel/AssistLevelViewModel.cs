@@ -18,7 +18,8 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.Pas, "PAS"),
 				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.Throttle, "Throttle Only"),
 				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.PasAndThrottle, "PAS & Throttle"),
-				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.Cruise, "Cruise")
+				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.VariablePas, "Variable PAS"),
+				new ValueItemViewModel<Configuration.AssistType>(Configuration.AssistType.Cruise, "Cruise"),
 			};
 
 
@@ -49,6 +50,7 @@ namespace BBSFW.ViewModel
 							TargetCurrentPercent = 0;
 							break;
 						case Configuration.AssistType.Pas:
+						case Configuration.AssistType.VariablePas:
 							MaxThrottlePercent = 0;
 							break;
 					}
