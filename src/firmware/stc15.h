@@ -19,7 +19,7 @@
 #define __sbit		bool
 #define __at(X)		
 
-#define __xdata		
+#define __xdata
 #define __data		
 
 #define INTERRUPT(name, vector)					void name()

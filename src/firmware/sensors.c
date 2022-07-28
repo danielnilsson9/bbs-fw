@@ -28,15 +28,15 @@
 static volatile uint16_t pas_pulse_counter;
 static volatile bool pas_direction_backward;
 static volatile uint16_t pas_period_length;	// pulse length counted in interrupt frequency (100us)
-static __xdata uint16_t pas_period_counter;
-static __xdata bool pas_prev1;
-static __xdata bool pas_prev2;
-static __xdata uint16_t pas_stop_delay_periods;
+static uint16_t pas_period_counter;
+static bool pas_prev1;
+static bool pas_prev2;
+static uint16_t pas_stop_delay_periods;
 
 static volatile uint16_t speed_ticks_period_length; // pulse length counted in interrupt frequency (100us)
-static __xdata uint16_t speed_period_counter;
-static __xdata bool speed_prev_state;
-static __xdata uint8_t speed_ticks_per_rpm;
+static uint16_t speed_period_counter;
+static bool speed_prev_state;
+static uint8_t speed_ticks_per_rpm;
 
 
 void sensors_init()
@@ -87,7 +87,7 @@ uint8_t pas_get_cadence_rpm()
 
 	if (tmp > 0)
 	{
-		return (uint8_t)((600000UL / NUM_SIGNALS) / tmp);
+		return (uint8_t)((600000ul / NUM_SIGNALS) / tmp);
 	}
 	else
 	{
@@ -107,24 +107,27 @@ uint16_t pas_get_pulse_counter()
 
 bool pas_is_pedaling_forwards()
 {
-	uint16_t tmp;
+	uint16_t period_length;
+	uint8_t direction_backward;
 	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
-	tmp = pas_period_length;
+	period_length = pas_period_length;
+	direction_backward = pas_direction_backward;
 	SET_BIT(IE2, 6);
 
 	// atomic read operation, no need to disable timer interrupt
-	return tmp > 0 && !pas_direction_backward;
+	return period_length > 0 && !direction_backward;
 }
 
 bool pas_is_pedaling_backwards()
 {
-	uint16_t tmp;
+	uint16_t period_length;
+	uint8_t direction_backward;
 	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
-	tmp = pas_period_length;
+	period_length = pas_period_length;
+	direction_backward = pas_direction_backward;
 	SET_BIT(IE2, 6);
 
-	// atomic read operation, no need to disable timer interrupt
-	return tmp > 0 && pas_direction_backward;
+	return period_length > 0 && direction_backward;
 }
 
 void speed_sensor_set_signals_per_rpm(uint8_t num_signals)
@@ -151,7 +154,7 @@ uint16_t speed_sensor_get_rpm_x10()
 
 	if (tmp > 0)
 	{
-		return 6000000UL / tmp / speed_ticks_per_rpm;
+		return 6000000ul / tmp / speed_ticks_per_rpm;
 	}
 
 	return 0;
@@ -196,7 +199,7 @@ INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2)
 	// No 16/32 bit or float computations in ISR (multiply/divide/modulo).
 	// Read SDCC compiler manual for more info.
 
-	// pas
+	// Pas
 	{
 		bool pas1 = GET_PIN_STATE(PIN_PAS1);
 		bool pas2 = GET_PIN_STATE(PIN_PAS2);
@@ -204,8 +207,16 @@ INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2)
 		if (pas1 && !pas_prev1)
 		{
 			pas_pulse_counter++;
-			pas_direction_backward = pas2;
 
+			if (pas_direction_backward != pas2)
+			{
+				pas_direction_backward = pas2;
+
+				// Reset pas pulse counter if pedal direction is changed,
+				// this variable counts the number of pulses since start of pedaling session.
+				pas_pulse_counter = 0;
+			}
+			
 			if (pas_period_counter > 0)
 			{
 				if (pas_period_counter <= pas_stop_delay_periods)
@@ -241,7 +252,7 @@ INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2)
 	}
 
 
-	// speed sensor
+	// Speed sensor
 	{
 		bool spd = GET_PIN_STATE(PIN_SPEED_SENSOR);
 

@@ -73,9 +73,9 @@
 
 
 
-static __xdata uint8_t msg_len;
-static __xdata uint8_t msgbuf[128];
-static __xdata uint32_t last_recv;
+static uint8_t msg_len;
+static uint8_t msgbuf[128];
+static uint32_t last_recv;
 
 
 static uint8_t compute_checksum(uint8_t* buf, uint8_t length);
@@ -708,14 +708,14 @@ static int8_t process_bafang_display_write_speed_limit()
 		return KEEP;
 	}
 
-	if (compute_checksum(msgbuf + 2, 2) == msgbuf[4])
-	{
-		// Ignoring speed limit requested by display,
-		// global speed limit is configured in firmware config tool.
-		// 
-		// uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
-		// app_set_wheel_max_speed_rpm(value);
-	}
+	//if (compute_checksum(msgbuf + 2, 2) == msgbuf[4])
+	//{
+	//	 //Ignoring speed limit requested by display,
+	//	 //global speed limit is configured in firmware config tool.
+	//	 
+	//	 uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
+	//	 app_set_wheel_max_speed_rpm(value);
+	//}
 
 	return 5;
 }

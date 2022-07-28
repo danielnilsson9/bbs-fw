@@ -47,27 +47,27 @@
 #define MSGBUF_SIZE					8
 
 
-static __xdata uint8_t is_connected;
-static __xdata uint8_t msgbuf[MSGBUF_SIZE];
+static uint8_t is_connected;
+static uint8_t msgbuf[MSGBUF_SIZE];
 
-static __xdata bool target_speed_changed;
-static __xdata uint8_t target_speed;
+static bool target_speed_changed;
+static uint8_t target_speed;
 
-static __xdata bool target_current_changed;
-static __xdata uint8_t target_current;
+static bool target_current_changed;
+static uint8_t target_current;
 
-static __xdata uint8_t lvc_volt_x10;
+static uint8_t lvc_volt_x10;
 
-static __xdata uint16_t status_flags;
-static __xdata uint16_t battery_volt_x10;
-static __xdata uint16_t battery_amp_x10;
+static uint16_t status_flags;
+static uint16_t battery_volt_x10;
+static uint16_t battery_amp_x10;
 
 // state machine state
-static __xdata uint8_t com_state;
-static __xdata uint8_t last_sent_opcode;
-static __xdata uint32_t last_request_write_ms;
-static __xdata uint32_t last_status_read_ms;
-static __xdata uint8_t next_status_read_opcode;
+static uint8_t com_state;
+static uint8_t last_sent_opcode;
+static uint32_t last_request_write_ms;
+static uint32_t last_status_read_ms;
+static uint8_t next_status_read_opcode;
 
 
 static uint8_t compute_checksum(uint8_t* msg, uint8_t len);
@@ -458,7 +458,7 @@ static void process_com_state_machine_idle()
 	//
 	// Set target speed/current are prioritzed over status reading (shorter check interval).
 
-	__xdata uint32_t now = system_ms();
+	uint32_t now = system_ms();
 
 	// make sure requests have some space between them
 	if (now - last_request_write_ms < 32)

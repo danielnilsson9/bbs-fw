@@ -19,37 +19,37 @@
 #include "system.h"
 
 
-static __xdata uint8_t assist_level;
-static __xdata uint8_t operation_mode;
-static __xdata uint16_t global_max_speed_rpm;
+static uint8_t assist_level;
+static uint8_t operation_mode;
+static uint16_t global_max_speed_rpm;
 
-static __xdata assist_level_t assist_level_data;
-static __xdata int32_t assist_max_wheel_speed_rpm_x10;
-static __xdata uint16_t speed_limit_ramp_interval_rpm_x10;
+static assist_level_t assist_level_data;
+static int32_t assist_max_wheel_speed_rpm_x10;
+static uint16_t speed_limit_ramp_interval_rpm_x10;
 
-static __xdata bool last_light_state;
-static __xdata bool cruise_paused;
-static __xdata bool cruise_block_throttle_return;
+static bool last_light_state;
+static bool cruise_paused;
+static bool cruise_block_throttle_return;
 
-static __xdata int8_t motor_temperature;
-static __xdata bool speed_limiting;
+static int8_t motor_temperature;
+static bool speed_limiting;
 
-static __xdata uint8_t ramp_up_target_current;
-static __xdata uint32_t last_ramp_up_increment_ms;
-static __xdata uint16_t ramp_up_current_interval_ms;
+static uint8_t ramp_up_target_current;
+static uint32_t last_ramp_up_increment_ms;
+static uint16_t ramp_up_current_interval_ms;
 
-static __xdata uint32_t motor_disable_ms;
+static uint32_t motor_disable_ms;
 
 #define MAX_TEMPERATURE						75
 #define CRUISE_ENGAGE_PAS_PULSES			12
-#define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	2
+#define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	3
 
 #define MOTOR_DISABLE_DELAY_MS				200
 
 
 void apply_pas(uint8_t* target_current);
-void apply_cruise(uint8_t* target_current, uint8_t throtle_percent);
-void apply_throttle(uint8_t* target_current, uint8_t throttle_percen);
+void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
+void apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
 void apply_current_ramp(uint8_t* target_current);
 void apply_speed_limit(uint8_t* target_current);
 void apply_thermal_limit(uint8_t* target_current);
@@ -95,13 +95,12 @@ void app_process()
 	}
 	else
 	{
-		uint8_t throttle = throttle_read();
-
+		uint8_t throttle_percent = throttle_read();
 		apply_pas(&target_current);
-		apply_cruise(&target_current, throttle);
+		apply_cruise(&target_current, throttle_percent);
 		apply_current_ramp(&target_current);	// order is important, ramp shall not affect throttle
 
-		apply_throttle(&target_current, throttle);
+		apply_throttle(&target_current, throttle_percent);
 	}
 
 	apply_speed_limit(&target_current);
@@ -253,8 +252,8 @@ void apply_pas(uint8_t* target_current)
 		{
 			if (assist_level_data.target_current_percent > *target_current)
 			{
-				*target_current = assist_level_data.target_current_percent;
-			}		
+				*target_current = assist_level_data.target_current_percent;			
+			}	
 		}
 	}
 }
@@ -401,7 +400,7 @@ void apply_speed_limit(uint8_t* target_current)
 
 void apply_thermal_limit(uint8_t* target_current)
 {
-	__xdata static int8_t last_logged_temp = 0;
+	static int8_t last_logged_temp = 0;
 
 	int8_t temp = temperature_read();
 

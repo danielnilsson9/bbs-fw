@@ -56,7 +56,7 @@ typedef struct
 
 	// pas options
 	uint8_t pas_start_delay_pulses;
-	uint8_t pas_stop_delay_x10ms;
+	uint8_t pas_stop_delay_x100s;
 
 	// throttle options
 	uint16_t throttle_start_voltage_mv;
@@ -70,7 +70,7 @@ typedef struct
 } config_t;
 
 
-extern config_t __xdata g_config;
+extern config_t g_config;
 
 void cfgstore_init();
 

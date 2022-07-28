@@ -10,24 +10,26 @@
 #include "system.h"
 #include <stdint.h>
 
+// NOTE:
+// Variables located i __data are there for atomic access.
 
 // UART1
-static volatile uint8_t rx1_head;
-static volatile uint8_t rx1_tail;
-static volatile uint8_t __xdata rx1_buf[256];
-static volatile uint8_t tx1_head;
-static volatile uint8_t tx1_tail;
-static volatile uint8_t tx1_sending;
-static volatile uint8_t __xdata tx1_buf[256];
+static volatile __data uint8_t rx1_head;
+static volatile __data uint8_t rx1_tail;
+static volatile uint8_t rx1_buf[256];
+static volatile __data uint8_t tx1_head;
+static volatile __data uint8_t tx1_tail;
+static volatile __data uint8_t tx1_sending;
+static volatile uint8_t tx1_buf[256];
 
 // UART2
-static volatile uint8_t rx2_head;
-static volatile uint8_t rx2_tail;
-static volatile uint8_t __xdata rx2_buf[256];
-static volatile uint8_t tx2_head;
-static volatile uint8_t tx2_tail;
-static volatile uint8_t tx2_sending;
-static volatile uint8_t __xdata tx2_buf[256];
+static volatile __data uint8_t rx2_head;
+static volatile __data uint8_t rx2_tail;
+static volatile uint8_t rx2_buf[256];
+static volatile __data uint8_t tx2_head;
+static volatile __data uint8_t tx2_tail;
+static volatile __data uint8_t tx2_sending;
+static volatile uint8_t tx2_buf[256];
 
 
 void uart1_open(uint32_t baudrate)
