@@ -22,7 +22,7 @@ If you find this project useful, consider sending a small [donation](https://www
 * No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
 * Support lower voltage cutoff for use with e.g. 36V battery.
 * Smooth Throttle/PAS override.
-* Optional separate set of street legal & offroad assist levels.
+* Optional separate set of street legal & offroad assist levels which can be toggled by a key combination.
 * Support setting road speed limit per assist level.
 * Support setting cadence limit per assist level.
 * Support cruise assist levels (i.e. motor power without pedal or throttle input).
