@@ -176,12 +176,22 @@ namespace BBSFW.ViewModel
 			if (SelectedComPort != null)
 			{
 				IsConnecting = true;
-				var connected = await _connection.Connect(SelectedComPort, TimeSpan.FromSeconds(120));
 
-				if (!connected)
+				try
 				{
-					MessageBox.Show("Failed to connect, timeout occured.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					var connected = await _connection.Connect(SelectedComPort, TimeSpan.FromSeconds(120));
+
+					if (!connected)
+					{
+						MessageBox.Show("Failed to connect, timeout occured.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					}
 				}
+				catch (Exception ex)
+				{
+					MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					IsConnected = false;
+					IsConnecting = false;
+				}	
 			}
 		}
 

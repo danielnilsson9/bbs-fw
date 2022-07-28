@@ -125,12 +125,12 @@ namespace BBSFW.Model
 		{
 			if (_port != null)
 			{
+				_isConnected = false;
+				_isConnecting = false;
+
 				_port.Close();
 				_port.DataReceived += OnDataReceived;
 				_port = null;
-
-				_isConnected = false;
-				_isConnecting = false;
 
 				lock (_rxBuffer)
 				{
