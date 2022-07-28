@@ -17,7 +17,7 @@
 #define CONFIG_EEPROM_PAGE		0
 
 
-static const uint8_t default_current_limits[] = { 25, 34, 43, 51, 60, 68, 74, 82, 90 }; // :TODO: fix
+static const uint8_t default_current_limits[] = { 7, 15, 23, 31, 43, 55, 67, 79, 91 };
 
 typedef struct
 {

@@ -385,6 +385,7 @@ namespace BBSFW.ViewModel
 			OnPropertyChanged(nameof(UseMetricUnits));
 			OnPropertyChanged(nameof(UseImperialUnits));
 			OnPropertyChanged(nameof(MaxCurrentAmps));
+			OnPropertyChanged(nameof(CurrentRampAmpsSecond));
 			OnPropertyChanged(nameof(LowCutoffVolts));
 			OnPropertyChanged(nameof(MaxSpeedKph));
 			OnPropertyChanged(nameof(MaxSpeedMph));
