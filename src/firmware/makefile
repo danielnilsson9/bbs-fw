@@ -60,7 +60,7 @@ HEADERS = \
 RELS = $(EXTRASRCS:.c=.rel)
 
 INCLUDES = -I$(IDIR) -I. -I../
-CFLAGS   = -m$(PLATFORM) -Ddouble=float --std-c99 --nolospre -D$(TARGET_MCU)
+CFLAGS   = -m$(PLATFORM) --model-large -Ddouble=float --std-c99 -D$(TARGET_MCU)
 ELF_FLAGS = 
 LIBS     = 
 

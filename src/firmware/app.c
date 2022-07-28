@@ -41,9 +41,13 @@ static uint16_t ramp_up_current_interval_ms;
 static uint32_t motor_disable_ms;
 
 #define MAX_TEMPERATURE						75
+
 #define CRUISE_ENGAGE_PAS_PULSES			12
+#define CRUISE_DISENGAGE_PAS_PULSES			4
+
 #define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	3
 
+// :TODO: implement fast current ramp down instead to avoid jerk when releasing throttle
 #define MOTOR_DISABLE_DELAY_MS				200
 
 
@@ -282,7 +286,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 		}
 
 		// pause cruise if started pedaling backwards
-		else if (pas_is_pedaling_backwards() && pas_get_pulse_counter() > CRUISE_ENGAGE_PAS_PULSES)
+		else if (pas_is_pedaling_backwards() && pas_get_pulse_counter() > CRUISE_DISENGAGE_PAS_PULSES)
 		{
 			cruise_paused = true;
 			cruise_block_throttle_return = true;
