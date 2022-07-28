@@ -10,11 +10,11 @@
 #include "stc15.h"
 #include "pins.h"
 
-static __xdata uint8_t next_channel;
-static __xdata uint8_t no_adc_reading_counter;
+static uint8_t next_channel;
+static uint8_t no_adc_reading_counter;
 
-static __xdata uint8_t throttle_value;
-static __xdata uint8_t temperature_value;
+static uint8_t throttle_value;
+static uint8_t temperature_value;
 
 
 void adc_init()

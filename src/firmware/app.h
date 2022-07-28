@@ -9,6 +9,7 @@
 #ifndef _APP_H_
 #define _APP_H_
 
+#include "stc15.h"
 #include <stdint.h>
 #include <stdbool.h>
 

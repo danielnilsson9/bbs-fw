@@ -16,15 +16,17 @@
 
 #include <stdbool.h>
 
-static __xdata uint8_t min_voltage_adc;
-static __xdata uint8_t max_voltage_adc;
+static uint8_t min_voltage_adc;
+static uint8_t max_voltage_adc;
 
-static __xdata uint8_t start_percent;
+static uint8_t start_percent;
 
-static __xdata bool throttle_low_ok;
-static __xdata bool throttle_hard_ok;
-static __xdata uint32_t throttle_hard_limit_hit_at;
+static bool throttle_low_ok;
+static bool throttle_hard_ok;
+static uint32_t throttle_hard_limit_hit_at;
 
+
+//#define LOG_THROTTLE_ADC
 
 #define ADC_VOLTAGE_MV						5000ul
 
@@ -54,14 +56,16 @@ bool throttle_ok()
 
 uint8_t throttle_read()
 {
-	//static __xdata uint8_t last_logged_throttle_adc = 0;
-
 	int16_t value = adc_get_throttle();
-	/*if (ABS(value - last_logged_throttle_adc) > 1)
+
+#ifdef LOG_THROTTLE_ADC
+	static uint8_t last_logged_throttle_adc = 0;	
+	if (ABS(value - last_logged_throttle_adc) > 1)
 	{
 		last_logged_throttle_adc = value;
 		eventlog_write_data(EVT_DATA_THROTTLE_ADC, value);		
-	}*/
+	}
+#endif
 	
 	if (value < THROTTLE_HARD_LOW_LIMIT_ADC || value > THROTTLE_HARD_HIGH_LIMIT_ADC)
 	{

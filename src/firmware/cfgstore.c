@@ -17,7 +17,7 @@
 #define CONFIG_EEPROM_PAGE		0
 
 
-static const uint8_t default_current_limits[] = { 25, 34, 43, 51, 60, 68, 74, 82, 90 };
+static const uint8_t default_current_limits[] = { 25, 34, 43, 51, 60, 68, 74, 82, 90 }; // :TODO: fix
 
 typedef struct
 {
@@ -27,8 +27,8 @@ typedef struct
 } config_header_t;
 
 
-static __xdata config_header_t header;
-__xdata config_t g_config;
+static config_header_t header;
+config_t g_config;
 
 
 static bool read_config();
@@ -207,7 +207,7 @@ static void load_default_config()
 	g_config.max_speed_kph = 100;
 
 	g_config.pas_start_delay_pulses = 5;
-	g_config.pas_stop_delay_x10ms = 20;
+	g_config.pas_stop_delay_x100s = 20;
 
 	g_config.throttle_start_voltage_mv = 900;
 	g_config.throttle_end_voltage_mv = 3600;
