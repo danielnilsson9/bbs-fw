@@ -9,13 +9,11 @@ PLATFORM = mcs51
 # Target name
 PNAME = main
 
-# Specific to this project, different BBSHD controller revisions 
-# uses different MCUs which affects eeprom operations.
-#
-# V1.5 -> IAP15W4K61
-# V1.4 -> STC15W4K56
-#TARGET_MCU = IAP15W4K61
-TARGET_MCU = STC15W4K56
+
+# When addding support for more controllers, define
+# new entries here if auto detection cannot be supported.
+TARGET_CONTROLLER = BBSHD
+
 
 # External libraries
 IDIR = 
@@ -60,7 +58,7 @@ HEADERS = \
 RELS = $(EXTRASRCS:.c=.rel)
 
 INCLUDES = -I$(IDIR) -I. -I../
-CFLAGS   = -m$(PLATFORM) --model-large -Ddouble=float --std-c99 -D$(TARGET_MCU)
+CFLAGS   = -m$(PLATFORM) --model-large -Ddouble=float --std-c99 -D$(TARGET_CONTROLLER)
 ELF_FLAGS = 
 LIBS     = 
 

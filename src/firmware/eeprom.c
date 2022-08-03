@@ -10,27 +10,25 @@
 #include "stc15.h"
 
 
-#if defined(STC15W4K56)
-	#define EEPROM_ADDRESS_OFFSET		0x0000
-	#define EEPROM_NUM_SECTORS			4
-#elif defined(IAP15W4K61)
-	#define EEPROM_ADDRESS_OFFSET		0xEC00
-	#define EEPROM_NUM_SECTORS			4
-#else
-	#define EEPROM_ADDRESS_OFFSET		0x0000
-	#define EEPROM_NUM_SECTORS			0
-#endif
+#define EEPROM_NUM_SECTORS			4
 
+// STC chips has a special area in flash for eeprom.
+#define STC15W4K56_ADDRESS_OFFSET		0x0000
+
+// IAP chips have no special area, same area as program
+// memory and address space is the same. We define the last
+// four sectors for eeprom usage ourself.
+#define IAP15W4K61_ADDRESS_OFFSET		0xEC00
 
 #define IAP_CMD_IDLE		0
 #define IAP_CMD_READ		1
 #define IAP_CMD_PROGRAM		2
 #define IAP_CMD_ERASE		3
 
-
 #define IAP_ENABLE			0x82		// Wait time, CPU_FREQ < 20MHz
 
 
+static uint16_t address_offset = 0x0000;
 static uint16_t selected_sector_offset = 0;
 
 
@@ -62,11 +60,25 @@ static void eeprom_end()
 	IAP_ADDRL = 0xff;
 }
 
+void eeprom_init()
+{
+	// Detect if we are running on IAP or STC model dependeing on if
+	// we can read from IAP address offset which is outside eeprom
+	// address space on STC model.
+
+	address_offset = IAP15W4K61_ADDRESS_OFFSET;
+	eeprom_select_page(0);
+	if (eeprom_read_byte(0) == -1)
+	{
+		address_offset = STC15W4K56_ADDRESS_OFFSET;
+	}
+}
+
 bool eeprom_select_page(int page)
 {
 	if (page >= 0 && page < EEPROM_NUM_SECTORS)
 	{
-		selected_sector_offset = EEPROM_ADDRESS_OFFSET +  page * 512;
+		selected_sector_offset = address_offset +  page * 512;
 		return true;
 	}
 

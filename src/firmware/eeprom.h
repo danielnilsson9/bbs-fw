@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+void eeprom_init();
+
 bool eeprom_select_page(int page);
 
 bool eeprom_erase_page();

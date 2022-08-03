@@ -34,6 +34,7 @@ void main(void)
 	eventlog_init(false);
 	extcom_init();
 
+	eeprom_init();
 	cfgstore_init();
 
 	adc_init();
