@@ -208,11 +208,14 @@ uint8_t app_get_status_code()
 {
 	uint16_t motor = motor_status();
 
-	// TODO: figure out current sense error code from motor controller
-
-	if (motor & 0x10)
+	if (motor & MOTOR_ERROR_HALL_SENSOR)
 	{
 		return STATUS_ERROR_HALL_SENSOR;
+	}
+
+	if (motor & MOTOR_ERROR_CURRENT_SENSE)
+	{
+		return STATUS_ERROR_CURRENT_SENSE;
 	}
 
 	if (!throttle_ok())
@@ -225,10 +228,12 @@ uint8_t app_get_status_code()
 		return STATUS_ERROR_CONTROLLER_OVER_TEMP;
 	}
 
-	if (motor & MOTOR_ERROR_LVC)
+	// Disable LVC error since it is not shown on display in original firmware
+	// Uncomment if you want to enable
+	/*if (motor & MOTOR_ERROR_LVC)
 	{
 		return STATUS_ERROR_LVC;
-	}
+	}*/
 
 	if (brake_is_activated() || gear_sensor_is_activated())
 	{
