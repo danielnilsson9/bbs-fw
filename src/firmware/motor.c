@@ -34,6 +34,7 @@
 
 #define READ_TIMEOUT			100
 
+#define ADC_STEPS_PER_VOLT_X10	148u
 
 // async om state machine
 #define COM_STATE_IDLE				0x01
@@ -315,7 +316,7 @@ static int try_read_response(uint8_t opcode, uint16_t* out_data)
 			{
 				if (opcode == OPCODE_LVC || opcode == OPCODE_READ_STATUS || opcode == OPCODE_READ_VOLTAGE)
 				{
-					*out_data = msgbuf[2] << 8 | msgbuf[3];
+					*out_data = ((uint16_t)msgbuf[2] << 8) | msgbuf[3];
 				}
 				else
 				{
@@ -414,7 +415,7 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V)
 
 	system_delay_ms(4);
 
-	send_request(OPCODE_LVC, lvc_V * 14);
+	send_request(OPCODE_LVC, ((uint16_t)lvc_V * ADC_STEPS_PER_VOLT_X10) / 10u);
 	if (!read_response(OPCODE_LVC, 0))
 	{
 		return 0;
@@ -617,7 +618,7 @@ static void process_com_state_machine()
 	case COM_STATE_READ_VOLTAGE:
 		if (try_read_response(OPCODE_READ_VOLTAGE, &data))
 		{
-			battery_volt_x10 = (data * 10) / 14;
+			battery_volt_x10 = (uint16_t)(((uint32_t)data * 100) / ADC_STEPS_PER_VOLT_X10);
 		}
 		else
 		{

@@ -33,6 +33,7 @@ static bool cruise_block_throttle_return;
 
 static int8_t motor_temperature;
 static bool speed_limiting;
+static bool lvc_limiting;
 
 static uint8_t ramp_up_target_current;
 static uint32_t last_ramp_up_increment_ms;
@@ -41,6 +42,7 @@ static uint16_t ramp_up_current_interval_ms;
 static uint32_t motor_disable_ms;
 
 #define MAX_TEMPERATURE						75
+#define LVC_RAMP_DOWN_OFFSET_V_X10			25		// Current ramp down starts at (LVC + 2.5V)
 
 #define CRUISE_ENGAGE_PAS_PULSES			12
 #define CRUISE_DISENGAGE_PAS_PULSES			4
@@ -57,6 +59,7 @@ void apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
 void apply_current_ramp(uint8_t* target_current);
 void apply_speed_limit(uint8_t* target_current);
 void apply_thermal_limit(uint8_t* target_current);
+void apply_low_voltage_limit(uint8_t* target_current);
 
 void reload_assist_params();
 
@@ -71,6 +74,7 @@ void app_init()
 	last_light_state = false;
 	motor_temperature = 0;
 	speed_limiting = false;
+	lvc_limiting = false;
 
 	ramp_up_target_current = 0;
 	last_ramp_up_increment_ms = 0;
@@ -110,6 +114,7 @@ void app_process()
 
 	apply_speed_limit(&target_current);
 	apply_thermal_limit(&target_current);
+	apply_low_voltage_limit(&target_current);
 
 	motor_set_target_speed((uint8_t)((255u * assist_level_data.max_cadence_percent) / 100u));
 	motor_set_target_current(target_current);
@@ -452,6 +457,42 @@ void apply_thermal_limit(uint8_t* target_current)
 	motor_temperature = temp;
 }
 
+void apply_low_voltage_limit(uint8_t* target_current)
+{
+	uint16_t voltage = motor_get_battery_voltage_x10();
+	uint16_t start_limit_v = motor_get_battery_lvc_x10() + LVC_RAMP_DOWN_OFFSET_V_X10;
+
+	if (voltage <= start_limit_v)
+	{
+		uint16_t lvc = motor_get_battery_lvc_x10();
+
+		if (!lvc_limiting)
+		{
+			eventlog_write_data(EVT_DATA_LVC_LIMITING, voltage);
+			lvc_limiting = true;
+		}
+
+		if (voltage < lvc)
+		{
+			voltage = lvc;
+		}
+
+		// ramp down power until 20% when approaching lvc
+		uint8_t tmp = (uint8_t)MAP32(voltage, lvc, start_limit_v, 20, 100);
+		if (*target_current > tmp)
+		{
+			*target_current = tmp;
+		}
+	}
+	else
+	{
+		if (lvc_limiting)
+		{
+			lvc_limiting = false;
+			eventlog_write_data(EVT_DATA_LVC_LIMITING, 0);
+		}
+	}
+}
 
 void reload_assist_params()
 {

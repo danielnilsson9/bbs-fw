@@ -44,6 +44,7 @@ namespace BBSFW.Model
 		private const int EVT_DATA_MAX_CURRENT_ADC_RESPONSE =	139;
 		private const int EVT_DATA_MAIN_LOOP_TIME =				140;
 		private const int EVT_DATA_THROTTLE_ADC =				141;
+		private const int EVT_DATA_LVC_LIMITING =				142;
 
 
 		public enum LogLevel
@@ -164,6 +165,15 @@ namespace BBSFW.Model
 					return $"Main loop, interval={_data}ms.";
 				case EVT_DATA_THROTTLE_ADC:
 					return $"Throttle adc, value={_data}.";
+				case EVT_DATA_LVC_LIMITING:
+					if (_data.Value != 0)
+					{
+						return $"Low voltage limiting activated, voltage={(_data / 10.0):0.0}";
+					}
+					else
+					{
+						return "Low voltage limiting deactivated.";
+					}
 			}
 
 			if (_data.HasValue)
