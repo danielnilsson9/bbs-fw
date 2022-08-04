@@ -35,9 +35,6 @@ If you find this project useful, consider sending a small [donation](https://www
 ## Limitations
 * No battery SOC calculation implemented yet, set display to show battery voltage instead.
 * No range estimation, the range field on the display will show motor temperature instead.
-* Low voltage cutoff is a bit crude, it does not limit power when approaching LVC.  
-When limit has been hit controller is disabled and needs to be restarted by power cycle.
-* Reporting of some motor technical error codes is missing (e.g. current sense resistor and phase line errors).
 
 
 ## Supported Hardware
@@ -52,6 +49,8 @@ V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
 ### BBS02
 
 Not yet. Consider sending a [donation](https://www.paypal.com/donate/?business=LVAYFCMQYN8F4&no_recurring=0&item_name=BBSHD-FW&currency_code=USD) that will go towards obtaining a BBS02 controller for reverse engineering.
+
+I have currently received 23 USD and will order a controller and start working on this if we reach 100.
 
 ### BBS01
 
