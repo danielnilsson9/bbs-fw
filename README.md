@@ -35,8 +35,6 @@ If you find this project useful, consider sending a small [donation](https://www
 ## Limitations
 * No battery SOC calculation implemented yet, set display to show battery voltage instead.
 * No range estimation, the range field on the display will show motor temperature instead.
-* Low voltage cutoff is a bit crude, it does not limit power when approaching LVC.  
-When limit has been hit controller is disabled and needs to be restarted by power cycle.
 
 
 ## Supported Hardware
