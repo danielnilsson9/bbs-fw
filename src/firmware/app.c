@@ -19,6 +19,32 @@
 #include "system.h"
 
 
+// Compile time options
+
+#define MAX_TEMPERATURE						75
+
+// Current ramp down starts at (LVC + 2.5V)
+#define LVC_RAMP_DOWN_OFFSET_V_X10			25		
+
+// Number of PAS sensor pulses to engage cruise mode,
+// there are 24 pulses per revolution.
+#define CRUISE_ENGAGE_PAS_PULSES			12
+
+// Number of PAS sensor pulses to disengage curise mode
+// by pedaling backwards. There are 24 pulses per revolution.
+#define CRUISE_DISENGAGE_PAS_PULSES			4
+
+// Size of speed limit ramp down interval.
+// If max speed is 50 and this is set to 3 then the
+// target current will start ramping down when passing 47
+// and be at 50% of max current when reaching 50.
+#define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	3
+
+ // Current ramp down (e.g. when releasing throttle, stop pedaling etc.) in percent per 10 millisecond.
+ // Specifying 1 will make ramp down periond 1 second if relasing from full throttle.
+#define CURRENT_RAMP_DOWN_PERCENT_10MS		5		
+
+
 static uint8_t assist_level;
 static uint8_t operation_mode;
 static uint16_t global_max_speed_rpm;
@@ -39,27 +65,19 @@ static uint8_t ramp_up_target_current;
 static uint32_t last_ramp_up_increment_ms;
 static uint16_t ramp_up_current_interval_ms;
 
-static uint32_t motor_disable_ms;
+static uint8_t ramp_down_target_current;
+static uint32_t last_ramp_down_decrement_ms;
 
-#define MAX_TEMPERATURE						75
-#define LVC_RAMP_DOWN_OFFSET_V_X10			25		// Current ramp down starts at (LVC + 2.5V)
-
-#define CRUISE_ENGAGE_PAS_PULSES			12
-#define CRUISE_DISENGAGE_PAS_PULSES			4
-
-#define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	3
-
-// :TODO: implement fast current ramp down instead to avoid jerk when releasing throttle
-#define MOTOR_DISABLE_DELAY_MS				200
 
 
 void apply_pas(uint8_t* target_current, uint8_t throttle_percent);
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
+void apply_current_ramp_up(uint8_t* target_current);
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
-void apply_current_ramp(uint8_t* target_current);
 void apply_speed_limit(uint8_t* target_current);
 void apply_thermal_limit(uint8_t* target_current);
 void apply_low_voltage_limit(uint8_t* target_current);
+void apply_current_ramp_down(uint8_t* target_current);
 
 void reload_assist_params();
 
@@ -79,8 +97,6 @@ void app_init()
 	ramp_up_target_current = 0;
 	last_ramp_up_increment_ms = 0;
 	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
-
-	motor_disable_ms = 0;
 
 	cruise_paused = true;
 	cruise_block_throttle_return = false;
@@ -107,7 +123,7 @@ void app_process()
 
 		apply_pas(&target_current, throttle_percent);
 		apply_cruise(&target_current, throttle_percent);
-		apply_current_ramp(&target_current);	// order is important, ramp shall not affect throttle
+		apply_current_ramp_up(&target_current);	// order is important, ramp up shall not affect throttle
 
 		apply_throttle(&target_current, throttle_percent);
 	}
@@ -116,29 +132,24 @@ void app_process()
 	apply_thermal_limit(&target_current);
 	apply_low_voltage_limit(&target_current);
 
+	apply_current_ramp_down(&target_current);
+
 	motor_set_target_speed((uint8_t)((255u * assist_level_data.max_cadence_percent) / 100u));
 	motor_set_target_current(target_current);
 	
 	if (target_current > 0 && !brake_is_activated() && !gear_sensor_is_activated())
 	{
 		motor_enable();
-		motor_disable_ms = 0;
 	}
 	else
 	{
-		if (motor_disable_ms == 0)
-		{
-			motor_disable_ms = system_ms();
-		}
-
-		if (brake_is_activated() || gear_sensor_is_activated() || (system_ms() - motor_disable_ms) > MOTOR_DISABLE_DELAY_MS)
-		{
-			motor_disable();
-		}
+		motor_disable();
 
 		// force reset current ramp
 		ramp_up_target_current = 0;
+		ramp_down_target_current = 0;
 		last_ramp_up_increment_ms = 0;
+		last_ramp_down_decrement_ms = 0;
 	}
 
 	if (motor_status() & MOTOR_ERROR_LVC)
@@ -336,7 +347,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 	}
 }
 
-void apply_current_ramp(uint8_t* target_current)
+void apply_current_ramp_up(uint8_t* target_current)
 {
 	if (*target_current > ramp_up_target_current)
 	{
@@ -493,6 +504,44 @@ void apply_low_voltage_limit(uint8_t* target_current)
 		}
 	}
 }
+
+void apply_current_ramp_down(uint8_t* target_current)
+{
+	if (*target_current < ramp_down_target_current)
+	{
+		uint32_t now = system_ms();
+		uint16_t time_diff = now - last_ramp_down_decrement_ms;
+
+		if (time_diff >= 10)
+		{
+			if (ramp_down_target_current >= CURRENT_RAMP_DOWN_PERCENT_10MS)
+			{
+				ramp_down_target_current -= CURRENT_RAMP_DOWN_PERCENT_10MS;
+			}
+			else
+			{
+				ramp_down_target_current = 0;
+			}
+	
+			if (last_ramp_down_decrement_ms == 0)
+			{
+				last_ramp_down_decrement_ms = now;
+			}
+			else
+			{
+				// offset for time overshoot to not accumulate large ramp error
+				last_ramp_down_decrement_ms = now - (uint8_t)(time_diff - 10);
+			}
+		}
+
+		*target_current = ramp_down_target_current;
+	}
+	else
+	{
+		ramp_down_target_current = *target_current;
+	}
+}
+
 
 void reload_assist_params()
 {
