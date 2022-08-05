@@ -45,6 +45,7 @@ namespace BBSFW.Model
 		private const int EVT_DATA_MAIN_LOOP_TIME =				140;
 		private const int EVT_DATA_THROTTLE_ADC =				141;
 		private const int EVT_DATA_LVC_LIMITING =				142;
+		private const int EVT_DATA_SHIFT_SENSOR =				143;
 
 
 		public enum LogLevel
@@ -173,6 +174,15 @@ namespace BBSFW.Model
 					else
 					{
 						return "Low voltage limiting deactivated.";
+					}
+				case EVT_DATA_SHIFT_SENSOR:
+					if (_data.Value != 0)
+					{
+						return $"Shift sensor power ramp started.";
+					}
+					else
+					{
+						return $"Shift sensor power ramp ended.";
 					}
 			}
 

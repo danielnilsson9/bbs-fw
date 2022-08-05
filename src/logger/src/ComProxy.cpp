@@ -193,6 +193,28 @@ void ComProxy::printFormat(Stream& stream, const Event& evt)
 		stream.print(evt.data);
 		stream.print(F("."));
 		break;
+    case EVT_DATA_LVC_LIMITING:
+        if (evt.data != 0)
+        {
+            stream.print(F("Low voltage limiting activated, voltage="));
+            stream.print(evt.data / 10.f);
+            stream.print(F("."));
+        }
+        else
+        {
+            stream.print("Low voltage limiting deactivated.");
+        }
+        break;
+    case EVT_DATA_SHIFT_SENSOR:
+        if (evt.data.Value != 0)
+        {
+            stream.print("Shift sensor power ramp started.");
+        }
+        else
+        {
+            stream.print("Shift sensor power ramp ended.");
+        }
+        break;
 	default:
 		stream.print(F("Unknown entry, id="));
 		stream.print(evt.id);

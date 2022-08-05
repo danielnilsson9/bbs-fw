@@ -42,7 +42,10 @@
 
  // Current ramp down (e.g. when releasing throttle, stop pedaling etc.) in percent per 10 millisecond.
  // Specifying 1 will make ramp down periond 1 second if relasing from full throttle.
-#define CURRENT_RAMP_DOWN_PERCENT_10MS		5		
+#define CURRENT_RAMP_DOWN_PERCENT_10MS		5
+
+// How long the power interrupt will last when gear sensor is triggered.
+#define SHIFT_SENSOR_INTERRUPT_PERIOD_MS	300
 
 
 static uint8_t assist_level;
@@ -68,16 +71,18 @@ static uint16_t ramp_up_current_interval_ms;
 static uint8_t ramp_down_target_current;
 static uint32_t last_ramp_down_decrement_ms;
 
+static uint32_t shift_sensor_activated_ms;
 
 
 void apply_pas(uint8_t* target_current, uint8_t throttle_percent);
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
-void apply_current_ramp_up(uint8_t* target_current);
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
 void apply_speed_limit(uint8_t* target_current);
 void apply_thermal_limit(uint8_t* target_current);
 void apply_low_voltage_limit(uint8_t* target_current);
+void apply_current_ramp_up(uint8_t* target_current);
 void apply_current_ramp_down(uint8_t* target_current);
+void apply_shift_sensor_interrupt(uint8_t* target_current);
 
 void reload_assist_params();
 
@@ -97,6 +102,8 @@ void app_init()
 	ramp_up_target_current = 0;
 	last_ramp_up_increment_ms = 0;
 	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
+
+	shift_sensor_activated_ms = 0;
 
 	cruise_paused = true;
 	cruise_block_throttle_return = false;
@@ -123,7 +130,9 @@ void app_process()
 
 		apply_pas(&target_current, throttle_percent);
 		apply_cruise(&target_current, throttle_percent);
-		apply_current_ramp_up(&target_current);	// order is important, ramp up shall not affect throttle
+
+		// order is important, ramp up shall not affect throttle
+		apply_current_ramp_up(&target_current);
 
 		apply_throttle(&target_current, throttle_percent);
 	}
@@ -134,10 +143,12 @@ void app_process()
 
 	apply_current_ramp_down(&target_current);
 
+	apply_shift_sensor_interrupt(&target_current);
+
 	motor_set_target_speed((uint8_t)((255u * assist_level_data.max_cadence_percent) / 100u));
 	motor_set_target_current(target_current);
 	
-	if (target_current > 0 && !brake_is_activated() && !gear_sensor_is_activated())
+	if (target_current > 0 && !brake_is_activated())
 	{
 		motor_enable();
 	}
@@ -145,7 +156,7 @@ void app_process()
 	{
 		motor_disable();
 
-		// force reset current ramp
+		// force reset current ramps
 		ramp_up_target_current = 0;
 		ramp_down_target_current = 0;
 		last_ramp_up_increment_ms = 0;
@@ -251,7 +262,7 @@ uint8_t app_get_status_code()
 		return STATUS_ERROR_LVC;
 	}*/
 
-	if (brake_is_activated() || gear_sensor_is_activated())
+	if (brake_is_activated())
 	{
 		return STATUS_BRAKING;
 	}
@@ -344,36 +355,6 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 				*target_current = assist_level_data.target_current_percent;
 			}
 		}
-	}
-}
-
-void apply_current_ramp_up(uint8_t* target_current)
-{
-	if (*target_current > ramp_up_target_current)
-	{
-		uint32_t now = system_ms();
-		uint16_t time_diff = now - last_ramp_up_increment_ms;
-
-		if (time_diff >= ramp_up_current_interval_ms)
-		{
-			++ramp_up_target_current;
-		
-			if (last_ramp_up_increment_ms == 0)
-			{
-				last_ramp_up_increment_ms = now;
-			}
-			else
-			{
-				// offset for time overshoot to not accumulate large ramp error
-				last_ramp_up_increment_ms = now - (uint8_t)(time_diff - ramp_up_current_interval_ms);
-			}		
-		}
-
-		*target_current = ramp_up_target_current;
-	}
-	else
-	{
-		ramp_up_target_current = *target_current;
 	}
 }
 
@@ -505,6 +486,36 @@ void apply_low_voltage_limit(uint8_t* target_current)
 	}
 }
 
+void apply_current_ramp_up(uint8_t* target_current)
+{
+	if (*target_current > ramp_up_target_current)
+	{
+		uint32_t now = system_ms();
+		uint16_t time_diff = now - last_ramp_up_increment_ms;
+
+		if (time_diff >= ramp_up_current_interval_ms)
+		{
+			++ramp_up_target_current;
+
+			if (last_ramp_up_increment_ms == 0)
+			{
+				last_ramp_up_increment_ms = now;
+			}
+			else
+			{
+				// offset for time overshoot to not accumulate large ramp error
+				last_ramp_up_increment_ms = now - (uint8_t)(time_diff - ramp_up_current_interval_ms);
+			}
+		}
+
+		*target_current = ramp_up_target_current;
+	}
+	else
+	{
+		ramp_up_target_current = *target_current;
+	}
+}
+
 void apply_current_ramp_down(uint8_t* target_current)
 {
 	if (*target_current < ramp_down_target_current)
@@ -541,6 +552,46 @@ void apply_current_ramp_down(uint8_t* target_current)
 		ramp_down_target_current = *target_current;
 	}
 }
+
+void apply_shift_sensor_interrupt(uint8_t* target_current)
+{
+	bool active = shift_sensor_is_activated();
+	if (active)
+	{
+		if (shift_sensor_activated_ms == 0)
+		{
+			shift_sensor_activated_ms = system_ms();
+			eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 1);
+		}
+	}
+
+	uint32_t timediff = system_ms() - shift_sensor_activated_ms;
+	if (active || timediff < SHIFT_SENSOR_INTERRUPT_PERIOD_MS)
+	{
+		if (timediff < SHIFT_SENSOR_INTERRUPT_PERIOD_MS / 4)
+		{
+			// reduce target power to 3/4 of requested (ramp down), shift started
+			*target_current = (uint8_t)(3u * (*target_current) / 4u);
+		}
+		else if (!active && timediff > (3 * SHIFT_SENSOR_INTERRUPT_PERIOD_MS) / 4)
+		{
+			// reduce target power to 3/4 of requested (ramp up), shift finished
+			*target_current = (uint8_t)(3u * (*target_current) / 4u);
+		}
+		else
+		{
+			// keep power at 1/2 requested
+			*target_current = (uint8_t)(*target_current / 2u);
+		}
+	}
+	else if (!active && shift_sensor_activated_ms != 0)
+	{
+		// shifting finished, force ramp up
+		shift_sensor_activated_ms = 0;
+		eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 0);
+	}
+}
+
 
 
 void reload_assist_params()

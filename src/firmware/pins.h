@@ -29,7 +29,7 @@
 
 #define PIN_SPEED_SENSOR				2, 2
 #define PIN_BRAKE						2, 4
-#define PIN_GEAR_SENSOR					2, 6
+#define PIN_SHIFT_SENSOR				2, 6
 #define PIN_THROTTLE					1, 3
 #define PIN_LIGHTS_POWER				2, 3
 #define PIN_LIGHTS						5, 1

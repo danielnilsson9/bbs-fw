@@ -57,7 +57,7 @@ void sensors_init()
 	SET_PIN_INPUT(PIN_PAS2);
 	SET_PIN_INPUT(PIN_SPEED_SENSOR);
 	SET_PIN_INPUT(PIN_BRAKE);
-	SET_PIN_INPUT(PIN_GEAR_SENSOR);
+	SET_PIN_INPUT(PIN_SHIFT_SENSOR);
 
 	pas_prev1 = GET_PIN_STATE(PIN_PAS1);
 	pas_prev2 = GET_PIN_STATE(PIN_PAS2);
@@ -187,9 +187,9 @@ bool brake_is_activated()
 	return !GET_PIN_STATE(PIN_BRAKE);
 }
 
-bool gear_sensor_is_activated()
+bool  shift_sensor_is_activated()
 {
-	return !GET_PIN_STATE(PIN_GEAR_SENSOR);
+	return !GET_PIN_STATE(PIN_SHIFT_SENSOR);
 }
 
 

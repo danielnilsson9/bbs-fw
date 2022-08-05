@@ -50,6 +50,7 @@
 #define EVT_DATA_MAIN_LOOP_TIME				140
 #define EVT_DATA_THROTTLE_ADC				141
 #define EVT_DATA_LVC_LIMITING				142
+#define EVT_DATA_SHIFT_SENSOR				143
 
 
 void eventlog_init(bool enabled);
