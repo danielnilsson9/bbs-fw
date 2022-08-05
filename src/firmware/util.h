@@ -16,5 +16,9 @@
 
 #define ABS(x) (x) < 0 ? -(x) : (x)
 
+// Low pass filter
+// value + (new_value - value) / n;
+#define EXPONENTIAL_FILTER(value, new_value, n)		(value) + ((new_value) - (value)) / (n)		
+
 #endif
 

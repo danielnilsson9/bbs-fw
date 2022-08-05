@@ -12,6 +12,7 @@
 #include "uart.h"
 #include "system.h"
 #include "adc.h"
+#include "util.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -160,22 +161,31 @@ uint16_t speed_sensor_get_rpm_x10()
 	return 0;
 }
 
-int8_t temperature_read()
+int16_t temperature_get_x100()
 {
-	uint8_t adc = adc_get_temperature();
+	static int16_t adc_x100 = 0;
 
-	if (adc != 0)
+	if (adc_x100 == 0)
+	{
+		adc_x100 = adc_get_temperature() * 100;
+	}
+	else
+	{
+		adc_x100 = EXPONENTIAL_FILTER(adc_x100, adc_get_temperature() * 100, 4);
+	}
+	
+	if (adc_x100 != 0)
 	{
 		// :TODO: Measure and calculate beta value for range 25 - 80 degrees
 		const float invBeta = 1.f / 3600.f;
 		const float invT0 = 1.f / 298.15f;
 
-		float R = 5100.f * ((255.f / (255.f - adc)) - 1.f);
+		float R = 5100.f * ((25500.f / (25500.f - adc_x100)) - 1.f);
 
 		float K = 1.f / (invT0 + invBeta * (logf(R / 10000.f)));
 		float C = K - 273.15f;
 
-		return (int8_t)(C + 0.5f);
+		return (int16_t)(C * 100.f + 0.5f);
 	}
 
 	return 0;

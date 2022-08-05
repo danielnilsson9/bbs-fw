@@ -21,7 +21,12 @@
 
 // Compile time options
 
+
 #define MAX_TEMPERATURE						75
+
+// Current ramp down starts at MAX_TEMPERATURE - 4.
+#define MAX_TEMPERATURE_RAMP_DOWN_INTERVAL	4	
+
 
 // Current ramp down starts at (LVC + 2.5V)
 #define LVC_RAMP_DOWN_OFFSET_V_X10			25		
@@ -40,8 +45,9 @@
 // and be at 50% of max current when reaching 50.
 #define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	3
 
- // Current ramp down (e.g. when releasing throttle, stop pedaling etc.) in percent per 10 millisecond.
- // Specifying 1 will make ramp down periond 1 second if relasing from full throttle.
+// Current ramp down (e.g. when releasing throttle, stop pedaling etc.) in percent per 10 millisecond.
+// Specifying 1 will make ramp down periond 1 second if relasing from full throttle.
+// Set to 100 to disable
 #define CURRENT_RAMP_DOWN_PERCENT_10MS		5
 
 // How long the power interrupt will last when gear sensor is triggered.
@@ -56,13 +62,8 @@ static assist_level_t assist_level_data;
 static int32_t assist_max_wheel_speed_rpm_x10;
 static uint16_t speed_limit_ramp_interval_rpm_x10;
 
-static bool last_light_state;
 static bool cruise_paused;
-static bool cruise_block_throttle_return;
-
 static int8_t motor_temperature;
-static bool speed_limiting;
-static bool lvc_limiting;
 
 static uint8_t ramp_up_target_current;
 static uint32_t last_ramp_up_increment_ms;
@@ -70,8 +71,6 @@ static uint16_t ramp_up_current_interval_ms;
 
 static uint8_t ramp_down_target_current;
 static uint32_t last_ramp_down_decrement_ms;
-
-static uint32_t shift_sensor_activated_ms;
 
 
 void apply_pas(uint8_t* target_current, uint8_t throttle_percent);
@@ -94,19 +93,14 @@ void app_init()
 	lights_disable();
 
 	global_max_speed_rpm = 0;
-	last_light_state = false;
 	motor_temperature = 0;
-	speed_limiting = false;
-	lvc_limiting = false;
 
 	ramp_up_target_current = 0;
 	last_ramp_up_increment_ms = 0;
 	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
 
-	shift_sensor_activated_ms = 0;
-
 	cruise_paused = true;
-	cruise_block_throttle_return = false;
+
 	operation_mode = OPERATION_MODE_DEFAULT;
 	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(g_config.max_speed_kph));
 	app_set_assist_level(g_config.assist_startup_level);
@@ -186,6 +180,8 @@ void app_set_assist_level(uint8_t level)
 
 void app_set_lights(bool on)
 {
+	static bool last_light_state = false;
+
 	if (
 		(g_config.assist_mode_select == ASSIST_MODE_SELECT_LIGHTS) ||
 		(assist_level == ASSIST_0 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS0_LIGHT)
@@ -277,7 +273,12 @@ uint8_t app_get_status_code()
 
 uint8_t app_get_motor_temperature()
 {
-	return motor_temperature;
+	if (motor_temperature < 0)
+	{
+		return 0;
+	}
+
+	return (uint8_t)motor_temperature;
 }
 
 
@@ -308,6 +309,8 @@ void apply_pas(uint8_t* target_current, uint8_t throttle_percent)
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 {
+	static bool cruise_block_throttle_return = false;
+
 	if ((assist_level_data.flags & ASSIST_FLAG_CRUISE) && throttle_ok())
 	{
 		// pause cruise if brake activated
@@ -372,6 +375,8 @@ void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 
 void apply_speed_limit(uint8_t* target_current)
 {
+	static bool speed_limiting = false;
+
 	if (g_config.use_speed_sensor && assist_max_wheel_speed_rpm_x10 > 0)
 	{
 		int16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
@@ -419,38 +424,52 @@ void apply_speed_limit(uint8_t* target_current)
 void apply_thermal_limit(uint8_t* target_current)
 {
 	static int8_t last_logged_temp = 0;
+	static uint32_t last_logged_temp_ms = 0;
+	static bool temperature_limiting = false;
 
-	int8_t temp = temperature_read();
+	int16_t temp_x100 = temperature_get_x100();
+	motor_temperature = temp_x100 / 100;
 
-	if (ABS(temp - last_logged_temp) > 1)
+	if (motor_temperature != last_logged_temp && system_ms() - last_logged_temp_ms > 5000)
 	{
-		// avoid log spamming if alternating between to values
-		last_logged_temp = temp;
-		eventlog_write_data(EVT_DATA_TEMPERATURE, temp);
+		last_logged_temp = motor_temperature;
+		last_logged_temp_ms = system_ms();
+		eventlog_write_data(EVT_DATA_TEMPERATURE, motor_temperature);
 	}
 
-	if (temp > MAX_TEMPERATURE)
+	if (motor_temperature >= (MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL))
 	{
-		if (motor_temperature <= MAX_TEMPERATURE)
+		if (!temperature_limiting)
 		{
+			temperature_limiting = true;
 			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 1);
 		}
 
-		*target_current = *target_current / 2;
+		if (temp_x100 > MAX_TEMPERATURE * 100)
+		{
+			temp_x100 = MAX_TEMPERATURE * 100;
+		}
+
+		uint8_t tmp = (uint8_t)MAP32(temp_x100, (MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL) * 100, MAX_TEMPERATURE * 100, 100, 20);
+		if (*target_current > tmp)
+		{
+			*target_current = tmp;
+		}
 	}
 	else
 	{
-		if (motor_temperature > MAX_TEMPERATURE)
+		if (temperature_limiting)
 		{
+			temperature_limiting = false;
 			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 0);
 		}
 	}
-
-	motor_temperature = temp;
 }
 
 void apply_low_voltage_limit(uint8_t* target_current)
 {
+	static bool lvc_limiting = false;
+
 	uint16_t voltage = motor_get_battery_voltage_x10();
 	uint16_t start_limit_v = motor_get_battery_lvc_x10() + LVC_RAMP_DOWN_OFFSET_V_X10;
 
@@ -555,6 +574,8 @@ void apply_current_ramp_down(uint8_t* target_current)
 
 void apply_shift_sensor_interrupt(uint8_t* target_current)
 {
+	static uint32_t shift_sensor_activated_ms = 0;
+
 	bool active = shift_sensor_is_activated();
 	if (active)
 	{
