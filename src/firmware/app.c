@@ -28,8 +28,12 @@
 #define MAX_TEMPERATURE_RAMP_DOWN_INTERVAL	4	
 
 
-// Current ramp down starts at (LVC + 2.5V)
-#define LVC_RAMP_DOWN_OFFSET_V_X10			25		
+// Current ramp down starts at LVC + (LVC * LVC_RAMP_DOWN_OFFSET_PERCENT / 100)
+// Example:
+// LVC is 42V
+// 42 * 0.06 = 2.5V
+// Ramp down starts at 42V + 2.5V
+#define LVC_RAMP_DOWN_OFFSET_PERCENT		6		
 
 // Number of PAS sensor pulses to engage cruise mode,
 // there are 24 pulses per revolution.
@@ -57,6 +61,7 @@
 static uint8_t assist_level;
 static uint8_t operation_mode;
 static uint16_t global_max_speed_rpm;
+static uint16_t lvc_ramp_down_offset_volt_x10;
 
 static assist_level_t assist_level_data;
 static int32_t assist_max_wheel_speed_rpm_x10;
@@ -93,6 +98,7 @@ void app_init()
 	lights_disable();
 
 	global_max_speed_rpm = 0;
+	lvc_ramp_down_offset_volt_x10 = (uint16_t)((g_config.low_cut_off_V * 10 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100);
 	motor_temperature = 0;
 
 	ramp_up_target_current = 0;
@@ -470,37 +476,43 @@ void apply_low_voltage_limit(uint8_t* target_current)
 {
 	static bool lvc_limiting = false;
 
-	uint16_t voltage = motor_get_battery_voltage_x10();
-	uint16_t start_limit_v = motor_get_battery_lvc_x10() + LVC_RAMP_DOWN_OFFSET_V_X10;
+	static uint32_t next_voltage_reading_ms = 125;
+	static int32_t filtered_min_battery_volt_x100 = 100 * 100;
 
-	if (voltage <= start_limit_v)
+	if (system_ms() > next_voltage_reading_ms)
 	{
-		uint16_t lvc = motor_get_battery_lvc_x10();
+		next_voltage_reading_ms = system_ms() + 125;
+		int32_t voltage_x100 = motor_get_battery_voltage_x10() * 10ul;
+
+		if (voltage_x100 < filtered_min_battery_volt_x100)
+		{
+			filtered_min_battery_volt_x100 = EXPONENTIAL_FILTER(filtered_min_battery_volt_x100, voltage_x100, 8);
+		}
+	}
+
+	uint16_t voltage_x10 = filtered_min_battery_volt_x100 / 10;
+	uint16_t start_limit_v_x10 = motor_get_battery_lvc_x10() + lvc_ramp_down_offset_volt_x10;
+
+	if (voltage_x10 <= start_limit_v_x10)
+	{
+		uint16_t lvc_x10 = motor_get_battery_lvc_x10();
 
 		if (!lvc_limiting)
 		{
-			eventlog_write_data(EVT_DATA_LVC_LIMITING, voltage);
+			eventlog_write_data(EVT_DATA_LVC_LIMITING, voltage_x10);
 			lvc_limiting = true;
 		}
 
-		if (voltage < lvc)
+		if (voltage_x10 < lvc_x10)
 		{
-			voltage = lvc;
+			voltage_x10 = lvc_x10;
 		}
 
 		// ramp down power until 20% when approaching lvc
-		uint8_t tmp = (uint8_t)MAP32(voltage, lvc, start_limit_v, 20, 100);
+		uint8_t tmp = (uint8_t)MAP32(voltage_x10, lvc_x10, start_limit_v_x10, 20, 100);
 		if (*target_current > tmp)
 		{
 			*target_current = tmp;
-		}
-	}
-	else
-	{
-		if (lvc_limiting)
-		{
-			lvc_limiting = false;
-			eventlog_write_data(EVT_DATA_LVC_LIMITING, 0);
 		}
 	}
 }
@@ -537,7 +549,8 @@ void apply_current_ramp_up(uint8_t* target_current)
 
 void apply_current_ramp_down(uint8_t* target_current)
 {
-	if (*target_current < ramp_down_target_current)
+	// apply fast ramp down if coming from high target current (> 50%)
+	if (*target_current > 50 && *target_current < ramp_down_target_current )
 	{
 		uint32_t now = system_ms();
 		uint16_t time_diff = now - last_ramp_down_decrement_ms;
