@@ -81,11 +81,11 @@ static uint32_t last_ramp_down_decrement_ms;
 void apply_pas(uint8_t* target_current, uint8_t throttle_percent);
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
+void apply_current_ramp_up(uint8_t* target_current);
+void apply_current_ramp_down(uint8_t* target_current);
 void apply_speed_limit(uint8_t* target_current);
 void apply_thermal_limit(uint8_t* target_current);
 void apply_low_voltage_limit(uint8_t* target_current);
-void apply_current_ramp_up(uint8_t* target_current);
-void apply_current_ramp_down(uint8_t* target_current);
 void apply_shift_sensor_interrupt(uint8_t* target_current);
 
 void reload_assist_params();
@@ -137,11 +137,11 @@ void app_process()
 		apply_throttle(&target_current, throttle_percent);
 	}
 
+	apply_current_ramp_down(&target_current);
+
 	apply_speed_limit(&target_current);
 	apply_thermal_limit(&target_current);
 	apply_low_voltage_limit(&target_current);
-
-	apply_current_ramp_down(&target_current);
 
 	apply_shift_sensor_interrupt(&target_current);
 
@@ -379,6 +379,76 @@ void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 	}
 }
 
+void apply_current_ramp_up(uint8_t* target_current)
+{
+	if (*target_current > ramp_up_target_current)
+	{
+		uint32_t now = system_ms();
+		uint16_t time_diff = now - last_ramp_up_increment_ms;
+
+		if (time_diff >= ramp_up_current_interval_ms)
+		{
+			++ramp_up_target_current;
+
+			if (last_ramp_up_increment_ms == 0)
+			{
+				last_ramp_up_increment_ms = now;
+			}
+			else
+			{
+				// offset for time overshoot to not accumulate large ramp error
+				last_ramp_up_increment_ms = now - (uint8_t)(time_diff - ramp_up_current_interval_ms);
+			}
+		}
+
+		*target_current = ramp_up_target_current;
+	}
+	else
+	{
+		ramp_up_target_current = *target_current;
+	}
+}
+
+void apply_current_ramp_down(uint8_t* target_current)
+{
+	// apply fast ramp down if coming from high target current (> 50%)
+	if (*target_current < ramp_down_target_current)
+	{
+		uint32_t now = system_ms();
+		uint16_t time_diff = now - last_ramp_down_decrement_ms;
+
+		if (time_diff >= 10)
+		{
+			uint8_t diff = ramp_down_target_current - *target_current;
+
+			if (diff >= CURRENT_RAMP_DOWN_PERCENT_10MS)
+			{
+				ramp_down_target_current -= CURRENT_RAMP_DOWN_PERCENT_10MS;
+			}
+			else
+			{
+				ramp_down_target_current -= diff;
+			}
+
+			if (last_ramp_down_decrement_ms == 0)
+			{
+				last_ramp_down_decrement_ms = now;
+			}
+			else
+			{
+				// offset for time overshoot to not accumulate large ramp error
+				last_ramp_down_decrement_ms = now - (uint8_t)(time_diff - 10);
+			}
+		}
+
+		*target_current = ramp_down_target_current;
+	}
+	else
+	{
+		ramp_down_target_current = *target_current;
+	}
+}
+
 void apply_speed_limit(uint8_t* target_current)
 {
 	static bool speed_limiting = false;
@@ -514,74 +584,6 @@ void apply_low_voltage_limit(uint8_t* target_current)
 		{
 			*target_current = tmp;
 		}
-	}
-}
-
-void apply_current_ramp_up(uint8_t* target_current)
-{
-	if (*target_current > ramp_up_target_current)
-	{
-		uint32_t now = system_ms();
-		uint16_t time_diff = now - last_ramp_up_increment_ms;
-
-		if (time_diff >= ramp_up_current_interval_ms)
-		{
-			++ramp_up_target_current;
-
-			if (last_ramp_up_increment_ms == 0)
-			{
-				last_ramp_up_increment_ms = now;
-			}
-			else
-			{
-				// offset for time overshoot to not accumulate large ramp error
-				last_ramp_up_increment_ms = now - (uint8_t)(time_diff - ramp_up_current_interval_ms);
-			}
-		}
-
-		*target_current = ramp_up_target_current;
-	}
-	else
-	{
-		ramp_up_target_current = *target_current;
-	}
-}
-
-void apply_current_ramp_down(uint8_t* target_current)
-{
-	// apply fast ramp down if coming from high target current (> 50%)
-	if (*target_current > 50 && *target_current < ramp_down_target_current )
-	{
-		uint32_t now = system_ms();
-		uint16_t time_diff = now - last_ramp_down_decrement_ms;
-
-		if (time_diff >= 10)
-		{
-			if (ramp_down_target_current >= CURRENT_RAMP_DOWN_PERCENT_10MS)
-			{
-				ramp_down_target_current -= CURRENT_RAMP_DOWN_PERCENT_10MS;
-			}
-			else
-			{
-				ramp_down_target_current = 0;
-			}
-	
-			if (last_ramp_down_decrement_ms == 0)
-			{
-				last_ramp_down_decrement_ms = now;
-			}
-			else
-			{
-				// offset for time overshoot to not accumulate large ramp error
-				last_ramp_down_decrement_ms = now - (uint8_t)(time_diff - 10);
-			}
-		}
-
-		*target_current = ramp_down_target_current;
-	}
-	else
-	{
-		ramp_down_target_current = *target_current;
 	}
 }
 
