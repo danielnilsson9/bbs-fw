@@ -21,6 +21,7 @@ static uint8_t max_voltage_adc;
 
 static uint8_t start_percent;
 
+static bool throttle_detected;
 static bool throttle_low_ok;
 static bool throttle_hard_ok;
 static uint32_t throttle_hard_limit_hit_at;
@@ -44,6 +45,7 @@ void throttle_init(uint16_t min_mv, uint16_t max_mv)
 	min_voltage_adc = (uint8_t)(((uint32_t)min_mv * 256) / ADC_VOLTAGE_MV);
 	max_voltage_adc = (uint8_t)(((uint32_t)max_mv * 256) / ADC_VOLTAGE_MV);
 	start_percent = 0;
+	throttle_detected = false;
 	throttle_low_ok = false;
 	throttle_hard_ok = true;
 	throttle_hard_limit_hit_at = 0;
@@ -51,7 +53,7 @@ void throttle_init(uint16_t min_mv, uint16_t max_mv)
 
 bool throttle_ok()
 {
-	return throttle_low_ok && throttle_hard_ok;
+	return !throttle_detected || (throttle_low_ok && throttle_hard_ok);
 }
 
 uint8_t throttle_read()
@@ -74,7 +76,7 @@ uint8_t throttle_read()
 		{
 			if (throttle_hard_ok && (system_ms() - throttle_hard_limit_hit_at) > THROTTLE_HARD_LIMIT_TOLERANCE_MS)
 			{
-				if (value < THROTTLE_HARD_LOW_LIMIT_ADC)
+				if (throttle_detected && value < THROTTLE_HARD_LOW_LIMIT_ADC)
 				{
 					eventlog_write(EVT_ERROR_THROTTLE_LOW_LIMIT);
 				}
@@ -93,6 +95,11 @@ uint8_t throttle_read()
 	}
 	else
 	{
+		if (value >= THROTTLE_HARD_LOW_LIMIT_ADC)
+		{
+			throttle_detected = true;
+		}
+
 		throttle_hard_limit_hit_at = 0;
 		throttle_hard_ok = true;
 	}
