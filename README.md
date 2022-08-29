@@ -26,7 +26,7 @@ If you find this project useful, consider sending a small [donation](https://www
 * Support setting road speed limit per assist level.
 * Support setting cadence limit per assist level.
 * Support cruise assist levels (i.e. motor power without pedal or throttle input).
-* Display motor/controller temperature (shown in range field on display).
+* Display motor/controller temperature on standard display.
 * Use of speed sensor is optional.
 * Use of display is optional.
 
