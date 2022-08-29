@@ -14,6 +14,7 @@
 #include "system.h"
 #include "sensors.h"
 #include "motor.h"
+#include "battery.h"
 #include "app.h"
 #include "util.h"
 #include "version.h"
@@ -497,7 +498,7 @@ static int16_t process_bafang_display_read_battery()
 		return KEEP;
 	}
 
-	uint8_t value = motor_get_battery_voltage_x10() / 10;
+	uint8_t value = battery_get_percent();
 
 	// should be in percent but can't be bottered to do SOC calculation.
 	// return in volts instead, i.e. 57% on display will correspond to 57V.

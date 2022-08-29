@@ -65,6 +65,7 @@ make all</NMakeReBuildCommandLine>
   <ItemGroup>
     <ClCompile Include="adc.c" />
     <ClCompile Include="app.c" />
+    <ClCompile Include="battery.c" />
     <ClCompile Include="cfgstore.c" />
     <ClCompile Include="eeprom.c" />
     <ClCompile Include="eventlog.c" />
@@ -80,6 +81,7 @@ make all</NMakeReBuildCommandLine>
   <ItemGroup>
     <ClInclude Include="adc.h" />
     <ClInclude Include="app.h" />
+    <ClInclude Include="battery.h" />
     <ClInclude Include="cfgstore.h" />
     <ClInclude Include="eeprom.h" />
     <ClInclude Include="eventlog.h" />

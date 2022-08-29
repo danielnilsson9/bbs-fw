@@ -23,6 +23,8 @@ void motor_enable();
 void motor_disable();
 
 uint16_t motor_status();
+uint8_t motor_get_target_speed();
+uint8_t motor_get_target_current();
 
 void motor_set_target_speed(uint8_t value);
 void motor_set_target_current(uint8_t percent);

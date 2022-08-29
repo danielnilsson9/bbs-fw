@@ -24,6 +24,7 @@ MAINSRC = main.c
 EXTRASRCS = \
 	adc.c \
 	app.c \
+	battery.c \
 	cfgstore.c \
 	eeprom.c \
 	eventlog.c \
@@ -39,6 +40,7 @@ EXTRASRCS = \
 HEADERS = \
 	adc.h \
 	app.h \
+	battery.h \
 	cfgstore.h \
 	eventlog.h \
 	eeprom.h \

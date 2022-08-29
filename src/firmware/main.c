@@ -11,6 +11,7 @@
 #include "system.h"
 #include "eventlog.h"
 #include "app.h"
+#include "battery.h"
 #include "watchdog.h"
 #include "adc.h"
 #include "motor.h"
@@ -39,9 +40,11 @@ void main(void)
 
 	adc_init();
 	sensors_init();
+
 	speed_sensor_set_signals_per_rpm(g_config.speed_sensor_signals);
 	pas_set_stop_delay(g_config.pas_stop_delay_x100s * 10);
 
+	battery_init();
 	throttle_init(g_config.throttle_start_voltage_mv, g_config.throttle_end_voltage_mv);
 	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_v);
 	lights_init();
@@ -64,6 +67,7 @@ void main(void)
 		SET_PIN_HIGH(PIN_GEAR_SENSOR);
 #endif
 		adc_process();
+		battery_process();
 		motor_process();
 		extcom_process();
 		app_process();

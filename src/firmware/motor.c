@@ -157,6 +157,16 @@ uint16_t motor_status()
 	return status_flags;
 }
 
+uint8_t motor_get_target_speed()
+{
+	return target_speed;
+}
+
+uint8_t motor_get_target_current()
+{
+	return target_current;
+}
+
 
 void motor_set_target_speed(uint8_t value)
 {
