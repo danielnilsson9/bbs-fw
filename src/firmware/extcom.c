@@ -26,7 +26,7 @@
 #define DISCARD		-1
 
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 192
 
 #define REQUEST_TYPE_READ						0x01
 #define REQUEST_TYPE_WRITE						0x02
@@ -74,43 +74,43 @@
 
 
 static uint8_t msg_len;
-static uint8_t msgbuf[128];
+static uint8_t msgbuf[BUFFER_SIZE];
 static uint32_t last_recv;
 
 
 static uint8_t compute_checksum(uint8_t* buf, uint8_t length);
 static void write_uart1_and_increment_checksum(uint8_t data, uint8_t* checksum);
 
-static int8_t try_process_request();
-static int8_t try_process_read_request();
-static int8_t try_process_write_request();
-static int8_t try_process_bafang_read_request();
-static int8_t try_process_bafang_write_request();
+static int16_t try_process_request();
+static int16_t try_process_read_request();
+static int16_t try_process_write_request();
+static int16_t try_process_bafang_read_request();
+static int16_t try_process_bafang_write_request();
 
 
-static int8_t process_read_fw_version();
-static int8_t process_read_evtlog_enable();
-static int8_t process_read_config();
+static int16_t process_read_fw_version();
+static int16_t process_read_evtlog_enable();
+static int16_t process_read_config();
 
-static int8_t process_write_evtlog_enable();
-static int8_t process_write_config();
-static int8_t process_write_reset_config();
+static int16_t process_write_evtlog_enable();
+static int16_t process_write_config();
+static int16_t process_write_reset_config();
 
 
-static int8_t process_bafang_display_read_status();
-static int8_t process_bafang_display_read_current();
-static int8_t process_bafang_display_read_battery();
-static int8_t process_bafang_display_read_speed();
-static int8_t process_bafang_display_read_unknown1();
-static int8_t process_bafang_display_read_range();
-static int8_t process_bafang_display_read_unknown2();
-static int8_t process_bafang_display_read_unknown3();
-static int8_t process_bafang_display_read_moving();
+static int16_t process_bafang_display_read_status();
+static int16_t process_bafang_display_read_current();
+static int16_t process_bafang_display_read_battery();
+static int16_t process_bafang_display_read_speed();
+static int16_t process_bafang_display_read_unknown1();
+static int16_t process_bafang_display_read_range();
+static int16_t process_bafang_display_read_unknown2();
+static int16_t process_bafang_display_read_unknown3();
+static int16_t process_bafang_display_read_moving();
 
-static int8_t process_bafang_display_write_pas();
-static int8_t process_bafang_display_write_mode();
-static int8_t process_bafang_display_write_lights();
-static int8_t process_bafang_display_write_speed_limit();
+static int16_t process_bafang_display_write_pas();
+static int16_t process_bafang_display_write_mode();
+static int16_t process_bafang_display_write_lights();
+static int16_t process_bafang_display_write_speed_limit();
 
 void extcom_init()
 {
@@ -157,7 +157,7 @@ void extcom_process()
 		msg_len = 0;
 	}
 
-	int8_t res = try_process_request();
+	int16_t res = try_process_request();
 	if (res == DISCARD)
 	{
 		msg_len = 0;
@@ -165,7 +165,7 @@ void extcom_process()
 	}
 	else if (res > 0)
 	{
-		if ((uint8_t)res < msg_len)
+		if (res < msg_len)
 		{
 			// will not happend due to request/response communication
 			memcpy(msgbuf, msgbuf + res, msg_len - res);
@@ -198,7 +198,7 @@ static void write_uart1_and_increment_checksum(uint8_t data, uint8_t* checksum)
 	uart1_write(data);
 }
 
-static int8_t try_process_request()
+static int16_t try_process_request()
 {
 	if (msg_len < 1)
 	{
@@ -220,7 +220,7 @@ static int8_t try_process_request()
 	return DISCARD; // unknown message
 }
 
-static int8_t try_process_read_request()
+static int16_t try_process_read_request()
 {
 	if (msg_len < 2)
 	{
@@ -240,7 +240,7 @@ static int8_t try_process_read_request()
 	return DISCARD;
 }
 
-static int8_t try_process_write_request()
+static int16_t try_process_write_request()
 {
 	if (msg_len < 2)
 	{
@@ -260,7 +260,7 @@ static int8_t try_process_write_request()
 	return DISCARD;
 }
 
-static int8_t try_process_bafang_read_request()
+static int16_t try_process_bafang_read_request()
 {
 	if (msg_len < 2)
 	{
@@ -292,7 +292,7 @@ static int8_t try_process_bafang_read_request()
 	return DISCARD;
 }
 
-static int8_t try_process_bafang_write_request()
+static int16_t try_process_bafang_write_request()
 {
 	if (msg_len < 2)
 	{
@@ -316,7 +316,7 @@ static int8_t try_process_bafang_write_request()
 
 
 
-static int8_t process_read_fw_version()
+static int16_t process_read_fw_version()
 {
 	if (msg_len < 3)
 	{
@@ -338,7 +338,7 @@ static int8_t process_read_fw_version()
 	return 3;
 }
 
-static int8_t process_read_evtlog_enable()
+static int16_t process_read_evtlog_enable()
 {
 	if (msg_len < 3)
 	{
@@ -357,7 +357,7 @@ static int8_t process_read_evtlog_enable()
 	return 3;
 }
 
-static int8_t process_read_config()
+static int16_t process_read_config()
 {
 	if (msg_len < 3)
 	{
@@ -385,7 +385,7 @@ static int8_t process_read_config()
 }
 
 
-static int8_t process_write_evtlog_enable()
+static int16_t process_write_evtlog_enable()
 {
 	if (msg_len < 4)
 	{
@@ -406,7 +406,7 @@ static int8_t process_write_evtlog_enable()
 	return 4;
 }
 
-static int8_t process_write_config()
+static int16_t process_write_config()
 {
 	if (msg_len < 4)
 	{
@@ -421,23 +421,26 @@ static int8_t process_write_config()
 		return KEEP;
 	}
 
-	if (compute_checksum(msgbuf, 4 + sizeof(config_t)) == msgbuf[4 + sizeof(config_t)] &&
-		version == CONFIG_VERSION && length == sizeof(config_t))
-	{	
-		memcpy(&g_config, msgbuf + 4, sizeof(config_t));
-		bool result = cfgstore_save();
+	if (compute_checksum(msgbuf, (uint8_t)(4 + sizeof(config_t))) == msgbuf[4 + sizeof(config_t)])
+	{
+		bool result = false;
+		if (version == CONFIG_VERSION && length == sizeof(config_t))
+		{
+			memcpy(&g_config, msgbuf + 4, sizeof(config_t));
+			result = cfgstore_save();
+		}
 
 		uint8_t checksum = 0;
 		write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
 		write_uart1_and_increment_checksum(OPCODE_WRITE_CONFIG, &checksum);
 		write_uart1_and_increment_checksum(result, &checksum);
-		uart1_write(checksum);		
+		uart1_write(checksum);
 	}
 
 	return 4 + length + 1;
 }
 
-static int8_t process_write_reset_config()
+static int16_t process_write_reset_config()
 {
 	if (msg_len < 3)
 	{
@@ -460,7 +463,7 @@ static int8_t process_write_reset_config()
 }
 
 
-static int8_t process_bafang_display_read_status()
+static int16_t process_bafang_display_read_status()
 {
 	if (msg_len < 2)
 	{
@@ -472,7 +475,7 @@ static int8_t process_bafang_display_read_status()
 	return 2;
 }
 
-static int8_t process_bafang_display_read_current()
+static int16_t process_bafang_display_read_current()
 {
 	if (msg_len < 2)
 	{
@@ -487,7 +490,7 @@ static int8_t process_bafang_display_read_current()
 	return 2;
 }
 
-static int8_t process_bafang_display_read_battery()
+static int16_t process_bafang_display_read_battery()
 {
 	if (msg_len < 2)
 	{
@@ -504,7 +507,7 @@ static int8_t process_bafang_display_read_battery()
 	return 2;
 }
 
-static int8_t process_bafang_display_read_speed()
+static int16_t process_bafang_display_read_speed()
 {
 	if (msg_len < 2)
 	{
@@ -519,7 +522,7 @@ static int8_t process_bafang_display_read_speed()
 	return 2;
 }
 
-static int8_t process_bafang_display_read_unknown1()
+static int16_t process_bafang_display_read_unknown1()
 {
 	if (msg_len < 3)
 	{
@@ -533,7 +536,7 @@ static int8_t process_bafang_display_read_unknown1()
 	return 3;
 }
 
-static int8_t process_bafang_display_read_range()
+static int16_t process_bafang_display_read_range()
 {
 	if (msg_len < 3)
 	{
@@ -561,7 +564,7 @@ static int8_t process_bafang_display_read_range()
 	return 3;
 }
 
-static int8_t process_bafang_display_read_unknown2()
+static int16_t process_bafang_display_read_unknown2()
 {
 	if (msg_len < 3)
 	{
@@ -575,7 +578,7 @@ static int8_t process_bafang_display_read_unknown2()
 	return 3;
 }
 
-static int8_t process_bafang_display_read_unknown3()
+static int16_t process_bafang_display_read_unknown3()
 {
 	if (msg_len < 3)
 	{
@@ -591,7 +594,7 @@ static int8_t process_bafang_display_read_unknown3()
 	return 3;
 }
 
-static int8_t process_bafang_display_read_moving()
+static int16_t process_bafang_display_read_moving()
 {
 	if (msg_len < 2)
 	{
@@ -606,7 +609,7 @@ static int8_t process_bafang_display_read_moving()
 }
 
 
-static int8_t process_bafang_display_write_pas()
+static int16_t process_bafang_display_write_pas()
 {
 	if (msg_len < 4)
 	{
@@ -657,7 +660,7 @@ static int8_t process_bafang_display_write_pas()
 	return 4;
 }
 
-static int8_t process_bafang_display_write_mode()
+static int16_t process_bafang_display_write_mode()
 {
 	if (msg_len < 4)
 	{
@@ -681,7 +684,7 @@ static int8_t process_bafang_display_write_mode()
 	return 4;
 }
 
-static int8_t process_bafang_display_write_lights()
+static int16_t process_bafang_display_write_lights()
 {
 	if (msg_len < 3)
 	{
@@ -701,7 +704,7 @@ static int8_t process_bafang_display_write_lights()
 	return 3;
 }
 
-static int8_t process_bafang_display_write_speed_limit()
+static int16_t process_bafang_display_write_speed_limit()
 {
 	if (msg_len < 5)
 	{
@@ -710,8 +713,8 @@ static int8_t process_bafang_display_write_speed_limit()
 
 	//if (compute_checksum(msgbuf + 2, 2) == msgbuf[4])
 	//{
-	//	 //Ignoring speed limit requested by display,
-	//	 //global speed limit is configured in firmware config tool.
+	//	 // Ignoring speed limit requested by display,
+	//	 // global speed limit is configured in firmware config tool.
 	//	 
 	//	 uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
 	//	 app_set_wheel_max_speed_rpm(value);

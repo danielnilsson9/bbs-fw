@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace BBSFW.Model
@@ -8,9 +10,27 @@ namespace BBSFW.Model
 	[XmlRoot("BBSFW", Namespace ="https://github.com/danielnilsson9/bbshd-fw")]
 	public class Configuration
 	{
-		public const int Version = 1;
-		public const int ByteSize = 120;
+		public const int CurrentVersion = 2;
+		public const int MinVersion = 1;
+		public const int MaxVersion = CurrentVersion;
 
+		public const int ByteSizeV1 = 120;
+		public const int ByteSizeV2 = 124;
+
+
+
+		public static int GetByteSize(int version)
+		{
+			switch (version)
+			{
+				case 1:
+					return ByteSizeV1;
+				case 2:
+					return ByteSizeV2;
+			}
+
+			return 0;
+		}
 
 		public enum AssistModeSelect
 		{
@@ -56,6 +76,7 @@ namespace BBSFW.Model
 		// global
 		public uint MaxCurrentAmps;
 		public uint CurrentRampAmpsSecond;
+		public float MaxBatteryVolts;
 		public uint LowCutoffVolts;
 		public uint MaxSpeedKph;
 
@@ -63,6 +84,7 @@ namespace BBSFW.Model
 		public bool UseSpeedSensor;
 		public bool UseDisplay;
 		public bool UsePushWalk;
+		public bool UseTemperatureSensor;
 
 		// speed sensor
 		public float WheelSizeInch;
@@ -77,10 +99,12 @@ namespace BBSFW.Model
 		public uint ThrottleEndMillivolts;
 		public uint ThrottleStartPercent;
 
+		// misc
+		public bool ShowTemperatureOnPushWalk;
+
 		// assists options
 		public AssistModeSelect AssistModeSelection;
 		public uint AssistStartupLevel;
-
 
 		public AssistLevel[] StandardAssistLevels = new AssistLevel[10];
 		public AssistLevel[] SportAssistLevels = new AssistLevel[10];
@@ -91,11 +115,13 @@ namespace BBSFW.Model
 			UseFreedomUnits = Properties.Settings.Default.UseFreedomUnits;
 			MaxCurrentAmps = 0;
 			CurrentRampAmpsSecond = 0;
+			MaxBatteryVolts = 0;
 			LowCutoffVolts = 0;
 
 			UseSpeedSensor = false;
 			UseDisplay = false;
 			UsePushWalk = false;
+			UseTemperatureSensor = false;
 
 			WheelSizeInch = 0;
 			NumWheelSensorSignals = 0;
@@ -107,6 +133,8 @@ namespace BBSFW.Model
 			ThrottleStartMillivolts = 0;
 			ThrottleEndMillivolts = 0;
 			ThrottleStartPercent = 0;
+
+			ShowTemperatureOnPushWalk = false;
 
 			AssistModeSelection = AssistModeSelect.Off;
 			AssistStartupLevel = 0;
@@ -122,9 +150,9 @@ namespace BBSFW.Model
 			}
 		}
 
-		public bool ParseFromBuffer(byte[] buffer)
+		public bool ParseFromBufferV1(byte[] buffer)
 		{
-			if (buffer.Length != ByteSize)
+			if (buffer.Length != ByteSizeV1)
 			{
 				return false;
 			}
@@ -176,6 +204,72 @@ namespace BBSFW.Model
 				}
 			}
 
+			// apply sane default settings for non existing options in version
+			MaxBatteryVolts = 0f;
+			UseTemperatureSensor = true;
+			ShowTemperatureOnPushWalk = false;
+
+			return true;
+		}
+
+		public bool ParseFromBufferV2(byte[] buffer)
+		{
+			if (buffer.Length != ByteSizeV2)
+			{
+				return false;
+			}
+
+			using (var s = new MemoryStream(buffer))
+			{
+				var br = new BinaryReader(s);
+
+				UseFreedomUnits = br.ReadBoolean();
+
+				MaxCurrentAmps = br.ReadByte();
+				CurrentRampAmpsSecond = br.ReadByte();
+				MaxBatteryVolts = br.ReadUInt16() / 100f;
+				LowCutoffVolts = br.ReadByte();
+				MaxSpeedKph = br.ReadByte();
+
+				UseSpeedSensor = br.ReadBoolean();
+				UseDisplay = br.ReadBoolean();
+				UsePushWalk = br.ReadBoolean();
+				UseTemperatureSensor = br.ReadBoolean();
+
+				WheelSizeInch = br.ReadUInt16() / 10f;
+				NumWheelSensorSignals = br.ReadByte();
+
+				PasStartDelayPulses = br.ReadByte();
+				PasStopDelayMilliseconds = br.ReadByte() * 10u;
+
+				ThrottleStartMillivolts = br.ReadUInt16();
+				ThrottleEndMillivolts = br.ReadUInt16();
+				ThrottleStartPercent = br.ReadByte();
+
+				ShowTemperatureOnPushWalk = br.ReadBoolean();
+
+				AssistModeSelection = (AssistModeSelect)br.ReadByte();
+				AssistStartupLevel = br.ReadByte();
+
+				for (int i = 0; i < 10; ++i)
+				{
+					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
+					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
+					StandardAssistLevels[i].MaxThrottlePercent = br.ReadByte();
+					StandardAssistLevels[i].MaxCadencePercent = br.ReadByte();
+					StandardAssistLevels[i].MaxSpeedPercent = br.ReadByte();
+				}
+
+				for (int i = 0; i < 10; ++i)
+				{
+					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
+					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
+					SportAssistLevels[i].MaxThrottlePercent = br.ReadByte();
+					SportAssistLevels[i].MaxCadencePercent = br.ReadByte();
+					SportAssistLevels[i].MaxSpeedPercent = br.ReadByte();
+				}
+			}
+
 			return true;
 		}
 
@@ -187,15 +281,16 @@ namespace BBSFW.Model
 
 				bw.Write(UseFreedomUnits);
 
-
 				bw.Write((byte)MaxCurrentAmps);
 				bw.Write((byte)CurrentRampAmpsSecond);
+				bw.Write((UInt16)(MaxBatteryVolts * 100));
 				bw.Write((byte)LowCutoffVolts);
 				bw.Write((byte)MaxSpeedKph);
 
 				bw.Write(UseSpeedSensor);
 				bw.Write(UseDisplay);
 				bw.Write(UsePushWalk);
+				bw.Write(UseTemperatureSensor);
 
 				bw.Write((UInt16)(WheelSizeInch * 10));
 				bw.Write((byte)NumWheelSensorSignals);
@@ -206,6 +301,8 @@ namespace BBSFW.Model
 				bw.Write((UInt16)ThrottleStartMillivolts);
 				bw.Write((UInt16)ThrottleEndMillivolts);
 				bw.Write((byte)ThrottleStartPercent);
+
+				bw.Write(ShowTemperatureOnPushWalk);
 
 				bw.Write((byte)AssistModeSelection);
 				bw.Write((byte)AssistStartupLevel);
@@ -237,10 +334,12 @@ namespace BBSFW.Model
 			UseFreedomUnits = cfg.UseFreedomUnits;
 			MaxCurrentAmps = cfg.MaxCurrentAmps;
 			CurrentRampAmpsSecond = cfg.CurrentRampAmpsSecond;
+			MaxBatteryVolts = cfg.MaxBatteryVolts;
 			LowCutoffVolts = cfg.LowCutoffVolts;
 			UseSpeedSensor = cfg.UseSpeedSensor;
 			UseDisplay = cfg.UseDisplay;
 			UsePushWalk = cfg.UsePushWalk;
+			UseTemperatureSensor = cfg.UseTemperatureSensor;
 			WheelSizeInch = cfg.WheelSizeInch;
 			NumWheelSensorSignals = cfg.NumWheelSensorSignals;
 			MaxSpeedKph = cfg.MaxSpeedKph;
@@ -249,6 +348,7 @@ namespace BBSFW.Model
 			ThrottleStartMillivolts = cfg.ThrottleStartMillivolts;
 			ThrottleEndMillivolts = cfg.ThrottleEndMillivolts;
 			ThrottleStartPercent = cfg.ThrottleStartPercent;
+			ShowTemperatureOnPushWalk = cfg.ShowTemperatureOnPushWalk;
 			AssistModeSelection = cfg.AssistModeSelection;
 			AssistStartupLevel = cfg.AssistStartupLevel;
 
@@ -285,9 +385,10 @@ namespace BBSFW.Model
 		public void WriteToFile(string filepath)
 		{
 			var serializer = new XmlSerializer(typeof(Configuration));
-			using (var writer = new StreamWriter(filepath))
+			var settings = new XmlWriterSettings { Encoding = Encoding.UTF8, Indent = true };
+			using (var xmlWriter = XmlWriter.Create(new StreamWriter(filepath), settings))
 			{
-				serializer.Serialize(writer, this);
+				serializer.Serialize(xmlWriter, this);
 			}
 		}
 
@@ -296,7 +397,8 @@ namespace BBSFW.Model
 		{
 			ValidateLimits(MaxCurrentAmps, 5, 33, "Max Current (A)");
 			ValidateLimits(CurrentRampAmpsSecond, 1, 255, "Current Ramp (A/s)");
-			ValidateLimits(LowCutoffVolts, 1, 100, "Low Volage Cut Off (V)");
+			ValidateLimits((uint)MaxBatteryVolts, 1, 100, "Max Battery Voltage (V)");
+			ValidateLimits(LowCutoffVolts, 1, 100, "Low Voltage Cut Off (V)");
 
 			ValidateLimits((uint)WheelSizeInch, 10, 40, "Wheel Size (inch)");
 			ValidateLimits(NumWheelSensorSignals, 1, 10, "Wheel Sensor Signals");

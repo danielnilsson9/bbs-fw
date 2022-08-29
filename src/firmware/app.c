@@ -98,7 +98,7 @@ void app_init()
 	lights_disable();
 
 	global_max_speed_rpm = 0;
-	lvc_ramp_down_offset_volt_x10 = (uint16_t)((g_config.low_cut_off_V * 10 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100);
+	lvc_ramp_down_offset_volt_x10 = (uint16_t)((g_config.low_cut_off_v * 10 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100);
 	motor_temperature = 0;
 
 	ramp_up_target_current = 0;
@@ -503,6 +503,12 @@ void apply_thermal_limit(uint8_t* target_current)
 	static uint32_t last_logged_temp_ms = 0;
 	static bool temperature_limiting = false;
 
+	if (!g_config.use_temperature_sensor)
+	{
+		motor_temperature = 0;
+		return;
+	}
+
 	int16_t temp_x100 = temperature_get_x100();
 	motor_temperature = temp_x100 / 100;
 
@@ -547,20 +553,20 @@ void apply_low_voltage_limit(uint8_t* target_current)
 	static bool lvc_limiting = false;
 
 	static uint32_t next_voltage_reading_ms = 125;
-	static int32_t filtered_min_battery_volt_x100 = 100 * 100;
+	static int32_t flt_min_bat_volt_x100 = 100 * 100;
 
 	if (system_ms() > next_voltage_reading_ms)
 	{
 		next_voltage_reading_ms = system_ms() + 125;
 		int32_t voltage_x100 = motor_get_battery_voltage_x10() * 10ul;
 
-		if (voltage_x100 < filtered_min_battery_volt_x100)
+		if (voltage_x100 < flt_min_bat_volt_x100)
 		{
-			filtered_min_battery_volt_x100 = EXPONENTIAL_FILTER(filtered_min_battery_volt_x100, voltage_x100, 8);
+			flt_min_bat_volt_x100 = EXPONENTIAL_FILTER(flt_min_bat_volt_x100, voltage_x100, 8);
 		}
 	}
 
-	uint16_t voltage_x10 = filtered_min_battery_volt_x100 / 10;
+	uint16_t voltage_x10 = flt_min_bat_volt_x100 / 10;
 	uint16_t start_limit_v_x10 = motor_get_battery_lvc_x10() + lvc_ramp_down_offset_volt_x10;
 
 	if (voltage_x10 <= start_limit_v_x10)
@@ -589,19 +595,19 @@ void apply_low_voltage_limit(uint8_t* target_current)
 
 void apply_shift_sensor_interrupt(uint8_t* target_current)
 {
-	static uint32_t shift_sensor_activated_ms = 0;
+	static uint32_t shift_sensor_act_ms = 0;
 
 	bool active = shift_sensor_is_activated();
 	if (active)
 	{
-		if (shift_sensor_activated_ms == 0)
+		if (shift_sensor_act_ms == 0)
 		{
-			shift_sensor_activated_ms = system_ms();
+			shift_sensor_act_ms = system_ms();
 			eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 1);
 		}
 	}
 
-	uint32_t timediff = system_ms() - shift_sensor_activated_ms;
+	uint32_t timediff = system_ms() - shift_sensor_act_ms;
 	if (active || timediff < SHIFT_SENSOR_INTERRUPT_PERIOD_MS)
 	{
 		if (timediff < SHIFT_SENSOR_INTERRUPT_PERIOD_MS / 4)
@@ -620,10 +626,10 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 			*target_current = (uint8_t)(*target_current / 2u);
 		}
 	}
-	else if (!active && shift_sensor_activated_ms != 0)
+	else if (!active && shift_sensor_act_ms != 0)
 	{
 		// shifting finished, force ramp up
-		shift_sensor_activated_ms = 0;
+		shift_sensor_act_ms = 0;
 		eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 0);
 	}
 }

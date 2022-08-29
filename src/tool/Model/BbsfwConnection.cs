@@ -59,6 +59,8 @@ namespace BBSFW.Model
 		private CompletionQueue<bool> _writeResetConfigCq = new CompletionQueue<bool>();
 
 
+		private int ConfigVersion = 0;
+
 		public bool IsConnected
 		{
 			get
@@ -290,13 +292,13 @@ namespace BBSFW.Model
 				int major = _rxBuffer[2];
 				int minor = _rxBuffer[3];
 				int patch = _rxBuffer[4];
-				int config = _rxBuffer[5];
+				ConfigVersion = _rxBuffer[5];
 
 				if (_isConnecting)
 				{
 					_isConnecting = false;
 					_isConnected = true;
-					Connected?.Invoke(String.Format("{0}.{1}.{2}", major, minor, patch), config);
+					Connected?.Invoke(String.Format("{0}.{1}.{2}", major, minor, patch), ConfigVersion);
 
 					SendEventLogEnableRequest(true);
 				}
@@ -321,19 +323,25 @@ namespace BBSFW.Model
 
 		private int ProcessReadResponseConfig()
 		{
-			const int MessageSize = (4 + Configuration.ByteSize + 1);
+			int version;
 
 			if (_rxBuffer.Count > 3)
 			{
-				var version = _rxBuffer[2];
+				version = _rxBuffer[2];
 				var size = _rxBuffer[3];
 
-				if (version != Configuration.Version || size != Configuration.ByteSize)
+				if (version < Configuration.MinVersion || version > Configuration.MaxVersion || size != Configuration.GetByteSize(version))
 				{
-					System.Diagnostics.Debug.WriteLine("Config read from flash has wrong version, discarding.");
+					System.Diagnostics.Debug.WriteLine("Config read from flash is of an unsupported version or is corrupt, discarding.");
 					return Discard;
 				}
 			}
+			else
+			{
+				return Keep;
+			}
+
+			int MessageSize = (4 + Configuration.GetByteSize(version) + 1);
 
 			if (_rxBuffer.Count < MessageSize)
 			{
@@ -343,7 +351,16 @@ namespace BBSFW.Model
 			if (ComputeChecksum(_rxBuffer, MessageSize - 1) == _rxBuffer[MessageSize - 1])
 			{
 				var cfg = new Configuration();
-				cfg.ParseFromBuffer(_rxBuffer.Skip(4).Take(Configuration.ByteSize).ToArray());
+
+				switch(version)
+				{
+					case 1:
+						cfg.ParseFromBufferV1(_rxBuffer.Skip(4).Take(Configuration.GetByteSize(version)).ToArray());
+						break;
+					case 2:
+						cfg.ParseFromBufferV2(_rxBuffer.Skip(4).Take(Configuration.GetByteSize(version)).ToArray());
+						break;
+				}
 
 				_readConfigCq.Complete(cfg);
 			}
@@ -491,12 +508,17 @@ namespace BBSFW.Model
 
 		private void SendWriteConfigRequest(Configuration config)
 		{
+			if (Configuration.CurrentVersion != ConfigVersion)
+			{
+				throw new InvalidOperationException("Unsupported config version.");
+			}
+
 			var cfgarr = config.WriteToBuffer();
 
 			var buf = new List<byte>();
 			buf.Add(REQUEST_TYPE_WRITE);
 			buf.Add(OPCODE_WRITE_CONFIG);
-			buf.Add((byte)Configuration.Version);
+			buf.Add((byte)Configuration.CurrentVersion);
 			buf.Add((byte)cfgarr.Length);
 			buf.AddRange(cfgarr);
 			buf.Add(ComputeChecksum(buf, buf.Count));

@@ -103,6 +103,19 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public float MaxBatteryVolts
+		{
+			get { return _config.MaxBatteryVolts; }
+			set
+			{
+				if (_config.MaxBatteryVolts != value)
+				{
+					_config.MaxBatteryVolts = value;
+					OnPropertyChanged(nameof(MaxBatteryVolts));
+				}
+			}
+		}
+
 		public uint LowCutoffVolts
 		{
 			get { return _config.LowCutoffVolts; }
@@ -183,6 +196,18 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public bool UseTemperatureSensor
+		{
+			get { return _config.UseTemperatureSensor; }
+			set
+			{
+				if (_config.UseTemperatureSensor != value)
+				{
+					_config.UseTemperatureSensor = value;
+					OnPropertyChanged(nameof(UseTemperatureSensor));
+				}
+			}
+		}
 
 		public uint ThrottleStartVoltageMillivolts
 		{
@@ -222,8 +247,6 @@ namespace BBSFW.ViewModel
 				}
 			}
 		}
-
-
 
 		public uint PasStartDelayDegrees
 		{
@@ -277,6 +300,18 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public bool ShowTemperatureOnPushWalk
+		{
+			get { return _config.ShowTemperatureOnPushWalk; }
+			set
+			{
+				if (_config.ShowTemperatureOnPushWalk != value)
+				{
+					_config.ShowTemperatureOnPushWalk = value;
+					OnPropertyChanged(nameof(ShowTemperatureOnPushWalk));
+				}
+			}
+		}
 
 		public uint StartupAssistLevel
 		{
@@ -386,13 +421,14 @@ namespace BBSFW.ViewModel
 			OnPropertyChanged(nameof(UseImperialUnits));
 			OnPropertyChanged(nameof(MaxCurrentAmps));
 			OnPropertyChanged(nameof(CurrentRampAmpsSecond));
+			OnPropertyChanged(nameof(MaxBatteryVolts));
 			OnPropertyChanged(nameof(LowCutoffVolts));
 			OnPropertyChanged(nameof(MaxSpeedKph));
 			OnPropertyChanged(nameof(MaxSpeedMph));
 			OnPropertyChanged(nameof(UseDisplay));
 			OnPropertyChanged(nameof(UseSpeedSensor));
 			OnPropertyChanged(nameof(UsePushWalk));
-			OnPropertyChanged(nameof(UsePushWalk));
+			OnPropertyChanged(nameof(UseTemperatureSensor));
 			OnPropertyChanged(nameof(ThrottleStartVoltageMillivolts));
 			OnPropertyChanged(nameof(ThrottleEndVoltageMillivolts));
 			OnPropertyChanged(nameof(ThrottleStartCurrentPercent));
@@ -400,6 +436,7 @@ namespace BBSFW.ViewModel
 			OnPropertyChanged(nameof(PasStopDelayMilliseconds));
 			OnPropertyChanged(nameof(WheelSizeInch));
 			OnPropertyChanged(nameof(SpeedSensorSignals));
+			OnPropertyChanged(nameof(ShowTemperatureOnPushWalk));
 			OnPropertyChanged(nameof(StartupAssistLevel));	
 			OnPropertyChanged(nameof(AssistModeSelection));
 			StandardAssistLevels = StandardAssistLevels.ToList();

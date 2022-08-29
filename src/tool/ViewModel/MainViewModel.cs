@@ -157,7 +157,10 @@ namespace BBSFW.ViewModel
 				return;
 			}
 
-			VerifyConfigVersion();
+			if (!VerifyConfigVersionForRead())
+			{
+				return;
+			}
 
 			var res = await ConnectionVm.GetConnection().ReadConfiguration(TimeSpan.FromSeconds(5));
 			if (!res.Timeout && res.Result != null)
@@ -182,7 +185,10 @@ namespace BBSFW.ViewModel
 				return;
 			}
 
-			VerifyConfigVersion();
+			if (!VerifyConfigVersionForWrite())
+			{
+				return;
+			}
 
 			var res = await ConnectionVm.GetConnection().WriteConfiguration(ConfigVm.GetConfig(), TimeSpan.FromSeconds(5));
 			if (!res.Timeout)
@@ -239,12 +245,22 @@ namespace BBSFW.ViewModel
 			Application.Current.Shutdown();
 		}
 
-
-		private bool VerifyConfigVersion()
+		private bool VerifyConfigVersionForRead()
 		{
-			if (ConnectionVm.ConfigVersion != Configuration.Version)
+			if (ConnectionVm.ConfigVersion < Configuration.MinVersion || ConnectionVm.ConfigVersion > Configuration.MaxVersion)
 			{
-				MessageBox.Show("Wrong firmware config version. Make sure you are using BBS-FW Config Tool for firmware version " + ConnectionVm.FirmwareVersion + ".", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				MessageBox.Show("Unsupported firmware config version. Please use BBS-FW Config Tool for firmware version " + ConnectionVm.FirmwareVersion + " to read configuration from flash.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				return false;
+			}
+
+			return true;
+		}
+
+		private bool VerifyConfigVersionForWrite()
+		{
+			if (ConnectionVm.ConfigVersion != Configuration.CurrentVersion)
+			{
+				MessageBox.Show("Unsupported firmware config version. Please use BBS-FW Config Tool for firmware version " + ConnectionVm.FirmwareVersion + " in order to write configuration to flash, or upgrade firmware to latest version.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				return false;
 			}
 

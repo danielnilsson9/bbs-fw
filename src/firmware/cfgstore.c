@@ -196,11 +196,13 @@ static void load_default_config()
 
 	g_config.max_current_amps = 30;
 	g_config.current_ramp_amps_s = 15;
-	g_config.low_cut_off_V = 42;
+	g_config.max_battery_x100v = 5460;
+	g_config.low_cut_off_v = 42;
 
 	g_config.use_speed_sensor = 1;
 	g_config.use_display = 1;
 	g_config.use_push_walk = 1;
+	g_config.use_temperature_sensor = 1;
 
 	g_config.wheel_size_inch_x10 = 280;
 	g_config.speed_sensor_signals = 1;
@@ -212,6 +214,8 @@ static void load_default_config()
 	g_config.throttle_start_voltage_mv = 900;
 	g_config.throttle_end_voltage_mv = 3600;
 	g_config.throttle_start_percent = 1;
+
+	g_config.show_temperature_push_walk = 0;
 
 	g_config.assist_mode_select = ASSIST_MODE_SELECT_OFF;
 	g_config.assist_startup_level = 3;

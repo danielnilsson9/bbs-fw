@@ -43,7 +43,7 @@ void main(void)
 	pas_set_stop_delay(g_config.pas_stop_delay_x100s * 10);
 
 	throttle_init(g_config.throttle_start_voltage_mv, g_config.throttle_end_voltage_mv);
-	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_V);
+	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_v);
 	lights_init();
 
 	app_init();

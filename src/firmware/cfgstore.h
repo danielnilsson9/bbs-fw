@@ -24,7 +24,7 @@
 #define ASSIST_MODE_SELECT_PAS0_LIGHT	0x03
 
 
-#define CONFIG_VERSION					1
+#define CONFIG_VERSION					2
 
 typedef struct
 {
@@ -43,13 +43,15 @@ typedef struct
 	// global
 	uint8_t max_current_amps;
 	uint8_t current_ramp_amps_s;
-	uint8_t low_cut_off_V;
+	uint16_t max_battery_x100v;
+	uint8_t low_cut_off_v;
 	uint8_t max_speed_kph;
 
 	// externals
 	uint8_t use_speed_sensor;
 	uint8_t use_display;
 	uint8_t use_push_walk;
+	uint8_t use_temperature_sensor;
 
 	// speed sensor
 	uint16_t wheel_size_inch_x10;
@@ -64,7 +66,10 @@ typedef struct
 	uint16_t throttle_end_voltage_mv;
 	uint8_t throttle_start_percent;
 
-	// assist options
+	// misc
+	uint8_t show_temperature_push_walk;
+
+	// assist levels
 	uint8_t assist_mode_select;
 	uint8_t assist_startup_level;
 	assist_level_t assist_levels[2][10];
