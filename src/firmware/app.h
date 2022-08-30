@@ -41,7 +41,7 @@
 #define STATUS_ERROR_HALL_SENSOR			0x08
 #define STATUS_ERROR_PHASE_LINE				0x09
 #define STATUS_ERROR_CONTROLLER_OVER_TEMP	0x10
-#define STATUS_ERROR_MOTOR_OVER_TEMP		0x11 // n/a to bbshd
+#define STATUS_ERROR_MOTOR_OVER_TEMP		0x11
 #define STATUS_ERROR_CURRENT_SENSE			0x12
 #define STATUS_ERROR_BATTERY_TEMP_SENSOR	0x13 // n/a
 #define STATUS_ERROR_MOTOR_TEMP_SENSOR		0x14 // n/a
@@ -65,6 +65,6 @@ void app_set_operation_mode(uint8_t mode);
 void app_set_wheel_max_speed_rpm(uint16_t value);
 
 uint8_t app_get_status_code();
-uint8_t app_get_motor_temperature();
+uint8_t app_get_temperature();
 
 #endif

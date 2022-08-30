@@ -8026,6 +8026,21 @@ Siemens, Philips, Valvo&lt;p&gt;
 <text x="-2.54" y="1.905" size="1.27" layer="25" ratio="10">&gt;NAME</text>
 <text x="-2.54" y="-3.175" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
 </package>
+<package name="P642">
+<description>&lt;b&gt;PHILIPS/VALVO NTC&lt;/b&gt;</description>
+<wire x1="-1.524" y1="-1.27" x2="1.524" y2="-1.27" width="0.1524" layer="21"/>
+<wire x1="1.524" y1="1.27" x2="-1.524" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-1.524" y1="-1.27" x2="-1.524" y2="1.27" width="0.1524" layer="21" curve="-180"/>
+<wire x1="1.524" y1="-1.27" x2="1.524" y2="1.27" width="0.1524" layer="21" curve="180"/>
+<wire x1="-1.27" y1="1.27" x2="1.289" y2="1.2556" width="0.1524" layer="21" curve="-74.108925"/>
+<wire x1="-1.289" y1="-1.2556" x2="1.27" y2="-1.27" width="0.1524" layer="21" curve="74.108925"/>
+<wire x1="-1.905" y1="-0.508" x2="1.905" y2="-0.508" width="0.1524" layer="51"/>
+<wire x1="-1.905" y1="0.508" x2="1.905" y2="0.508" width="0.1524" layer="51"/>
+<pad name="1" x="-1.27" y="0" drill="0.8128" shape="long" rot="R90"/>
+<pad name="2" x="1.27" y="0" drill="0.8128" shape="long" rot="R90"/>
+<text x="-2.286" y="2.032" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="-2.54" y="-3.429" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+</package>
 </packages>
 <symbols>
 <symbol name="NTC">
@@ -8065,6 +8080,28 @@ Siemens, Philips, Valvo&lt;p&gt;
 </gates>
 <devices>
 <device name="" package="P640">
+<connects>
+<connect gate="1" pin="1" pad="1"/>
+<connect gate="1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="MF" value="" constant="no"/>
+<attribute name="MPN" value="" constant="no"/>
+<attribute name="OC_FARNELL" value="unknown" constant="no"/>
+<attribute name="OC_NEWARK" value="unknown" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="NTC642-6" prefix="R" uservalue="yes">
+<description>&lt;b&gt;PHILIPS NTC&lt;/b&gt;</description>
+<gates>
+<gate name="1" symbol="NTC" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="P642">
 <connects>
 <connect gate="1" pin="1" pad="1"/>
 <connect gate="1" pin="2" pad="2"/>
@@ -8175,9 +8212,13 @@ Siemens, Philips, Valvo&lt;p&gt;
 <part name="R44" library="rcl" deviceset="R-EU_" device="R0603" value="0"/>
 <part name="R43" library="ptc-ntc" deviceset="NTC640" device="" value="10k"/>
 <part name="R45" library="rcl" deviceset="R-EU_" device="R0603" value="5.1k"/>
-<part name="+3V4" library="supply1" deviceset="+3V3" device="" value="+4.3V"/>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
-<part name="R46" library="rcl" deviceset="R-EU_" device="R0603" value="2.0K"/>
+<part name="R46" library="rcl" deviceset="R-EU_" device="R0603" value="3.0K"/>
+<part name="P+8" library="supply1" deviceset="+5V" device=""/>
+<part name="R47" library="rcl" deviceset="R-EU_" device="R0603" value="5.1K"/>
+<part name="P+9" library="supply1" deviceset="+5V" device=""/>
+<part name="R48" library="ptc-ntc" deviceset="NTC642-6" device="" value="10K"/>
+<part name="GND13" library="supply1" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -8199,7 +8240,7 @@ Siemens, Philips, Valvo&lt;p&gt;
 the bottom side of pcb right under STC MCU.
 
 Two SOT-23, likely two transistors, 
-some form of level conversion to 5V maybe?</text>
+some form of input protection maybe?</text>
 <text x="17.018" y="60.198" size="1.778" layer="97">PAS1</text>
 <text x="17.018" y="62.738" size="1.778" layer="97">PAS2</text>
 <text x="159.766" y="166.878" size="1.778" layer="97">Debug Terminalt?
@@ -8264,9 +8305,9 @@ Constant data output at 9600 baud.</text>
 <instance part="R42" gate="G$1" x="208.28" y="124.46" rot="R180"/>
 <instance part="R43" gate="1" x="190.5" y="78.74" rot="R90"/>
 <instance part="R45" gate="G$1" x="175.26" y="78.74"/>
-<instance part="+3V4" gate="G$1" x="160.02" y="86.36"/>
 <instance part="GND12" gate="1" x="200.66" y="73.66"/>
 <instance part="R46" gate="G$1" x="190.5" y="66.04"/>
+<instance part="P+9" gate="1" x="160.02" y="86.36"/>
 </instances>
 <busses>
 </busses>
@@ -8293,6 +8334,12 @@ Constant data output at 9600 baud.</text>
 <pinref part="P+4" gate="1" pin="+5V"/>
 <pinref part="D5" gate="G$1" pin="A"/>
 <wire x1="55.88" y1="119.38" x2="55.88" y2="111.76" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="R45" gate="G$1" pin="1"/>
+<wire x1="160.02" y1="78.74" x2="170.18" y2="78.74" width="0.1524" layer="91"/>
+<pinref part="P+9" gate="1" pin="+5V"/>
+<wire x1="160.02" y1="83.82" x2="160.02" y2="78.74" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -8506,12 +8553,6 @@ Constant data output at 9600 baud.</text>
 <wire x1="43.18" y1="38.1" x2="38.1" y2="38.1" width="0.1524" layer="91"/>
 <junction x="38.1" y="38.1"/>
 </segment>
-<segment>
-<pinref part="+3V4" gate="G$1" pin="+3V3"/>
-<wire x1="160.02" y1="83.82" x2="160.02" y2="78.74" width="0.1524" layer="91"/>
-<pinref part="R45" gate="G$1" pin="1"/>
-<wire x1="160.02" y1="78.74" x2="170.18" y2="78.74" width="0.1524" layer="91"/>
-</segment>
 </net>
 <net name="N$7" class="0">
 <segment>
@@ -8683,16 +8724,12 @@ Constant data output at 9600 baud.</text>
 <text x="172.72" y="165.1" size="1.778" layer="97">Serial Communication between MCUs</text>
 <text x="217.17" y="20.32" size="2.54" layer="94">Daniel Nilsson</text>
 <text x="142.24" y="58.42" size="1.778" layer="97">WARNING:
-Not sure this opamp circuit is 100% correct.
+Not sure this opamp circuit is 100% correct, it looks a bit strange.
 
 OPAMP is there to amplify voltage drop over shunt
-resistors in order to get a more detailed reading with ADC.
-
-Connected to NEC MCU which cannot be programmed
-atm so doesn't really matter.</text>
-<text x="68.072" y="166.878" size="1.778" layer="97">Unknown function (ADC4)
-Labeled as "T" on hall sensor board.
-Motor temperature sensor?</text>
+resistors in order to get a more detailed reading with ADC.</text>
+<text x="80.772" y="166.878" size="1.778" layer="97">Motor winding temperature sensor.
+Labeled as "T" on hall sensor board.</text>
 <text x="165.1" y="127" size="1.778" layer="97">Some form of status LED.
 Seems to be blinking during normal operation.</text>
 <text x="17.78" y="106.68" size="1.778" layer="97">Motor Control Enable</text>
@@ -8736,6 +8773,10 @@ Seems to be blinking during normal operation.</text>
 <instance part="LED1" gate="G$1" x="165.1" y="119.38" rot="R90"/>
 <instance part="R20" gate="G$1" x="66.04" y="104.14"/>
 <instance part="R44" gate="G$1" x="66.04" y="111.76"/>
+<instance part="P+8" gate="1" x="35.56" y="172.72"/>
+<instance part="R47" gate="G$1" x="43.18" y="165.1"/>
+<instance part="R48" gate="1" x="35.56" y="152.4"/>
+<instance part="GND13" gate="1" x="27.94" y="154.94"/>
 </instances>
 <busses>
 </busses>
@@ -8791,6 +8832,13 @@ Seems to be blinking during normal operation.</text>
 <pinref part="GND11" gate="1" pin="GND"/>
 <pinref part="C4" gate="G$1" pin="2"/>
 <wire x1="66.04" y1="152.4" x2="66.04" y2="154.94" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="R48" gate="1" pin="2"/>
+<wire x1="35.56" y1="157.48" x2="35.56" y2="160.02" width="0.1524" layer="91"/>
+<wire x1="35.56" y1="160.02" x2="27.94" y2="160.02" width="0.1524" layer="91"/>
+<pinref part="GND13" gate="1" pin="GND"/>
+<wire x1="27.94" y1="160.02" x2="27.94" y2="157.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$11" class="0">
@@ -8971,10 +9019,17 @@ Seems to be blinking during normal operation.</text>
 <net name="N$16" class="0">
 <segment>
 <pinref part="JP4" gate="A" pin="6"/>
-<wire x1="27.94" y1="144.78" x2="50.8" y2="144.78" width="0.1524" layer="91"/>
+<wire x1="27.94" y1="144.78" x2="35.56" y2="144.78" width="0.1524" layer="91"/>
+<wire x1="35.56" y1="144.78" x2="50.8" y2="144.78" width="0.1524" layer="91"/>
 <wire x1="50.8" y1="144.78" x2="50.8" y2="165.1" width="0.1524" layer="91"/>
 <pinref part="R39" gate="G$1" pin="1"/>
 <wire x1="50.8" y1="165.1" x2="53.34" y2="165.1" width="0.1524" layer="91"/>
+<pinref part="R47" gate="G$1" pin="2"/>
+<wire x1="48.26" y1="165.1" x2="50.8" y2="165.1" width="0.1524" layer="91"/>
+<junction x="50.8" y="165.1"/>
+<pinref part="R48" gate="1" pin="1"/>
+<wire x1="35.56" y1="147.32" x2="35.56" y2="144.78" width="0.1524" layer="91"/>
+<junction x="35.56" y="144.78"/>
 </segment>
 </net>
 <net name="STC_P1.4" class="0">
@@ -9011,6 +9066,12 @@ Seems to be blinking during normal operation.</text>
 <wire x1="154.94" y1="124.46" x2="154.94" y2="119.38" width="0.1524" layer="91"/>
 <pinref part="LED1" gate="G$1" pin="A"/>
 <wire x1="154.94" y1="119.38" x2="162.56" y2="119.38" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="P+8" gate="1" pin="+5V"/>
+<wire x1="35.56" y1="170.18" x2="35.56" y2="165.1" width="0.1524" layer="91"/>
+<pinref part="R47" gate="G$1" pin="1"/>
+<wire x1="35.56" y1="165.1" x2="38.1" y2="165.1" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$19" class="0">

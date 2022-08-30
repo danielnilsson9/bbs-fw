@@ -544,7 +544,7 @@ static int16_t process_bafang_display_read_range()
 		return KEEP;
 	}
 
-	uint16_t temp = app_get_motor_temperature();
+	uint16_t temp = app_get_temperature();
 
 	if (g_config.use_freedom_units)
 	{

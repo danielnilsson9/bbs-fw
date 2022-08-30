@@ -40,6 +40,21 @@ static bool speed_prev_state;
 static uint8_t speed_ticks_per_rpm;
 
 
+static float thermistor_ntc_calculate_temperature(int16_t adc_x100, float R1)
+{
+	// :TODO: measure real beta for each thermistor type and pass inverse as function param
+	const float invBeta = 1.f / 3600.f;
+	const float invT0 = 1.f / 298.15f;
+
+	float R = R1 * ((25500.f / (25500.f - adc_x100)) - 1.f);
+
+	float K = 1.f / (invT0 + invBeta * (logf(R / 10000.f)));
+	float C = K - 273.15f;
+
+	return C;
+}
+
+
 void sensors_init()
 {
 	pas_period_counter = 0;
@@ -161,31 +176,48 @@ uint16_t speed_sensor_get_rpm_x10()
 	return 0;
 }
 
-int16_t temperature_get_x100()
-{
-	static int16_t adc_x100 = 0;
 
-	if (adc_x100 == 0)
+int16_t temperature_contr_x100()
+{
+	const float R1 = 5100.f;
+
+	static int16_t adc_contr_x100 = 0;
+
+	if (adc_contr_x100 == 0)
 	{
-		adc_x100 = adc_get_temperature() * 100;
+		adc_contr_x100 = adc_get_temperature_contr() * 100;
 	}
 	else
 	{
-		adc_x100 = EXPONENTIAL_FILTER(adc_x100, adc_get_temperature() * 100, 4);
+		adc_contr_x100 = EXPONENTIAL_FILTER(adc_contr_x100, adc_get_temperature_contr() * 100, 4);
 	}
 	
-	if (adc_x100 != 0)
+	if (adc_contr_x100 != 0)
 	{
-		// :TODO: Measure and calculate beta value for range 25 - 80 degrees
-		const float invBeta = 1.f / 3600.f;
-		const float invT0 = 1.f / 298.15f;
+		return (int16_t)(thermistor_ntc_calculate_temperature(adc_contr_x100, R1) * 100.f + 0.5f);
+	}
 
-		float R = 5100.f * ((25500.f / (25500.f - adc_x100)) - 1.f);
+	return 0;
+}
 
-		float K = 1.f / (invT0 + invBeta * (logf(R / 10000.f)));
-		float C = K - 273.15f;
+int16_t temperature_motor_x100()
+{
+	const float R1 = 5100.f;
 
-		return (int16_t)(C * 100.f + 0.5f);
+	static int16_t adc_motor_x100 = 0;
+
+	if (adc_motor_x100 == 0)
+	{
+		adc_motor_x100 = adc_get_temperature_contr() * 100;
+	}
+	else
+	{
+		adc_motor_x100 = EXPONENTIAL_FILTER(adc_motor_x100, adc_get_temperature_motor() * 100, 4);
+	}
+
+	if (adc_motor_x100 != 0)
+	{
+		return (int16_t)(thermistor_ntc_calculate_temperature(adc_motor_x100, R1) * 100.f + 0.5f);
 	}
 
 	return 0;

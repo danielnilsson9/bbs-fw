@@ -68,7 +68,8 @@ static int32_t assist_max_wheel_speed_rpm_x10;
 static uint16_t speed_limit_ramp_interval_rpm_x10;
 
 static bool cruise_paused;
-static int8_t motor_temperature;
+static int8_t temperature_contr_c;
+static int8_t temperature_motor_c;
 
 static uint8_t ramp_up_target_current;
 static uint32_t last_ramp_up_increment_ms;
@@ -99,7 +100,8 @@ void app_init()
 
 	global_max_speed_rpm = 0;
 	lvc_ramp_down_offset_volt_x10 = (uint16_t)((g_config.low_cut_off_v * 10 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100);
-	motor_temperature = 0;
+	temperature_contr_c = 0;
+	temperature_motor_c = 0;
 
 	ramp_up_target_current = 0;
 	last_ramp_up_increment_ms = 0;
@@ -252,7 +254,12 @@ uint8_t app_get_status_code()
 		return STATUS_ERROR_THROTTLE;
 	}
 
-	if (motor_temperature > MAX_TEMPERATURE)
+	if (temperature_motor_c > MAX_TEMPERATURE)
+	{
+		return STATUS_ERROR_MOTOR_OVER_TEMP;
+	}
+
+	if (temperature_contr_c > MAX_TEMPERATURE)
 	{
 		return STATUS_ERROR_CONTROLLER_OVER_TEMP;
 	}
@@ -277,14 +284,16 @@ uint8_t app_get_status_code()
 	return STATUS_IDLE;
 }
 
-uint8_t app_get_motor_temperature()
+uint8_t app_get_temperature()
 {
-	if (motor_temperature < 0)
+	int8_t temp_max = MAX(temperature_contr_c, temperature_motor_c);
+
+	if (temp_max < 0)
 	{
 		return 0;
 	}
 
-	return (uint8_t)motor_temperature;
+	return (uint8_t)temp_max;
 }
 
 
@@ -499,27 +508,38 @@ void apply_speed_limit(uint8_t* target_current)
 
 void apply_thermal_limit(uint8_t* target_current)
 {
-	static int8_t last_logged_temp = 0;
+	static int8_t last_logged_temp_contr = 0;
+	static int8_t last_logged_temp_motor = 0;
 	static uint32_t last_logged_temp_ms = 0;
+
 	static bool temperature_limiting = false;
 
 	if (!g_config.use_temperature_sensor)
 	{
-		motor_temperature = 0;
+		temperature_motor_c = 0;
+		temperature_contr_c = 0;
 		return;
 	}
 
-	int16_t temp_x100 = temperature_get_x100();
-	motor_temperature = temp_x100 / 100;
+	int16_t temp_contr_x100 = temperature_contr_x100();
+	temperature_contr_c = temp_contr_x100 / 100;
 
-	if (motor_temperature != last_logged_temp && system_ms() - last_logged_temp_ms > 5000)
+	int16_t temp_motor_x100 = temperature_motor_x100();	
+	temperature_motor_c = temp_motor_x100 / 100;
+
+	int16_t max_temp_x100 = MAX(temp_contr_x100, temp_motor_x100);
+	int8_t max_temp = MAX(temperature_contr_c, temperature_motor_c);
+
+	if ((temperature_contr_c != last_logged_temp_contr || temperature_motor_c != last_logged_temp_motor) &&
+		(system_ms() - last_logged_temp_ms) > 5000)
 	{
-		last_logged_temp = motor_temperature;
+		last_logged_temp_contr = temperature_contr_c;
+		last_logged_temp_motor = temperature_motor_c;
 		last_logged_temp_ms = system_ms();
-		eventlog_write_data(EVT_DATA_TEMPERATURE, motor_temperature);
+		eventlog_write_data(EVT_DATA_TEMPERATURE, (uint16_t)temperature_motor_c << 8 | temperature_contr_c);
 	}
 
-	if (motor_temperature >= (MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL))
+	if (max_temp >= (MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL))
 	{
 		if (!temperature_limiting)
 		{
@@ -527,12 +547,12 @@ void apply_thermal_limit(uint8_t* target_current)
 			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 1);
 		}
 
-		if (temp_x100 > MAX_TEMPERATURE * 100)
+		if (max_temp_x100 > MAX_TEMPERATURE * 100)
 		{
-			temp_x100 = MAX_TEMPERATURE * 100;
+			max_temp_x100 = MAX_TEMPERATURE * 100;
 		}
 
-		uint8_t tmp = (uint8_t)MAP32(temp_x100, (MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL) * 100, MAX_TEMPERATURE * 100, 100, 20);
+		uint8_t tmp = (uint8_t)MAP32(max_temp_x100, (MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL) * 100, MAX_TEMPERATURE * 100, 100, 20);
 		if (*target_current > tmp)
 		{
 			*target_current = tmp;

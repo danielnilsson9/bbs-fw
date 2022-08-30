@@ -138,7 +138,7 @@ namespace BBSFW.Model
 				case EVT_DATA_LIGHTS:
 					return $"Lights status changed to {_data}.";
 				case EVT_DATA_TEMPERATURE:
-					return $"Motor controller temperature changed to {_data}C.";
+					return $"Temperature changed, motor={_data >> 8}C, controller={_data & 0xff}C.";
 				case EVT_DATA_THERMAL_LIMITING:
 					if (_data.Value != 0)
 					{
