@@ -21,11 +21,17 @@
 
 // Compile time options
 
-
-#define MAX_TEMPERATURE						75
+// Applied to both motor and controller tmeperature sensor
+#define MAX_TEMPERATURE							75
 
 // Current ramp down starts at MAX_TEMPERATURE - 4.
-#define MAX_TEMPERATURE_RAMP_DOWN_INTERVAL	4	
+#define MAX_TEMPERATURE_RAMP_DOWN_INTERVAL		4
+
+// Maximum allowed motor current in percent of maximum configured current (A)
+// to still apply when maximum temperature has been reached.
+// Motor current is ramped down linearly until this value when approaching
+// max temperature.
+#define MAX_TEMPERATURE_LOW_CURRENT_PERCENT		20
 
 
 // Current ramp down starts at LVC + (LVC * LVC_RAMP_DOWN_OFFSET_PERCENT / 100)
@@ -33,29 +39,34 @@
 // LVC is 42V
 // 42 * 0.06 = 2.5V
 // Ramp down starts at 42V + 2.5V
-#define LVC_RAMP_DOWN_OFFSET_PERCENT		6		
+#define LVC_RAMP_DOWN_OFFSET_PERCENT			6
+
+// Maximum allowed motor current in percent of maximum configured current (A)
+// to still apply when LVC has been reached.
+// Motor current is ramped down linearly until this value when approacing LVC.
+#define LVC_LOW_CURRENT_PERCENT					20
 
 // Number of PAS sensor pulses to engage cruise mode,
 // there are 24 pulses per revolution.
-#define CRUISE_ENGAGE_PAS_PULSES			12
+#define CRUISE_ENGAGE_PAS_PULSES				12
 
 // Number of PAS sensor pulses to disengage curise mode
 // by pedaling backwards. There are 24 pulses per revolution.
-#define CRUISE_DISENGAGE_PAS_PULSES			4
+#define CRUISE_DISENGAGE_PAS_PULSES				4
 
 // Size of speed limit ramp down interval.
 // If max speed is 50 and this is set to 3 then the
 // target current will start ramping down when passing 47
 // and be at 50% of max current when reaching 50.
-#define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH	3
+#define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH		3
 
 // Current ramp down (e.g. when releasing throttle, stop pedaling etc.) in percent per 10 millisecond.
 // Specifying 1 will make ramp down periond 1 second if relasing from full throttle.
 // Set to 100 to disable
-#define CURRENT_RAMP_DOWN_PERCENT_10MS		5
+#define CURRENT_RAMP_DOWN_PERCENT_10MS			5
 
 // How long the power interrupt will last when gear sensor is triggered.
-#define SHIFT_SENSOR_INTERRUPT_PERIOD_MS	300
+#define SHIFT_SENSOR_INTERRUPT_PERIOD_MS		300
 
 
 static uint8_t assist_level;
@@ -552,7 +563,14 @@ void apply_thermal_limit(uint8_t* target_current)
 			max_temp_x100 = MAX_TEMPERATURE * 100;
 		}
 
-		uint8_t tmp = (uint8_t)MAP32(max_temp_x100, (MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL) * 100, MAX_TEMPERATURE * 100, 100, 20);
+		uint8_t tmp = (uint8_t)MAP32(
+			max_temp_x100,													// value
+			(MAX_TEMPERATURE - MAX_TEMPERATURE_RAMP_DOWN_INTERVAL) * 100,	// in_min
+			MAX_TEMPERATURE * 100,											// in_max
+			100,															// out_min
+			MAX_TEMPERATURE_LOW_CURRENT_PERCENT								// out_max
+		);
+
 		if (*target_current > tmp)
 		{
 			*target_current = tmp;
@@ -605,7 +623,14 @@ void apply_low_voltage_limit(uint8_t* target_current)
 		}
 
 		// ramp down power until 20% when approaching lvc
-		uint8_t tmp = (uint8_t)MAP32(voltage_x10, lvc_x10, start_limit_v_x10, 20, 100);
+		uint8_t tmp = (uint8_t)MAP32(
+			voltage_x10,					// value
+			lvc_x10,						// in_min
+			start_limit_v_x10,				// in_max
+			LVC_LOW_CURRENT_PERCENT,		// out_min
+			100								// out_max
+		);
+
 		if (*target_current > tmp)
 		{
 			*target_current = tmp;
