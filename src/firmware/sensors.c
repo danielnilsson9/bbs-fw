@@ -208,7 +208,7 @@ int16_t temperature_motor_x100()
 
 	if (adc_motor_x100 == 0)
 	{
-		adc_motor_x100 = adc_get_temperature_contr() * 100;
+		adc_motor_x100 = adc_get_temperature_motor() * 100;
 	}
 	else
 	{
