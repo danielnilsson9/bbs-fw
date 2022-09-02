@@ -61,6 +61,12 @@ namespace BBSFW.Model
 
 		private int ConfigVersion = 0;
 
+		public enum Controller
+		{
+			BBSHD = 1,
+			BBS02 = 2
+		}
+
 		public bool IsConnected
 		{
 			get
@@ -70,8 +76,8 @@ namespace BBSFW.Model
 		}
 
 
-		public event Action<string, int>		Connected;
-		public event Action						Disconnected;
+		public event Action<Controller, string, int>	Connected;
+		public event Action								Disconnected;
 
 
 		public event Action<EventLogEntry>		EventLog;
@@ -280,31 +286,47 @@ namespace BBSFW.Model
 
 		private int ProcessReadResponseFwVersion()
 		{
-			const int MessageSize = 7;
+			const int MessageSizeV1 = 7;
+			const int MessageSizeV2 = 8;
 
-			if (_rxBuffer.Count < MessageSize)
+			if (_rxBuffer.Count < MessageSizeV1)
 			{
 				return Keep;
 			}
 
-			if (ComputeChecksum(_rxBuffer, MessageSize - 1) == _rxBuffer[MessageSize - 1])
+			int size = MessageSizeV1;
+
+			int major = _rxBuffer[2];
+			int minor = _rxBuffer[3];
+			int patch = _rxBuffer[4];
+
+			if (major > 1 || minor > 0)
 			{
-				int major = _rxBuffer[2];
-				int minor = _rxBuffer[3];
-				int patch = _rxBuffer[4];
+				// Controller model field added in firmware version 1.1
+				// Keep backwards compatibility
+				if (_rxBuffer.Count < MessageSizeV2)
+				{
+					return Keep;
+				}
+
+				size = MessageSizeV2;
+			}
+
+			if (ComputeChecksum(_rxBuffer, size - 1) == _rxBuffer[size - 1])
+			{
 				ConfigVersion = _rxBuffer[5];
 
 				if (_isConnecting)
 				{
 					_isConnecting = false;
 					_isConnected = true;
-					Connected?.Invoke(String.Format("{0}.{1}.{2}", major, minor, patch), ConfigVersion);
+					Connected?.Invoke(size == MessageSizeV1 ? Controller.BBSHD : (Controller)_rxBuffer[6] ,String.Format("{0}.{1}.{2}", major, minor, patch), ConfigVersion); ;
 
 					SendEventLogEnableRequest(true);
 				}
 			}
 
-			return MessageSize;
+			return size;
 		}
 
 		private int ProcessReadResponseEvtlogEnable()

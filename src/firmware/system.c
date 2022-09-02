@@ -8,14 +8,15 @@
 
 #include "system.h"
 #include "watchdog.h"
-
-#define TIMER0_RELOAD	((65535 - CPU_FREQ / 1000) + 1)
+#include "timers.h"
 
 static volatile uint32_t	_ms;
+static volatile uint8_t		_x100us;
 
 void system_init()
 {
 	_ms = 0;
+	_x100us = 0;
 
 	// Wait for stable voltage (above lvd)
 	while (IS_BIT_SET(PCON, 5))
@@ -23,17 +24,7 @@ void system_init()
 		CLEAR_BIT(PCON, 5);
 	}
 
-	EA = 0; // disable interrupts
-
-	TMOD = (TMOD & 0xf0) | 0x00; // Timer 0: 16-bit with autoreload
-	AUXR |= 0x80; // Run timer 0 at CPU_FREQ
-
-	TH0 = TIMER0_RELOAD >> 8;
-	TL0 = TIMER0_RELOAD;
-
-	EA = 1; // enable interrupts
-	ET0 = 1; // enable timer0 interrupts
-	TR0 = 1; // start timer 0
+	timer0_init_system();
 }
 
 uint32_t system_ms()
@@ -59,9 +50,12 @@ void system_delay_ms(uint16_t ms)
 	}
 }
 
-
-INTERRUPT_USING(isr_timer0, IRQ_TIMER0, 1)
+void system_timer0_isr()
 {
-	_ms++;
+	_x100us++;
+	if (_x100us == 10)
+	{
+		_x100us = 0;
+		_ms++;
+	}
 }
-

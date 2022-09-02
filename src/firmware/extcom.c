@@ -333,6 +333,7 @@ static int16_t process_read_fw_version()
 		write_uart1_and_increment_checksum(VERSION_MINOR, &checksum);
 		write_uart1_and_increment_checksum(VERSION_PATCH, &checksum);
 		write_uart1_and_increment_checksum(CONFIG_VERSION, &checksum);
+		write_uart1_and_increment_checksum(CTRL_TYPE, &checksum);
 		uart1_write(checksum);
 	}
 

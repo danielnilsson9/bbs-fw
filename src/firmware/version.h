@@ -13,4 +13,13 @@
 #define VERSION_MINOR		1
 #define VERSION_PATCH		0
 
+
+#if defined(BBSHD)
+	#define CTRL_TYPE		1
+#elif defined(BBS02)
+	#define CTRL_TYPE		2
+#else
+	#define CTRL_TYPE		0
+#endif
+
 #endif

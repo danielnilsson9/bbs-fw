@@ -57,6 +57,9 @@
     <ClCompile Include="battery.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="timers.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="motor.h">
@@ -117,6 +120,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="battery.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

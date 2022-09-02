@@ -9,11 +9,9 @@ PLATFORM = mcs51
 # Target name
 PNAME = main
 
-
-# When addding support for more controllers, define
-# new entries here if auto detection cannot be supported.
-TARGET_CONTROLLER = BBSHD
-
+# Select target controller:
+#TARGET_CONTROLLER = BBSHD
+TARGET_CONTROLLER = BBS02
 
 # External libraries
 IDIR = 
@@ -29,6 +27,7 @@ EXTRASRCS = \
 	eeprom.c \
 	eventlog.c \
 	extcom.c \
+	timers.c \
 	lights.c \
 	motor.c \
 	uart.c \
@@ -45,6 +44,7 @@ HEADERS = \
 	eventlog.h \
 	eeprom.h \
 	extcom.h \
+	timers.h \
 	lights.h \
 	motor.h \
 	uart.h \

@@ -8,6 +8,7 @@
 
 #include "eeprom.h"
 #include "cfgstore.h"
+#include "timers.h"
 #include "system.h"
 #include "eventlog.h"
 #include "app.h"
@@ -29,7 +30,10 @@
 
 void main(void)
 {
+	motor_init_pins();
+
 	watchdog_init();
+	timers_init();
 	system_init();
 
 	eventlog_init(false);
@@ -53,7 +57,7 @@ void main(void)
 
 
 #ifdef DEBUG_LOOP_TIME_PIN
-	SET_PIN_OUTPUT(PIN_GEAR_SENSOR);
+	SET_PIN_OUTPUT(PIN_SHIFT_SENSOR);
 #endif
 
 #ifdef DEBUG_LOOP_TIME_EVENTLOG
@@ -64,7 +68,7 @@ void main(void)
 	while (1)
 	{
 #ifdef DEBUG_LOOP_TIME_PIN
-		SET_PIN_HIGH(PIN_GEAR_SENSOR);
+		SET_PIN_HIGH(PIN_SHIFT_SENSOR);
 #endif
 		adc_process();
 		battery_process();
@@ -73,7 +77,7 @@ void main(void)
 		app_process();
 
 #ifdef DEBUG_LOOP_TIME_PIN
-		SET_PIN_LOW(PIN_GEAR_SENSOR);
+		SET_PIN_LOW(PIN_SHIFT_SENSOR);
 #endif
 
 #ifdef DEBUG_LOOP_TIME_EVENTLOG
@@ -84,7 +88,7 @@ void main(void)
 		prev_loop_ms = (uint16_t)system_ms();
 #endif
 
-		system_delay_ms(4);
+		system_delay_ms(2);
 		watchdog_yeild();
 	}
 }

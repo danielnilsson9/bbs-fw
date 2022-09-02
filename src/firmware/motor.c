@@ -83,15 +83,28 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V);
 static void process_com_state_machine();
 
 
+void motor_init_pins()
+{
+	SET_PIN_OUTPUT(PIN_MOTOR_POWER_ENABLE);
+	SET_PIN_OUTPUT(PIN_MOTOR_CONTROL_ENABLE);
+	SET_PIN_OUTPUT(PIN_MOTOR_EXTRA);
+
+	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
+	SET_PIN_HIGH(PIN_MOTOR_CONTROL_ENABLE);
+	SET_PIN_HIGH(PIN_MOTOR_EXTRA);
+}
+
 void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 {
+	motor_init_pins();
+
 	is_connected = 0;
 	target_speed_changed = false;
 	target_speed = 0;
 	target_current_changed = false;
 	target_current = 0;
-	lvc_volt_x10 = (uint16_t)lvc_V * 10;
 	status_flags = 0;
+	lvc_volt_x10 = (uint16_t)lvc_V * 10;
 	battery_volt_x10 = 0;
 	battery_amp_x10 = 0;
 
@@ -101,18 +114,10 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 	last_status_read_ms = 0;
 	next_status_read_opcode = OPCODE_READ_STATUS;
 
-	SET_PIN_OUTPUT(PIN_MOTOR_POWER_ENABLE);
-	SET_PIN_OUTPUT(PIN_MOTOR_CONTROL_ENABLE);
-	SET_PIN_OUTPUT(PIN_MOTOR_EXTRA);
-
-	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
-	SET_PIN_HIGH(PIN_MOTOR_CONTROL_ENABLE);
-	SET_PIN_HIGH(PIN_MOTOR_EXTRA);
-
 	uart2_open(4800);
 
-	// Extra wait for other MCU to power on
-	system_delay_ms(100);
+	// Give other MCU time to power on
+	while (system_ms() < 100);
 
 	if (connect() && configure(max_current_mA, lvc_V))
 	{
@@ -369,7 +374,17 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V)
 {
 	uint16_t tmp = 0;
 
+	// This initialization is done exactly as in orginal firmware for BBSHD/BBS02.
+	// The meaning of most parameters is unknown.
+
+#if defined (BBSHD)
 	send_request(OPCODE_UNKNOWN1, 0x5a);
+#elif defined (BBS02)
+	send_request(OPCODE_UNKNOWN1, 0x5f);
+#else
+	return 0;
+#endif
+
 	if (!read_response(OPCODE_UNKNOWN1, 0))
 	{
 		return 0;

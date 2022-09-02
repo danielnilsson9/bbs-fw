@@ -74,6 +74,7 @@ make all</NMakeReBuildCommandLine>
     <ClCompile Include="main.c" />
     <ClCompile Include="sensors.c" />
     <ClCompile Include="throttle.c" />
+    <ClCompile Include="timers.c" />
     <ClCompile Include="uart.c" />
     <ClCompile Include="motor.c" />
     <ClCompile Include="watchdog.c" />
@@ -91,6 +92,7 @@ make all</NMakeReBuildCommandLine>
     <ClInclude Include="sensors.h" />
     <ClInclude Include="pins.h" />
     <ClInclude Include="throttle.h" />
+    <ClInclude Include="timers.h" />
     <ClInclude Include="uart.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="stc15.h" />

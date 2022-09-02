@@ -8,10 +8,12 @@
 
 #include "uart.h"
 #include "system.h"
+#include "timers.h"
+#include "pins.h"
 #include <stdint.h>
 
 // NOTE:
-// Variables located i __data are there for atomic access.
+// Variables located in __data are there for atomic access.
 
 // UART1
 static volatile __data uint8_t rx1_head;
@@ -40,12 +42,15 @@ void uart1_open(uint32_t baudrate)
 	tx1_tail = 0;
 	tx1_sending = 0;
 
-	unsigned short reload = 65535 - CPU_FREQ / 4 / baudrate + 1;
-
-	// Set up signal routing around UART1
+#if (GET_PORT_NUM(PIN_EXTERNAL_RX) == 3 && GET_PORT_NUM(PIN_EXTERNAL_TX) == 3)
 	AUXR1 = (AUXR1 & 0x3f) | 0x00; // Keep UART1 on P3.0/P3.1
-	P3M0 &= ~0x03; // Put pins P3.0/P3.1 into quasi bidirectional mode.
-	P3M1 &= ~0x03;
+#else
+	#error Unupported UART port configured.
+#endif
+
+	SET_PIN_QUASI(PIN_EXTERNAL_RX);
+	SET_PIN_QUASI(PIN_EXTERNAL_TX);
+
 	AUXR &= ~0x01; // Clock UART1 from T1
 	PCON &= ~0x40; // Expose SM0 bit
 	SM1 = 1; // UART 8-N-1
@@ -53,13 +58,7 @@ void uart1_open(uint32_t baudrate)
 	SM2 = 0; // Point-to-point UART
 	ES = 1; // Enable serial interrupt
 
-	// Set up timer 1 for baudrate
-	TMOD = (TMOD & 0x0f) | 0x00; // Run T1 in mode 0 (16-bit reload)
-	AUXR |= 0x40; // Run T1 at CPU_FREQ
-	TL1 = reload; // Set the reload value for given baudrate.
-	TH1 = reload >> 8;
-	ET1 = 0; // No interrupts from timer 1.
-	TR1 = 1; // Start timer 1
+	timer1_init_uart1(baudrate);
 
 	REN = 1; // Rx enable
 }
@@ -72,23 +71,23 @@ void uart2_open(uint32_t baudrate)
 	tx2_tail = 0;
 	tx2_sending = 0;
 
-	unsigned short reload = 65535 - CPU_FREQ / 4 / baudrate + 1;
+#if (GET_PORT_NUM(PIN_MOTOR_RX) == 1 && GET_PORT_NUM(PIN_MOTOR_TX) == 1)
+	{
+		P_SW2 = (P_SW2 & 0xfe) | 0x00; // Keep UART2 on P1.0/P1.1
+	}
+#else
+	#error Unupported UART port configured.
+#endif
 
-	P_SW2 = (P_SW2 & 0xfe) | 0x00; // Keep UART2 on P1.0/P1.1
-	P1M0 &= ~0x03; // Put pins P1.0/P1.1 into quasi bidirectional mode.
-	P1M1 &= ~0x03;
+	SET_PIN_QUASI(PIN_MOTOR_RX);
+	SET_PIN_QUASI(PIN_MOTOR_TX);
+
 	// UART 2 can only user timer 2
 	S2CON &= ~(1 << 7); // UART 8-N-1
 	S2CON &= ~(1 << 5); // Point-to-point UART
 	IE2 |= (1 << 0); // Enable serial 2 interrupt
 
-	// Set up timer 2 for baudrate
-	AUXR &= ~(1 << 3); // as timer
-	AUXR |= (1 << 2); // Run T2 at CPU_FREQ
-	T2H = reload >> 8;
-	T2L = reload;
-	IE2 &= ~(1 << 2); // No interrupts from timer 2
-	AUXR |= (1 << 4); // Start timer 2
+	timer2_init_uart2(baudrate);
 
 	S2CON |= (1 << 4); // Rx enable
 }
