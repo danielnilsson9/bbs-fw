@@ -519,16 +519,9 @@ void apply_speed_limit(uint8_t* target_current)
 
 void apply_thermal_limit(uint8_t* target_current)
 {
-	static uint32_t next_logg_temp_ms = 1000;
+	static uint32_t next_logg_temp_ms = 10000;
 
 	static bool temperature_limiting = false;
-
-	if (!g_config.use_temperature_sensor)
-	{
-		temperature_motor_c = 0;
-		temperature_contr_c = 0;
-		return;
-	}
 
 	int16_t temp_contr_x100 = temperature_contr_x100();
 	temperature_contr_c = temp_contr_x100 / 100;
@@ -539,7 +532,7 @@ void apply_thermal_limit(uint8_t* target_current)
 	int16_t max_temp_x100 = MAX(temp_contr_x100, temp_motor_x100);
 	int8_t max_temp = MAX(temperature_contr_c, temperature_motor_c);
 
-	if (system_ms() > next_logg_temp_ms)
+	if (g_config.use_temperature_sensor && system_ms() > next_logg_temp_ms)
 	{
 		next_logg_temp_ms = system_ms() + 10000;
 		eventlog_write_data(EVT_DATA_TEMPERATURE, (uint16_t)temperature_motor_c << 8 | temperature_contr_c);

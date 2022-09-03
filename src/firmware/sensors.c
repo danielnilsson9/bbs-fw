@@ -13,6 +13,7 @@
 #include "system.h"
 #include "adc.h"
 #include "util.h"
+#include "cfgstore.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -180,21 +181,23 @@ uint16_t speed_sensor_get_rpm_x10()
 int16_t temperature_contr_x100()
 {
 	const float R1 = 5100.f;
-
 	static int16_t adc_contr_x100 = 0;
 
-	if (adc_contr_x100 == 0)
+	if (g_config.use_temperature_sensor & TEMPERATURE_SENSOR_CONTR)
 	{
-		adc_contr_x100 = adc_get_temperature_contr() * 100;
-	}
-	else
-	{
-		adc_contr_x100 = EXPONENTIAL_FILTER(adc_contr_x100, adc_get_temperature_contr() * 100, 4);
-	}
-	
-	if (adc_contr_x100 != 0)
-	{
-		return (int16_t)(thermistor_ntc_calculate_temperature(adc_contr_x100, R1) * 100.f + 0.5f);
+		if (adc_contr_x100 == 0)
+		{
+			adc_contr_x100 = adc_get_temperature_contr() * 100;
+		}
+		else
+		{
+			adc_contr_x100 = EXPONENTIAL_FILTER(adc_contr_x100, adc_get_temperature_contr() * 100, 4);
+		}
+
+		if (adc_contr_x100 != 0)
+		{
+			return (int16_t)(thermistor_ntc_calculate_temperature(adc_contr_x100, R1) * 100.f + 0.5f);
+		}
 	}
 
 	return 0;
@@ -203,21 +206,23 @@ int16_t temperature_contr_x100()
 int16_t temperature_motor_x100()
 {
 	const float R1 = 5100.f;
-
 	static int16_t adc_motor_x100 = 0;
 
-	if (adc_motor_x100 == 0)
+	if (g_config.use_temperature_sensor & TEMPERATURE_SENSOR_MOTOR)
 	{
-		adc_motor_x100 = adc_get_temperature_motor() * 100;
-	}
-	else
-	{
-		adc_motor_x100 = EXPONENTIAL_FILTER(adc_motor_x100, adc_get_temperature_motor() * 100, 4);
-	}
+		if (adc_motor_x100 == 0)
+		{
+			adc_motor_x100 = adc_get_temperature_motor() * 100;
+		}
+		else
+		{
+			adc_motor_x100 = EXPONENTIAL_FILTER(adc_motor_x100, adc_get_temperature_motor() * 100, 4);
+		}
 
-	if (adc_motor_x100 != 0)
-	{
-		return (int16_t)(thermistor_ntc_calculate_temperature(adc_motor_x100, R1) * 100.f + 0.5f);
+		if (adc_motor_x100 != 0)
+		{
+			return (int16_t)(thermistor_ntc_calculate_temperature(adc_motor_x100, R1) * 100.f + 0.5f);
+		}
 	}
 
 	return 0;

@@ -20,6 +20,14 @@ namespace BBSFW.ViewModel
 				195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345, 360
 			};
 
+		public static List<Configuration.TemperatureSensor> TemperatureSensorOptions
+		{
+			get
+			{
+				return Enum.GetValues<Configuration.TemperatureSensor>().ToList();
+			}
+		}
+
 
 		public static List<uint> StartupAssistLevelOptions { get; } =
 			new List<uint>() { 0, 1, 2, 3, 4, 5, 6, 7 ,8, 9 };
@@ -196,7 +204,7 @@ namespace BBSFW.ViewModel
 			}
 		}
 
-		public bool UseTemperatureSensor
+		public Configuration.TemperatureSensor UseTemperatureSensor
 		{
 			get { return _config.UseTemperatureSensor; }
 			set

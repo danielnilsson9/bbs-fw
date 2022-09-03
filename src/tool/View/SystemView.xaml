@@ -146,9 +146,18 @@
 			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Walk Mode:" />
 			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePushWalk, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Temperature Sensor:" />
-			<CheckBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseTemperatureSensor, UpdateSourceTrigger=PropertyChanged}" />
-			
+			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Temperature Sensor:">
+				<TextBlock.ToolTip>
+					<TextBlock Width="300" TextWrapping="Wrap">
+						Select which temperature sensors to use for thermal limiting if motor/controller gets to hot.
+						Normally you should have this set to "All" but if you have a motor or controller with a broken
+						temperature sensor it could be usuful to select only the sensors that are working. This will let
+						you continue to use your motor/controller even though temperature monitoring is not working.
+					</TextBlock>
+				</TextBlock.ToolTip>
+			</TextBlock>
+			<ComboBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" Width="80" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.TemperatureSensorOptions}" SelectedItem="{Binding ConfigVm.UseTemperatureSensor, UpdateSourceTrigger=PropertyChanged}" />
+
 		</Grid>
 
 
@@ -194,7 +203,7 @@
 
 			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 10 0 0" Text="Show Temperature during Walk Mode:">
 				<TextBlock.ToolTip>
-					<TextBlock>
+					<TextBlock Width="300" TextWrapping="Wrap">
 						Show controller temperature in speed field on display while walk mode is active.
 						<LineBreak />
 						Walk mode is usually engaged on long press of minus button on display.

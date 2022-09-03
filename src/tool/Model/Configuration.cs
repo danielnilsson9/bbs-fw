@@ -50,6 +50,13 @@ namespace BBSFW.Model
 			Cruise = 0x04
 		};
 
+		public enum TemperatureSensor
+		{
+			Disabled = 0x00,
+			Controller = 0x01,
+			Motor = 0x02,
+			All = 0x03
+		}
 
 		public class AssistLevel
 		{
@@ -84,7 +91,7 @@ namespace BBSFW.Model
 		public bool UseSpeedSensor;
 		public bool UseDisplay;
 		public bool UsePushWalk;
-		public bool UseTemperatureSensor;
+		public TemperatureSensor UseTemperatureSensor;
 
 		// speed sensor
 		public float WheelSizeInch;
@@ -121,7 +128,7 @@ namespace BBSFW.Model
 			UseSpeedSensor = false;
 			UseDisplay = false;
 			UsePushWalk = false;
-			UseTemperatureSensor = false;
+			UseTemperatureSensor = TemperatureSensor.All;
 
 			WheelSizeInch = 0;
 			NumWheelSensorSignals = 0;
@@ -206,7 +213,7 @@ namespace BBSFW.Model
 
 			// apply sane default settings for non existing options in version
 			MaxBatteryVolts = 0f;
-			UseTemperatureSensor = true;
+			UseTemperatureSensor = TemperatureSensor.All;
 			ShowTemperatureOnPushWalk = false;
 
 			return true;
@@ -234,7 +241,7 @@ namespace BBSFW.Model
 				UseSpeedSensor = br.ReadBoolean();
 				UseDisplay = br.ReadBoolean();
 				UsePushWalk = br.ReadBoolean();
-				UseTemperatureSensor = br.ReadBoolean();
+				UseTemperatureSensor = (TemperatureSensor)br.ReadByte();
 
 				WheelSizeInch = br.ReadUInt16() / 10f;
 				NumWheelSensorSignals = br.ReadByte();
@@ -290,7 +297,7 @@ namespace BBSFW.Model
 				bw.Write(UseSpeedSensor);
 				bw.Write(UseDisplay);
 				bw.Write(UsePushWalk);
-				bw.Write(UseTemperatureSensor);
+				bw.Write((byte)UseTemperatureSensor);
 
 				bw.Write((UInt16)(WheelSizeInch * 10));
 				bw.Write((byte)NumWheelSensorSignals);
