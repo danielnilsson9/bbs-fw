@@ -530,7 +530,7 @@ static int16_t process_bafang_display_read_speed()
 	}
 	else
 	{
-		uint16_t speed = speed_sensor_get_rpm_x10() / 10;
+		speed = speed_sensor_get_rpm_x10() / 10;
 	}
 	
 	uart1_write(speed >> 8);
