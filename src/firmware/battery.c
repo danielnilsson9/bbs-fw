@@ -25,7 +25,7 @@ static uint8_t compute_battery_percent()
 	// Consider battery full if above 98% of configure max voltage
 	int32_t full_x1000v = 98l * g_config.max_battery_x100v * 10 / 100;
 
-	int32_t val = MAP32(motor_get_battery_voltage_x10() * 100, g_config.low_cut_off_v * 1000, full_x1000v, 0, 100);
+	int32_t val = MAP32(motor_get_battery_voltage_x10() * 100l, g_config.low_cut_off_v * 1000l, full_x1000v, 0, 100);
 
 	if (val > 100)
 	{
@@ -42,7 +42,7 @@ static uint8_t compute_battery_percent()
 
 void battery_init()
 {
-	battery_percent = 100;
+	battery_percent = 0;
 	motor_disabled_at_ms = 0;
 }
 
