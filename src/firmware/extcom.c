@@ -500,8 +500,6 @@ static int16_t process_bafang_display_read_battery()
 
 	uint8_t value = battery_get_percent();
 
-	// should be in percent but can't be bottered to do SOC calculation.
-	// return in volts instead, i.e. 57% on display will correspond to 57V.
 	uart1_write(value);
 	uart1_write(value); // checksum
 
@@ -515,7 +513,26 @@ static int16_t process_bafang_display_read_speed()
 		return KEEP;
 	}
 
-	uint16_t speed = speed_sensor_get_rpm_x10() / 10;
+	uint16_t speed = 0;
+
+	if (g_config.show_temperature_push_walk && app_get_assist_level() == ASSIST_PUSH)
+	{
+		uint16_t temp = app_get_temperature();
+		if (g_config.use_freedom_units)
+		{
+			// Keep temperature in C but compensate for kph -> mph conversion display will do.
+			// Farenheit would be out of range, displays will not show anything over 99.
+			temp = (temp * 161) / 100;
+		}
+
+		// T_kph -> rpm
+		speed = (uint16_t)(25000.f / (3 * 3.14159f * 1.27f * g_config.wheel_size_inch_x10) * temp);
+	}
+	else
+	{
+		uint16_t speed = speed_sensor_get_rpm_x10() / 10;
+	}
+	
 	uart1_write(speed >> 8);
 	uart1_write(speed);
 	uart1_write(0x20 + (speed >> 8) + speed); // weird checksum
@@ -545,7 +562,6 @@ static int16_t process_bafang_display_read_range()
 	}
 
 	uint16_t temp = app_get_temperature();
-
 	if (g_config.use_freedom_units)
 	{
 		// Convert to farenheit and compensate for the km -> miles conversion the diplay will do

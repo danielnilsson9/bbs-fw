@@ -246,6 +246,11 @@ void app_set_wheel_max_speed_rpm(uint16_t value)
 	}
 }
 
+uint8_t app_get_assist_level()
+{
+	return assist_level;
+}
+
 uint8_t app_get_status_code()
 {
 	uint16_t motor = motor_status();
