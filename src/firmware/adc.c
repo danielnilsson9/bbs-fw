@@ -14,8 +14,8 @@ static uint8_t next_channel;
 static uint8_t no_adc_reading_counter;
 
 static uint8_t throttle_value;
-static uint8_t temperature_contr_value;
-static uint8_t temperature_motor_value;
+static uint16_t temperature_contr_value;
+static uint16_t temperature_motor_value;
 
 
 void adc_init()
@@ -68,13 +68,13 @@ void adc_process()
 		}
 		case GET_PIN_NUM(PIN_TEMPERATURE_CONTR):
 		{
-			temperature_contr_value = ADC_RES;
+			temperature_contr_value = (((uint16_t)ADC_RES) << 2) | ADC_RESL;
 			next_channel = GET_PIN_NUM(PIN_TEMPERATURE_MOTOR);
 			break;
 		}
 		case GET_PIN_NUM(PIN_TEMPERATURE_MOTOR):
 		{
-			temperature_motor_value = ADC_RES;
+			temperature_motor_value = (((uint16_t)ADC_RES) << 2) | ADC_RESL;
 			next_channel = GET_PIN_NUM(PIN_THROTTLE);
 			break;
 		}}
@@ -106,12 +106,12 @@ uint8_t adc_get_throttle()
 	return throttle_value;
 }
 
-uint8_t adc_get_temperature_contr()
+uint16_t adc_get_temperature_contr()
 {
 	return temperature_contr_value;
 }
 
-uint8_t adc_get_temperature_motor()
+uint16_t adc_get_temperature_motor()
 {
 	return temperature_motor_value;
 }

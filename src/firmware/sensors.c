@@ -14,6 +14,7 @@
 #include "adc.h"
 #include "util.h"
 #include "cfgstore.h"
+#include "eventlog.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -26,6 +27,37 @@
 #define SPEED_SENSOR_MIN_PULSE_MS_X10	10
 #define SPEED_SENSOR_TIMEOUT_MS_X10		25000
 
+
+// Table values from VESC project, BBSHD hwconf by LUNA:
+// https://github.com/vedderb/bldc
+//
+// Some versions of the BBSHD motor (hall sensor board)
+// has a PTC thermisor instead of a NTC thermistor.
+// [R_x100, C_x100]
+#define BBSHD_PTC_LUT_SIZE	18
+typedef struct { int32_t x; int16_t y; } pt_t;
+static const pt_t bbshd_ptc_lut[BBSHD_PTC_LUT_SIZE] =
+{
+	{ 93300, -1500 },
+	{ 94000, -1100 },
+	{ 109000, 2500 },
+	{ 110700, 3000 },
+	{ 112400, 3500 },
+	{ 114000, 4000 },
+	{ 115500, 4500 },
+	{ 117000, 5000 },
+	{ 118100, 5500 },
+	{ 119100, 6000 },
+	{ 119800, 6500 },
+	{ 120200, 7000 },
+	{ 121100, 7500 },
+	{ 121700, 8000 },
+	{ 122400, 8500 },
+	{ 123100, 9000 },
+	{ 127400, 9500 },
+	{ 138500, 10000 }
+};
+static bool bbshd_ptc_thermistor;
 
 static volatile uint16_t pas_pulse_counter;
 static volatile bool pas_direction_backward;
@@ -41,13 +73,9 @@ static bool speed_prev_state;
 static uint8_t speed_ticks_per_rpm;
 
 
-static float thermistor_ntc_calculate_temperature(int16_t adc_x100, float R1)
+static float thermistor_ntc_calculate_temperature(float R, float invBeta)
 {
-	// :TODO: measure real beta for each thermistor type and pass inverse as function param
-	const float invBeta = 1.f / 3600.f;
 	const float invT0 = 1.f / 298.15f;
-
-	float R = R1 * ((25500.f / (25500.f - adc_x100)) - 1.f);
 
 	float K = 1.f / (invT0 + invBeta * (logf(R / 10000.f)));
 	float C = K - 273.15f;
@@ -55,9 +83,43 @@ static float thermistor_ntc_calculate_temperature(int16_t adc_x100, float R1)
 	return C;
 }
 
+static int16_t thermistor_ptc_bbshd_calculate_temperature(int32_t R_x100)
+{
+	// interpolate in lookup table
+
+	if (R_x100 < bbshd_ptc_lut[0].x)
+	{
+		// use minimum value
+		return bbshd_ptc_lut[0].y;
+	}
+	else if (R_x100 > bbshd_ptc_lut[BBSHD_PTC_LUT_SIZE - 1].x)
+	{
+		// use maximum value
+		return bbshd_ptc_lut[BBSHD_PTC_LUT_SIZE - 1].y;
+	}
+
+	uint8_t i = 0;
+	for (i = 0; i < BBSHD_PTC_LUT_SIZE - 1; i++)
+	{
+		if (bbshd_ptc_lut[i + 1].x > R_x100)
+		{
+			break;
+		}
+	}
+
+	return (uint16_t)MAP32(R_x100,
+		bbshd_ptc_lut[i].x,
+		bbshd_ptc_lut[i + 1].x,
+		bbshd_ptc_lut[i].y,
+		bbshd_ptc_lut[i + 1].y);
+}
+
 
 void sensors_init()
 {
+	// will be evaulated when first reading take place
+	bbshd_ptc_thermistor = false;
+
 	pas_period_counter = 0;
 	pas_pulse_counter = 0;
 	pas_direction_backward = false;
@@ -181,22 +243,24 @@ uint16_t speed_sensor_get_rpm_x10()
 int16_t temperature_contr_x100()
 {
 	const float R1 = 5100.f;
-	static int16_t adc_contr_x100 = 0;
+	const float invBeta = 1.f / 3600.f;
+	static int32_t adc_contr_x100 = 0;
 
 	if (g_config.use_temperature_sensor & TEMPERATURE_SENSOR_CONTR)
 	{
 		if (adc_contr_x100 == 0)
 		{
-			adc_contr_x100 = adc_get_temperature_contr() * 100;
+			adc_contr_x100 = adc_get_temperature_contr() * 100l;
 		}
 		else
 		{
-			adc_contr_x100 = EXPONENTIAL_FILTER(adc_contr_x100, adc_get_temperature_contr() * 100, 4);
+			adc_contr_x100 = EXPONENTIAL_FILTER(adc_contr_x100, adc_get_temperature_contr() * 100l, 4);
 		}
 
 		if (adc_contr_x100 != 0)
 		{
-			return (int16_t)(thermistor_ntc_calculate_temperature(adc_contr_x100, R1) * 100.f + 0.5f);
+			float R = R1 * ((102300.f / (102300.f - adc_contr_x100)) - 1.f);
+			return (int16_t)(thermistor_ntc_calculate_temperature(R, invBeta) * 100.f + 0.5f);
 		}
 	}
 
@@ -206,22 +270,50 @@ int16_t temperature_contr_x100()
 int16_t temperature_motor_x100()
 {
 	const float R1 = 5100.f;
-	static int16_t adc_motor_x100 = 0;
+	const float invBeta = 1.f / 3990.f;
+
+	static int32_t adc_motor_x100 = 0;
 
 	if (g_config.use_temperature_sensor & TEMPERATURE_SENSOR_MOTOR)
 	{
+		bool first = false;
 		if (adc_motor_x100 == 0)
 		{
-			adc_motor_x100 = adc_get_temperature_motor() * 100;
+			first = true;
+			adc_motor_x100 = adc_get_temperature_motor() * 100l;
 		}
 		else
 		{
-			adc_motor_x100 = EXPONENTIAL_FILTER(adc_motor_x100, adc_get_temperature_motor() * 100, 4);
+			adc_motor_x100 = EXPONENTIAL_FILTER(adc_motor_x100, adc_get_temperature_motor() * 100l, 4);
 		}
 
 		if (adc_motor_x100 != 0)
 		{
-			return (int16_t)(thermistor_ntc_calculate_temperature(adc_motor_x100, R1) * 100.f + 0.5f);
+			float R = R1 * ((102300.f / (102300.f - adc_motor_x100)) - 1.f);
+
+			if (first)
+			{
+				if (R > 1500.f)
+				{
+					// not likely to be a 1k ptc thermistor, assume 10k ntc
+					bbshd_ptc_thermistor = false;
+					eventlog_write_data(EVT_DATA_BBSHD_THERMISTOR, 0);
+				}
+				else
+				{
+					bbshd_ptc_thermistor = true;
+					eventlog_write_data(EVT_DATA_BBSHD_THERMISTOR, 1);
+				}
+			}
+		
+			if (bbshd_ptc_thermistor)
+			{
+				return thermistor_ptc_bbshd_calculate_temperature((int32_t)(R * 100.f + 0.5f));
+			}
+			else
+			{
+				return(int16_t)(thermistor_ntc_calculate_temperature(R, invBeta) * 100.f + 0.5f);
+			}
 		}
 	}
 

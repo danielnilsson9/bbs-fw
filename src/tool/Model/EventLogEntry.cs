@@ -46,6 +46,7 @@ namespace BBSFW.Model
 		private const int EVT_DATA_THROTTLE_ADC =				141;
 		private const int EVT_DATA_LVC_LIMITING =				142;
 		private const int EVT_DATA_SHIFT_SENSOR =				143;
+		private const int EVT_DATA_BBSHD_THERMISTOR =			144;
 
 
 		public enum LogLevel
@@ -138,7 +139,10 @@ namespace BBSFW.Model
 				case EVT_DATA_LIGHTS:
 					return $"Lights status changed to {_data}.";
 				case EVT_DATA_TEMPERATURE:
-					return $"Temperature, motor={_data >> 8}C, controller={_data & 0xff}C.";
+					{
+						byte[] raw = BitConverter.GetBytes(_data.Value);
+						return $"Temperature, motor={(sbyte)raw[1]}C, controller={(sbyte)raw[0]}C.";
+					}
 				case EVT_DATA_THERMAL_LIMITING:
 					if (_data.Value != 0)
 					{
@@ -183,6 +187,15 @@ namespace BBSFW.Model
 					else
 					{
 						return $"Shift sensor power ramp ended.";
+					}
+				case EVT_DATA_BBSHD_THERMISTOR:
+					if (_data.Value != 0)
+					{
+						return "BBSHD motor with PTC thermistor detected.";
+					}
+					else
+					{
+						return "BBSHD motor with NTC thermistor detected.";
 					}
 			}
 
