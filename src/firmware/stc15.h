@@ -44,11 +44,6 @@ SFR(PCON2, 0x97);
 SFR(T2H, 0xD6);
 SFR(T2L, 0xD7);
 
-
-SFR(T4T3M, 0xD1);
-SFR(T4H, 0xD2);
-SFR(T4L, 0xD3);
-
 SBIT(P5_4, 0xC8, 4);
 SBIT(P5_5, 0xC8, 5);
 

@@ -134,10 +134,11 @@ void sensors_init()
 	speed_prev_state = false;
 	speed_ticks_per_rpm = 1;
 
-	// pins do not have external interrupt, use timer 4 to evaluate state frequently
+	// pins do not have external interrupt, use timer0 to evaluate state frequently
 	SET_PIN_INPUT(PIN_PAS1);
 	SET_PIN_INPUT(PIN_PAS2);
 	SET_PIN_INPUT(PIN_SPEED_SENSOR);
+
 	SET_PIN_QUASI(PIN_BRAKE); // input pullup
 	SET_PIN_QUASI(PIN_SHIFT_SENSOR); // input pullup
 
@@ -156,9 +157,9 @@ void pas_set_stop_delay(uint16_t delay_ms)
 uint8_t pas_get_cadence_rpm()
 {
 	uint16_t tmp;
-	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	ET0 = 0; // disable timer0 interrupts
 	tmp = pas_period_length;
-	SET_BIT(IE2, 6);
+	ET0 = 1;
 
 	if (tmp > 0)
 	{
@@ -173,9 +174,9 @@ uint8_t pas_get_cadence_rpm()
 uint16_t pas_get_pulse_counter()
 {
 	uint16_t tmp;
-	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	ET0 = 0; // disable timer0 interrupts
 	tmp = pas_pulse_counter;
-	SET_BIT(IE2, 6);
+	ET0 = 1;
 
 	return tmp;
 }
@@ -184,10 +185,10 @@ bool pas_is_pedaling_forwards()
 {
 	uint16_t period_length;
 	uint8_t direction_backward;
-	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	ET0 = 0; // disable timer0 interrupts
 	period_length = pas_period_length;
 	direction_backward = pas_direction_backward;
-	SET_BIT(IE2, 6);
+	ET0 = 1;
 
 	// atomic read operation, no need to disable timer interrupt
 	return period_length > 0 && !direction_backward;
@@ -197,10 +198,10 @@ bool pas_is_pedaling_backwards()
 {
 	uint16_t period_length;
 	uint8_t direction_backward;
-	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	ET0 = 0; // disable timer0 interrupts
 	period_length = pas_period_length;
 	direction_backward = pas_direction_backward;
-	SET_BIT(IE2, 6);
+	ET0 = 1;
 
 	return period_length > 0 && direction_backward;
 }
@@ -213,9 +214,9 @@ void speed_sensor_set_signals_per_rpm(uint8_t num_signals)
 bool speed_sensor_is_moving()
 {
 	uint16_t tmp;
-	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	ET0 = 0; // disable timer0 interrupts
 	tmp = speed_ticks_period_length;
-	SET_BIT(IE2, 6);
+	ET0 = 1;
 
 	return tmp > 0;
 }
@@ -223,9 +224,9 @@ bool speed_sensor_is_moving()
 uint16_t speed_sensor_get_rpm_x10()
 {
 	uint16_t tmp;
-	CLEAR_BIT(IE2, 6); // disable timer 4 interrupts
+	ET0 = 0; // disable timer0 interrupts
 	tmp = speed_ticks_period_length;
-	SET_BIT(IE2, 6);
+	ET0 = 1;
 
 	if (tmp > 0)
 	{
