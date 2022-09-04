@@ -35,6 +35,7 @@
 #define READ_TIMEOUT			100
 
 #define ADC_STEPS_PER_VOLT_X10	148u
+#define SPEED_STEPS				250u
 
 // async om state machine
 #define COM_STATE_IDLE				0x01
@@ -173,11 +174,16 @@ uint8_t motor_get_target_current()
 }
 
 
-void motor_set_target_speed(uint8_t value)
+void motor_set_target_speed(uint8_t percent)
 {
-	if (target_speed != value)
+	if (percent > 100)
 	{
-		target_speed = value;
+		percent = 100;
+	}
+
+	if (target_speed != percent)
+	{
+		target_speed = percent;
 		target_speed_changed = true;
 	}
 }
@@ -504,7 +510,7 @@ static void process_com_state_machine_idle()
 
 	if (target_speed_changed)
 	{
-		send_request_async(OPCODE_TARGET_SPEED, target_speed);
+		send_request_async(OPCODE_TARGET_SPEED, (uint8_t)((SPEED_STEPS * target_speed) / 100));
 		last_sent_opcode = OPCODE_TARGET_SPEED;
 		last_request_write_ms = now;
 		com_state = COM_STATE_WAIT_RESPONSE;
@@ -598,7 +604,7 @@ static void process_com_state_machine()
 	case COM_STATE_SET_SPEED:
 		if (try_read_response(OPCODE_TARGET_SPEED, &data))
 		{
-			eventlog_write_data(EVT_DATA_TARGET_SPEED, data);
+			eventlog_write_data(EVT_DATA_TARGET_SPEED, (uint8_t)((data * 100) / SPEED_STEPS));
 		}
 		else
 		{

@@ -158,7 +158,7 @@ void app_process()
 
 	apply_shift_sensor_interrupt(&target_current);
 
-	motor_set_target_speed((uint8_t)((255u * assist_level_data.max_cadence_percent) / 100u));
+	motor_set_target_speed(assist_level_data.max_cadence_percent);
 	motor_set_target_current(target_current);
 	
 	if (target_current > 0 && !brake_is_activated())

@@ -126,7 +126,7 @@ namespace BBSFW.Model
 				case EVT_DATA_TARGET_CURRENT:
 					return $"Motor target current changed to {_data}%.";
 				case EVT_DATA_TARGET_SPEED:
-					return $"Motor target speed changed to {(_data * 100) / 255}%.";
+					return $"Motor target speed changed to {_data}%.";
 				case EVT_DATA_MOTOR_STATUS:
 					Level = _data != 0 ? LogLevel.Error : LogLevel.Info;
 					return $"Motor controller status changed to 0x{_data:X}.";
@@ -147,11 +147,11 @@ namespace BBSFW.Model
 					if (_data.Value != 0)
 					{
 						Level = LogLevel.Warning;
-						return "Thermal limit reached, power reduced to 50%.";
+						return "Thermal limiting activated, reducing power.";
 					}
 					else
 					{
-						return "Thermal limiting removed.";
+						return "Thermal limiting deactivated.";
 					}
 				case EVT_DATA_SPEED_LIMITING:
 					if (_data.Value != 0)
