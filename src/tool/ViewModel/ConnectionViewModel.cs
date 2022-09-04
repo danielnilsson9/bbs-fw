@@ -77,6 +77,21 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+
+		private BbsfwConnection.Controller _controller;
+		public BbsfwConnection.Controller Controller
+		{
+			get { return _controller; }
+			set
+			{
+				if (_controller != value)
+				{
+					_controller = value;
+					OnPropertyChanged(nameof(Controller));
+				}
+			}
+		}
+
 		private string _firmwareVersion = "N/A";
 		public string FirmwareVersion
 		{
@@ -153,11 +168,12 @@ namespace BBSFW.ViewModel
 		}
 
 
-		private void OnConnected(string fwversion, int configVersion)
+		private void OnConnected(BbsfwConnection.Controller controller, string fwversion, int configVersion)
 		{
 			IsConnected = true;
 			IsConnecting = false;
 
+			Controller = controller;
 			FirmwareVersion = fwversion;
 			ConfigVersion = configVersion;
 		}

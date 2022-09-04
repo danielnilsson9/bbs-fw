@@ -15,12 +15,14 @@
 #include "util.h"
 #include "cfgstore.h"
 #include "eventlog.h"
+#include "timers.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
 
-#define TIMER4_RELOAD	((65535 - CPU_FREQ / 10000) + 1)		// every 100us
+// interrupt runs at 100us interval, see timer0 in timers.c
+// timer0 is shared between system and sensors modules
 
 #define NUM_SIGNALS		24
 
@@ -59,6 +61,7 @@ static const pt_t bbshd_ptc_lut[BBSHD_PTC_LUT_SIZE] =
 	{ 138510, 10000 }
 };
 static bool bbshd_ptc_thermistor;
+
 
 static volatile uint16_t pas_pulse_counter;
 static volatile bool pas_direction_backward;
@@ -125,7 +128,6 @@ void sensors_init()
 	pas_pulse_counter = 0;
 	pas_direction_backward = false;
 	pas_period_length = 0;
-	//pas_rpm = 0;
 	pas_stop_delay_periods = 1500;
 	speed_period_counter = 0;
 	speed_ticks_period_length = 0;
@@ -136,20 +138,13 @@ void sensors_init()
 	SET_PIN_INPUT(PIN_PAS1);
 	SET_PIN_INPUT(PIN_PAS2);
 	SET_PIN_INPUT(PIN_SPEED_SENSOR);
-	SET_PIN_INPUT(PIN_BRAKE);
-	SET_PIN_INPUT(PIN_SHIFT_SENSOR);
+	SET_PIN_QUASI(PIN_BRAKE); // input pullup
+	SET_PIN_QUASI(PIN_SHIFT_SENSOR); // input pullup
 
 	pas_prev1 = GET_PIN_STATE(PIN_PAS1);
 	pas_prev2 = GET_PIN_STATE(PIN_PAS2);
 
-	CLEAR_BIT(T4T3M, 6); // use as timer
-	SET_BIT(T4T3M, 5); // Run at CPU_FREQ
-
-	T4H = TIMER4_RELOAD >> 8;
-	T4L = TIMER4_RELOAD & 0x0ff;
-
-	SET_BIT(IE2, 6); // Enable interrupts timer 4
-	SET_BIT(T4T3M, 7); // start timer 4
+	timer0_init_sensors();
 }
 
 
@@ -270,6 +265,8 @@ int16_t temperature_contr_x100()
 
 int16_t temperature_motor_x100()
 {
+	// Sensor only present in the BBSHD motor
+#ifdef BBSHD
 	const float R1 = 5100.f;
 	const float invBeta = 1.f / 3990.f;
 
@@ -317,6 +314,7 @@ int16_t temperature_motor_x100()
 			}
 		}
 	}
+#endif
 
 	return 0;
 }
@@ -333,7 +331,7 @@ bool  shift_sensor_is_activated()
 }
 
 
-INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2)
+void sensors_timer0_isr() // runs every 100us, see timers.c
 {
 	// WARNING:
 	// No 16/32 bit or float computations in ISR (multiply/divide/modulo).

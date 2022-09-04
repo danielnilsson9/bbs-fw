@@ -30,10 +30,12 @@ void adc_init()
 	SET_PIN_LOW(PIN_TEMPERATURE_CONTR);
 	SET_BIT(P1ASF, GET_PIN_NUM(PIN_TEMPERATURE_CONTR));
 
+#ifdef BBSHD
 	// Setup pin motor temperature pin as adc input
 	SET_PIN_INPUT(PIN_TEMPERATURE_MOTOR);
 	SET_PIN_LOW(PIN_TEMPERATURE_MOTOR);
 	SET_BIT(P1ASF, GET_PIN_NUM(PIN_TEMPERATURE_MOTOR));
+#endif
 
 	ADC_RES = 0;
 	ADC_RESL = 0;
@@ -69,15 +71,22 @@ void adc_process()
 		case GET_PIN_NUM(PIN_TEMPERATURE_CONTR):
 		{
 			temperature_contr_value = (((uint16_t)ADC_RES) << 2) | ADC_RESL;
+#ifdef BBSHD
 			next_channel = GET_PIN_NUM(PIN_TEMPERATURE_MOTOR);
+#else
+			next_channel = GET_PIN_NUM(PIN_THROTTLE);
+#endif
 			break;
 		}
+#ifdef BBSHD
 		case GET_PIN_NUM(PIN_TEMPERATURE_MOTOR):
 		{
 			temperature_motor_value = (((uint16_t)ADC_RES) << 2) | ADC_RESL;
 			next_channel = GET_PIN_NUM(PIN_THROTTLE);
 			break;
-		}}
+		}
+#endif
+		}
 	}
 	else if (++no_adc_reading_counter > 8)
 	{

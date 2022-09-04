@@ -194,7 +194,12 @@ static void load_default_config()
 {
 	g_config.use_freedom_units = 0;
 
+#if defined(BBSHD)
 	g_config.max_current_amps = 30;
+#else
+	g_config.max_current_amps = 20;
+#endif
+
 	g_config.current_ramp_amps_s = 15;
 	g_config.max_battery_x100v = 5460;
 	g_config.low_cut_off_v = 42;

@@ -16,7 +16,9 @@
 #define MOTOR_ERROR_HALL_SENSOR		0x2000
 #define MOTOR_ERROR_CURRENT_SENSE	0x0004
 
+void motor_init_pins();
 void motor_init(uint16_t max_current_mA, uint8_t lvc_V);
+
 void motor_process();
 
 void motor_enable();

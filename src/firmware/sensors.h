@@ -33,6 +33,4 @@ int16_t temperature_motor_x100();
 bool brake_is_activated();
 bool shift_sensor_is_activated();
 
-INTERRUPT_USING(isr_timer4, IRQ_TIMER4, 2);
-
 #endif
