@@ -28,34 +28,35 @@
 #define SPEED_SENSOR_TIMEOUT_MS_X10		25000
 
 
-// Table values from VESC project, BBSHD hwconf by LUNA:
-// https://github.com/vedderb/bldc
-//
 // Some versions of the BBSHD motor (hall sensor board)
-// has a PTC thermisor instead of a NTC thermistor.
+// has a PTC thermistor instead of a NTC thermistor.
+// Using standard PT1000 table.
 // [R_x100, C_x100]
-#define BBSHD_PTC_LUT_SIZE	18
+#define BBSHD_PTC_LUT_SIZE	21
 typedef struct { int32_t x; int16_t y; } pt_t;
 static const pt_t bbshd_ptc_lut[BBSHD_PTC_LUT_SIZE] =
 {
-	{ 93300, -1500 },
-	{ 94000, -1100 },
-	{ 109000, 2500 },
-	{ 110700, 3000 },
-	{ 112400, 3500 },
-	{ 114000, 4000 },
-	{ 115500, 4500 },
-	{ 117000, 5000 },
-	{ 118100, 5500 },
-	{ 119100, 6000 },
-	{ 119800, 6500 },
-	{ 120200, 7000 },
-	{ 121100, 7500 },
-	{ 121700, 8000 },
-	{ 122400, 8500 },
-	{ 123100, 9000 },
-	{ 127400, 9500 },
-	{ 138500, 10000 }
+	{ 92100, -2000 },
+	{ 96090, -1000 },
+	{ 100000, 0000 },
+	{ 103900, 1000 },
+	{ 107790, 2000 },
+	{ 109730, 2500 },
+	{ 111670, 3000 },
+	{ 113610, 3500 },
+	{ 115540, 4000 },
+	{ 117470, 4500 },
+	{ 119400, 5000 },
+	{ 121320, 5500 },
+	{ 123240, 6000 },
+	{ 125160, 6500 },
+	{ 127080, 7000 },
+	{ 128990, 7500 },
+	{ 130900, 8000 },
+	{ 132800, 8500 },
+	{ 134710, 9000 },
+	{ 136610, 9500 },
+	{ 138510, 10000 }
 };
 static bool bbshd_ptc_thermistor;
 
