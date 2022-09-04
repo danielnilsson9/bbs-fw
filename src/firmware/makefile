@@ -10,8 +10,8 @@ PLATFORM = mcs51
 PNAME = main
 
 # Select target controller:
-#TARGET_CONTROLLER = BBSHD
-TARGET_CONTROLLER = BBS02
+TARGET_CONTROLLER = BBSHD
+#TARGET_CONTROLLER = BBS02
 
 # External libraries
 IDIR = 
