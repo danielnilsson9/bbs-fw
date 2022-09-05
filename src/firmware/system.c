@@ -30,9 +30,10 @@ void system_init()
 uint32_t system_ms()
 {
 	uint32_t val;
+	uint8_t et0 = ET0;
 	ET0 = 0; // disable timer0 interrupts
 	val = _ms;
-	ET0 = 1;
+	ET0 = et0;
 	return val;
 }
 
