@@ -51,6 +51,8 @@ void system_delay_ms(uint16_t ms)
 	}
 }
 
+#pragma save  
+#pragma nooverlay // See SDCC manual about function calls in ISR
 void system_timer0_isr()
 {
 	_x100us++;
@@ -60,3 +62,4 @@ void system_timer0_isr()
 		_ms++;
 	}
 }
+#pragma restore

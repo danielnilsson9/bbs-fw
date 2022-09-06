@@ -332,6 +332,8 @@ bool  shift_sensor_is_activated()
 }
 
 
+#pragma save  
+#pragma nooverlay // See SDCC manual about function calls in ISR
 void sensors_timer0_isr() // runs every 100us, see timers.c
 {
 	// WARNING:
@@ -429,3 +431,4 @@ void sensors_timer0_isr() // runs every 100us, see timers.c
 	}
 	
 }
+#pragma restore
