@@ -34,8 +34,16 @@
 
 #define READ_TIMEOUT			100
 
-#define ADC_STEPS_PER_VOLT_X10	148u
-#define SPEED_STEPS				250u
+
+#if defined(BBSHD)
+	#define ADC_STEPS_PER_AMP_X10	69
+	#define ADC_STEPS_PER_VOLT_X10	146
+#elif defined(BBS02)
+	#define ADC_STEPS_PER_AMP_X10	56
+	#define ADC_STEPS_PER_VOLT_X10	151
+#endif
+
+#define SPEED_STEPS					250
 
 // async om state machine
 #define COM_STATE_IDLE				0x01
@@ -454,7 +462,7 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V)
 
 	system_delay_ms(4);
 
-	tmp = (uint16_t)((max_current_mA * 69UL) / 10000UL);
+	tmp = (uint16_t)((max_current_mA * (uint32_t)ADC_STEPS_PER_AMP_X10) / 10000UL);
 	if (tmp > 255)
 	{
 		tmp = 255;
@@ -510,7 +518,7 @@ static void process_com_state_machine_idle()
 
 	if (target_speed_changed)
 	{
-		send_request_async(OPCODE_TARGET_SPEED, (uint8_t)((SPEED_STEPS * target_speed) / 100));
+		send_request_async(OPCODE_TARGET_SPEED, (uint8_t)(((uint16_t)SPEED_STEPS * target_speed) / 100));
 		last_sent_opcode = OPCODE_TARGET_SPEED;
 		last_request_write_ms = now;
 		com_state = COM_STATE_WAIT_RESPONSE;
@@ -635,7 +643,7 @@ static void process_com_state_machine()
 	case COM_STATE_READ_CURRENT:
 		if (try_read_response(OPCODE_READ_CURRENT, &data))
 		{
-			battery_amp_x10 = (data * 100) / 69;
+			battery_amp_x10 = (data * 100) / ADC_STEPS_PER_AMP_X10;
 		}
 		else
 		{
