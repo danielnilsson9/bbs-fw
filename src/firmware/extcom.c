@@ -484,7 +484,7 @@ static int16_t process_bafang_display_read_current()
 		return KEEP;
 	}
 
-	uint8_t amp_x2 = (uint8_t)(motor_get_battery_current_x10() * 2) / 10;
+	uint8_t amp_x2 = (uint8_t)((motor_get_battery_current_x10() * 2) / 10);
 
 	uart1_write(amp_x2);
 	uart1_write(amp_x2); // checksum
