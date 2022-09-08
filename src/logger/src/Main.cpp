@@ -35,11 +35,11 @@ void initProxy()
 
     if (proxy.connect())
     {
-        logSerial.println("Connected to BBSHD Controller.");
+        logSerial.println("Connected to controller.");
     }
     else
     {
-        logSerial.println("Failed to connect to BBSHD Controller.");
+        logSerial.println("Failed to connect to controller.");
     }
 }
 

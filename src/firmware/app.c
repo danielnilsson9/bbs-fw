@@ -1,5 +1,5 @@
 /*
- * bbshd-fw
+ * bbs-fw
  *
  * Copyright (C) Daniel Nilsson, 2022.
  *
