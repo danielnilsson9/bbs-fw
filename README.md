@@ -1,6 +1,6 @@
-# BBSHD Open Source Firmware
+# BBSHD/BBS02 Open Source Firmware
 
-This firmware is intended to replace the original Bafang firmware on the BBSHD motor controller. Almost all functionality of original firmware has been implemented and more special features has been added.
+This firmware is intended to replace the original Bafang firmware on the BBSHD/BBS02 motor controller. Almost all functionality of original firmware has been implemented and additional features has been added.
 
 This firmware is compatible with all displays that works with the original firmware. A custom configuration tool is provided since BafangConfigTool is not compatible due to a different set of supported parameters.
 
@@ -18,7 +18,7 @@ If you find this project useful, consider sending a small [donation](https://www
 
 
 ## Highlights
-* A bit more power without hardware modifications! (max 32A).
+* A bit more power without hardware modifications! (max 33A).
 * No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
 * Support lower voltage cutoff for use with e.g. 36V battery.
 * Smooth Throttle/PAS override.
@@ -26,15 +26,15 @@ If you find this project useful, consider sending a small [donation](https://www
 * Support setting road speed limit per assist level.
 * Support setting cadence limit per assist level.
 * Support cruise assist levels (i.e. motor power without pedal or throttle input).
+* Thermal ramp down.
+* Low voltage ramp down.
 * Display motor/controller temperature on standard display.
 * Use of speed sensor is optional.
-* Use of display is optional.
 
 ![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
 
 ## Limitations
-* No battery SOC calculation implemented yet, set display to show battery voltage instead.
-* No range estimation, the range field on the display will show motor temperature instead.
+* "Keep Current" option available in original firmware not yet implemented.
 
 
 ## Supported Hardware
@@ -46,14 +46,18 @@ Revision | MCU          | Released    | Comment
 V1.4     | STC15W4K56S4 | ~2017       | V1.3 printed on PCB, sticker with 1.4.
 V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
 
-### BBS02
+### BBS02B
 
-Not yet. Consider sending a [donation](https://www.paypal.com/donate/?business=LVAYFCMQYN8F4&no_recurring=0&item_name=BBSHD-FW&currency_code=USD) to support the development and hardware procurement needed for reverse engineering.
+Revision | MCU          | Released    | Comment
+-------- | ------------ | ----------- | --------------------
+V1.?     | STC15F2K60S2 |             | 
+V1.?     | IAP15F2K61S2 |             | 
 
+BBS02A - No idea, not tested, not recommended to try unless you have an already bricked controller.
 
 ### BBS01
 
-No.
+No, send me a controller and I will add it.
 
 ## Legal
 * Installing this firmware will void your warranty.
