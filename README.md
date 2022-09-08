@@ -50,8 +50,8 @@ V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
 
 Revision | MCU          | Released    | Comment
 -------- | ------------ | ----------- | --------------------
-V1.?     | STC15F2K60S2 |             | 
-V1.?     | IAP15F2K61S2 |             | 
+V1.?     | STC15F2K60S2 |             | Supported from BBS-FW version 1.1
+V1.?     | IAP15F2K61S2 |             | Supported from BBS-FW version 1.1
 
 BBS02A - No idea, not tested, not recommended to try unless you have an already bricked controller.
 
