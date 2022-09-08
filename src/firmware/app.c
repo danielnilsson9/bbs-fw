@@ -66,7 +66,7 @@
 #define CURRENT_RAMP_DOWN_PERCENT_10MS			5
 
 // How long the power interrupt will last when gear sensor is triggered.
-#define SHIFT_SENSOR_INTERRUPT_PERIOD_MS		300
+#define SHIFT_SENSOR_INTERRUPT_PERIOD_MS		600
 
 
 static uint8_t assist_level;
