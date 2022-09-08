@@ -26,8 +26,8 @@ If you find this project useful, consider sending a small [donation](https://www
 * Support setting road speed limit per assist level.
 * Support setting cadence limit per assist level.
 * Support cruise assist levels (i.e. motor power without pedal or throttle input).
-* Thermal limiting ramp down.
-* Low voltage ramp down.
+* Thermal limiting gradual ramp down.
+* Low voltage gradual ramp down.
 * Display motor/controller temperature on standard display.
 * Use of speed sensor is optional.
 
