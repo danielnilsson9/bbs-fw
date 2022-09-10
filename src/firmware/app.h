@@ -30,8 +30,7 @@
 #define OPERATION_MODE_SPORT	0x01
 
 // Matches status codes used by Bafang
-#define STATUS_IDLE							0x00
-#define STATUS_PEDALING						0x01
+#define STATUS_NORMAL						0x01
 #define STATUS_BRAKING						0x03
 
 #define STATUS_ERROR_THROTTLE_HIGH			0x04 // todo

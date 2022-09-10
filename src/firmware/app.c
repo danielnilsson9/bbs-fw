@@ -292,6 +292,7 @@ uint8_t app_get_status_code()
 		return STATUS_BRAKING;
 	}
 
+	return STATUS_NORMAL;
 }
 
 uint8_t app_get_temperature()
