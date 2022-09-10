@@ -25,7 +25,7 @@
 	#define PIN_MOTOR_RX					1, 0
 	#define PIN_MOTOR_TX					1, 1
 	
-	//#define PIN_VOLTAGE					1, 6
+	#define PIN_VOLTAGE						1, 6
 	#define PIN_TEMPERATURE_CONTR			1, 7
 	#define PIN_TEMPERATURE_MOTOR			1, 4
 	
@@ -53,7 +53,8 @@
 	#define PIN_MOTOR_EXTRA					5, 5
 	#define PIN_MOTOR_RX					1, 0
 	#define PIN_MOTOR_TX					1, 1
-	
+
+	#define PIN_VOLTAGE						1, 7
 	#define PIN_TEMPERATURE_CONTR			1, 2
 	
 	#define PIN_PAS1						2, 3

@@ -20,6 +20,9 @@ static uint16_t temperature_motor_value;
 
 void adc_init()
 {
+	// Setup pin voltage as high impedance input even though it is not used
+	SET_PIN_INPUT(PIN_VOLTAGE);
+
 	// Setup pin throttle as adc input
 	SET_PIN_INPUT(PIN_THROTTLE);
 	SET_PIN_LOW(PIN_THROTTLE);

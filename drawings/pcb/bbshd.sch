@@ -8250,7 +8250,7 @@ Constant data output at 9600 baud.</text>
 <text x="187.96" y="93.98" size="1.778" layer="97">??? Has not been traced</text>
 <text x="18.796" y="29.718" size="1.778" layer="97">SPD</text>
 <text x="217.17" y="20.066" size="2.54" layer="94">Daniel Nilsson</text>
-<text x="180.34" y="55.88" size="1.778" layer="97">ADC6 - Battery voltage measurement</text>
+<text x="193.04" y="53.34" size="1.778" layer="97">ADC6 - Battery voltage measurement</text>
 <text x="231.648" y="123.698" size="1.778" layer="97">TxD4</text>
 <text x="231.648" y="133.858" size="1.778" layer="97">RxD4</text>
 <text x="231.648" y="159.258" size="1.778" layer="97">RxD3</text>
@@ -8662,11 +8662,15 @@ Constant data output at 9600 baud.</text>
 <pinref part="R29" gate="G$1" pin="1"/>
 </segment>
 </net>
-<net name="N$15" class="0">
+<net name="NEC_P151" class="0">
 <segment>
 <pinref part="R30" gate="G$1" pin="1"/>
 <pinref part="R29" gate="G$1" pin="2"/>
 <wire x1="190.5" y1="48.26" x2="187.96" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="187.96" y1="48.26" x2="187.96" y2="35.56" width="0.1524" layer="91"/>
+<junction x="187.96" y="48.26"/>
+<wire x1="187.96" y1="35.56" x2="205.74" y2="35.56" width="0.1524" layer="91"/>
+<label x="205.74" y="35.56" size="1.778" layer="95" xref="yes"/>
 </segment>
 </net>
 <net name="STC_P1.6" class="0">

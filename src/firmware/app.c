@@ -292,12 +292,6 @@ uint8_t app_get_status_code()
 		return STATUS_BRAKING;
 	}
 
-	if (pas_is_pedaling_forwards())
-	{
-		return STATUS_PEDALING;
-	}
-
-	return STATUS_IDLE;
 }
 
 uint8_t app_get_temperature()
@@ -524,7 +518,7 @@ void apply_speed_limit(uint8_t* target_current)
 
 void apply_thermal_limit(uint8_t* target_current)
 {
-	static uint32_t next_logg_temp_ms = 10000;
+	static uint32_t next_log_temp_ms = 10000;
 
 	static bool temperature_limiting = false;
 
@@ -537,9 +531,9 @@ void apply_thermal_limit(uint8_t* target_current)
 	int16_t max_temp_x100 = MAX(temp_contr_x100, temp_motor_x100);
 	int8_t max_temp = MAX(temperature_contr_c, temperature_motor_c);
 
-	if (g_config.use_temperature_sensor && system_ms() > next_logg_temp_ms)
+	if (eventlog_is_enabled() && g_config.use_temperature_sensor && system_ms() > next_log_temp_ms)
 	{
-		next_logg_temp_ms = system_ms() + 10000;
+		next_log_temp_ms = system_ms() + 10000;
 		eventlog_write_data(EVT_DATA_TEMPERATURE, (uint16_t)temperature_motor_c << 8 | temperature_contr_c);
 	}
 
@@ -581,6 +575,7 @@ void apply_thermal_limit(uint8_t* target_current)
 
 void apply_low_voltage_limit(uint8_t* target_current)
 {
+	static uint32_t next_log_volt_ms = 10000;
 	static bool lvc_limiting = false;
 
 	static uint32_t next_voltage_reading_ms = 125;
@@ -594,6 +589,12 @@ void apply_low_voltage_limit(uint8_t* target_current)
 		if (voltage_x100 < flt_min_bat_volt_x100)
 		{
 			flt_min_bat_volt_x100 = EXPONENTIAL_FILTER(flt_min_bat_volt_x100, voltage_x100, 8);
+		}
+
+		if (eventlog_is_enabled() && system_ms() > next_log_volt_ms)
+		{
+			next_log_volt_ms = system_ms() + 10000;
+			eventlog_write_data(EVT_DATA_VOLTAGE, (uint16_t)voltage_x100);
 		}
 	}
 

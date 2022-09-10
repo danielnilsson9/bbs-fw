@@ -12,7 +12,7 @@
 
 void watchdog_init()
 {
-	WDT_CONTR = 0x34; // Enable watchdog timer, pre-scaler 32 (680ms)
+	WDT_CONTR = 0x34; // Enable watchdog timer, pre-scaler 32 (625ms, 20MHz)
 }
 
 void watchdog_yeild()

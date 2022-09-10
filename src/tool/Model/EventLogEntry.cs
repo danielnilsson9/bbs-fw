@@ -47,6 +47,7 @@ namespace BBSFW.Model
 		private const int EVT_DATA_LVC_LIMITING =				142;
 		private const int EVT_DATA_SHIFT_SENSOR =				143;
 		private const int EVT_DATA_BBSHD_THERMISTOR =			144;
+		private const int EVT_DATA_VOLTAGE =					145;
 
 
 		public enum LogLevel
@@ -197,6 +198,8 @@ namespace BBSFW.Model
 					{
 						return "BBSHD motor with NTC thermistor detected.";
 					}
+				case EVT_DATA_VOLTAGE:
+					return $"Battery voltage reading, value={_data / 100f}V.";
 			}
 
 			if (_data.HasValue)

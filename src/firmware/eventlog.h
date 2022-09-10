@@ -52,6 +52,7 @@
 #define EVT_DATA_LVC_LIMITING				142
 #define EVT_DATA_SHIFT_SENSOR				143
 #define EVT_DATA_BBSHD_THERMISTOR			144
+#define EVT_DATA_VOLTAGE					145
 
 
 void eventlog_init(bool enabled);
