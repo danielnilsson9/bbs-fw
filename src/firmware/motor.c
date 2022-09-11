@@ -66,7 +66,7 @@ static uint8_t target_speed;
 static bool target_current_changed;
 static uint8_t target_current;
 
-static uint8_t lvc_volt_x10;
+static uint16_t lvc_volt_x10;
 
 static uint16_t status_flags;
 static uint16_t battery_volt_x10;
