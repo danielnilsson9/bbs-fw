@@ -53,7 +53,7 @@
 #define OPCODE_BAFANG_DISPLAY_READ_SPEED		0x20
 #define OPCODE_BAFANG_DISPLAY_READ_UNKNOWN1		0x21
 #define OPCODE_BAFANG_DISPLAY_READ_RANGE		0x22
-#define OPCODE_BAFANG_DISPLAY_READ_UNKNOWN2		0x24
+#define OPCODE_BAFANG_DISPLAY_READ_CALORIES		0x24
 #define OPCODE_BAFANG_DISPLAY_READ_UNKNOWN3		0x25
 #define OPCODE_BAFANG_DISPLAY_READ_MOVING		0x31
 
@@ -104,7 +104,7 @@ static int16_t process_bafang_display_read_battery();
 static int16_t process_bafang_display_read_speed();
 static int16_t process_bafang_display_read_unknown1();
 static int16_t process_bafang_display_read_range();
-static int16_t process_bafang_display_read_unknown2();
+static int16_t process_bafang_display_read_calories();
 static int16_t process_bafang_display_read_unknown3();
 static int16_t process_bafang_display_read_moving();
 
@@ -282,8 +282,8 @@ static int16_t try_process_bafang_read_request()
 		return process_bafang_display_read_unknown1();
 	case OPCODE_BAFANG_DISPLAY_READ_RANGE:
 		return process_bafang_display_read_range();
-	case OPCODE_BAFANG_DISPLAY_READ_UNKNOWN2:
-		return process_bafang_display_read_unknown2();
+	case OPCODE_BAFANG_DISPLAY_READ_CALORIES:
+		return process_bafang_display_read_calories();
 	case OPCODE_BAFANG_DISPLAY_READ_UNKNOWN3:
 		return process_bafang_display_read_unknown3();
 	case OPCODE_BAFANG_DISPLAY_READ_MOVING:
@@ -582,16 +582,21 @@ static int16_t process_bafang_display_read_range()
 	return 3;
 }
 
-static int16_t process_bafang_display_read_unknown2()
+static int16_t process_bafang_display_read_calories()
 {
 	if (msg_len < 3)
 	{
 		return KEEP;
 	}
 
-	uart1_write(0x00);
-	uart1_write(0x00);
-	uart1_write(0x00); // checksum
+	uint8_t checksum = 0;
+
+	// send battery voltage x10 to show in calories field
+	uint16_t volt = motor_get_battery_voltage_x10();
+
+	write_uart1_and_increment_checksum(volt >> 8, & checksum);
+	write_uart1_and_increment_checksum(volt & 0xff, & checksum);
+	uart1_write(checksum); // checksum
 
 	return 3;
 }
