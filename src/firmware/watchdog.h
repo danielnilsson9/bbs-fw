@@ -9,8 +9,12 @@
 #ifndef _WATCHDOG_H_
 #define _WATCHDOG_H_
 
+#include <stdbool.h>
+
 void watchdog_init();
 void watchdog_yeild();
+
+bool watchdog_triggered();
 
 #endif
 

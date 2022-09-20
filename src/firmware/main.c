@@ -39,6 +39,15 @@ void main(void)
 	eventlog_init(false);
 	extcom_init();
 
+	if (watchdog_triggered())
+	{
+		// force write watchdog reset to eventlog
+		bool prev = eventlog_is_enabled();
+		eventlog_set_enabled(true);
+		eventlog_write(EVT_ERROR_WATCHDOG_TRIGGERED);
+		eventlog_set_enabled(prev);
+	}
+
 	eeprom_init();
 	cfgstore_init();
 

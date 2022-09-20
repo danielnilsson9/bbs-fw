@@ -29,6 +29,7 @@ namespace BBSFW.Model
 		private const int EVT_ERROR_CONFIG_CHECKSUM =			74;
 		private const int EVT_ERROR_THROTTLE_LOW_LIMIT =		75;
 		private const int EVT_ERROR_THROTTLE_HIGH_LIMIT =		76;
+		private const int EVT_ERROR_WATCHDOG_TRIGGERED =		77;
 
 		private const int EVT_DATA_TARGET_CURRENT =				128;
 		private const int EVT_DATA_TARGET_SPEED =				129;
@@ -123,6 +124,8 @@ namespace BBSFW.Model
 					return "Invalid throttle reading, below low limit, check throttle.";
 				case EVT_ERROR_THROTTLE_HIGH_LIMIT:
 					return "Invalid throttle reading, above high limit, check throttle.";
+				case EVT_ERROR_WATCHDOG_TRIGGERED:
+					return "Software reset by watchdog, software error.";
 
 				case EVT_DATA_TARGET_CURRENT:
 					return $"Motor target current changed to {_data}%.";
