@@ -34,6 +34,8 @@
 // has a PTC thermistor instead of a NTC thermistor.
 // Using standard PT1000 table.
 // [R_x100, C_x100]
+
+#ifdef BBSHD
 #define BBSHD_PTC_LUT_SIZE	21
 typedef struct { int32_t x; int16_t y; } pt_t;
 static const pt_t bbshd_ptc_lut[BBSHD_PTC_LUT_SIZE] =
@@ -61,6 +63,7 @@ static const pt_t bbshd_ptc_lut[BBSHD_PTC_LUT_SIZE] =
 	{ 138510, 10000 }
 };
 static bool bbshd_ptc_thermistor;
+#endif
 
 
 static volatile uint16_t pas_pulse_counter;
@@ -87,6 +90,7 @@ static float thermistor_ntc_calculate_temperature(float R, float invBeta)
 	return C;
 }
 
+#ifdef BBSHD
 static int16_t thermistor_ptc_bbshd_calculate_temperature(int32_t R_x100)
 {
 	// interpolate in lookup table
@@ -117,12 +121,15 @@ static int16_t thermistor_ptc_bbshd_calculate_temperature(int32_t R_x100)
 		bbshd_ptc_lut[i].y,
 		bbshd_ptc_lut[i + 1].y);
 }
+#endif
 
 
 void sensors_init()
 {
 	// will be evaulated when first reading take place
+#ifdef BBSHD
 	bbshd_ptc_thermistor = false;
+#endif
 
 	pas_period_counter = 0;
 	pas_pulse_counter = 0;

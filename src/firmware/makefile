@@ -13,6 +13,12 @@ PNAME = main
 TARGET_CONTROLLER = BBSHD
 #TARGET_CONTROLLER = BBS02
 
+
+XRAM_SIZE = 1792
+ifeq ($(TARGET_CONTROLLER), BBSHD)
+	XRAM_SIZE = 3840
+endif
+
 # External libraries
 IDIR = 
 SDIR = 
@@ -60,7 +66,7 @@ HEADERS = \
 RELS = $(EXTRASRCS:.c=.rel)
 
 INCLUDES = -I$(IDIR) -I. -I../
-CFLAGS   = -m$(PLATFORM) --model-large -Ddouble=float --std-c99 -D$(TARGET_CONTROLLER)
+CFLAGS   = -m$(PLATFORM) --model-large --xram-size $(XRAM_SIZE) -Ddouble=float --std-c99 -D$(TARGET_CONTROLLER)
 ELF_FLAGS = 
 LIBS     = 
 
