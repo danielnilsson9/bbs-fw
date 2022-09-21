@@ -20,12 +20,15 @@ static uint32_t motor_disabled_at_ms;
 
 static uint8_t compute_battery_percent()
 {
-	// Compute battery percent using stupid linear approximation between lvc and configure max voltage under no load (not correct).
+	// Compute battery percent using linear interpolation between lvc and configure max voltage under no load.
 
 	// Consider battery full if above 98% of configure max voltage
-	int32_t full_x1000v = 98l * g_config.max_battery_x100v * 10 / 100;
+	int32_t full_x1000v = 98l * g_config.max_battery_x100v / 10;
 
-	int32_t val = MAP32(motor_get_battery_voltage_x10() * 100l, g_config.low_cut_off_v * 1000l, full_x1000v, 0, 100);
+	// Consider battery empty at 5% above configured low voltage cutoff
+	int32_t empty_x1000v = 105l * g_config.low_cut_off_v * 10;
+
+	int32_t val = MAP32(motor_get_battery_voltage_x10() * 100l, empty_x1000v, full_x1000v, 0, 100);
 
 	if (val > 100)
 	{
