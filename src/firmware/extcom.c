@@ -533,10 +533,12 @@ static int16_t process_bafang_display_read_speed()
 	{
 		speed = speed_sensor_get_rpm_x10() / 10;
 	}
-	
-	uart1_write(speed >> 8);
-	uart1_write(speed);
-	uart1_write(0x20 + (speed >> 8) + speed); // weird checksum
+
+	uint8_t checksum = 0;
+
+	write_uart1_and_increment_checksum(speed >> 8, &checksum);
+	write_uart1_and_increment_checksum((uint8_t)speed, &checksum);
+	uart1_write(checksum + (uint8_t)0x20); // weird checksum
 
 	return 2;
 }
