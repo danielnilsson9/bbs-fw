@@ -36,11 +36,11 @@
 
 
 #if defined(BBSHD)
-	#define ADC_STEPS_PER_AMP_X10	69
-	#define ADC_STEPS_PER_VOLT_X10	149 /// 146 in orginal firmware
+	#define ADC_STEPS_PER_AMP_X10		69
+	#define ADC_STEPS_PER_VOLT_X100		1490 // 1460 in orginal firmware
 #elif defined(BBS02)
-	#define ADC_STEPS_PER_AMP_X10	56
-	#define ADC_STEPS_PER_VOLT_X10	151
+	#define ADC_STEPS_PER_AMP_X10		56
+	#define ADC_STEPS_PER_VOLT_X100		1510
 #endif
 
 #define SPEED_STEPS					250
@@ -66,10 +66,12 @@ static uint8_t target_speed;
 static bool target_current_changed;
 static uint8_t target_current;
 
+static uint16_t adc_steps_per_volt_x100;
 static uint16_t lvc_volt_x10;
 
 static uint16_t status_flags;
 static uint16_t battery_volt_x10;
+static uint16_t battery_adc_steps;
 static uint16_t battery_amp_x10;
 
 // state machine state
@@ -103,7 +105,7 @@ void motor_init_pins()
 	SET_PIN_HIGH(PIN_MOTOR_EXTRA);
 }
 
-void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
+void motor_init(uint16_t max_current_mA, uint8_t lvc_V, int16_t adc_calib_volt_steps_x100)
 {
 	motor_init_pins();
 
@@ -113,8 +115,10 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V)
 	target_current_changed = false;
 	target_current = 0;
 	status_flags = 0;
+	adc_steps_per_volt_x100 = ADC_STEPS_PER_VOLT_X100 + adc_calib_volt_steps_x100;
 	lvc_volt_x10 = (uint16_t)lvc_V * 10;
 	battery_volt_x10 = 0;
+	battery_adc_steps = 0;
 	battery_amp_x10 = 0;
 
 	com_state = COM_STATE_IDLE;
@@ -208,6 +212,28 @@ void motor_set_target_current(uint8_t percent)
 		target_current = percent;
 		target_current_changed = true;
 	}
+}
+
+int16_t motor_calibrate_battery_voltage(uint16_t actual_voltage_x100)
+{
+	int16_t diff = 0;
+	if (actual_voltage_x100 != 0)
+	{
+		uint16_t calibrated_adc_steps_volt_x100 = (uint16_t)(((uint32_t)battery_adc_steps * 10000u) / actual_voltage_x100);
+		diff = calibrated_adc_steps_volt_x100 - ADC_STEPS_PER_VOLT_X100;
+
+		adc_steps_per_volt_x100 = calibrated_adc_steps_volt_x100;
+	}
+	else
+	{
+		// reset calibration if 0 is received
+		adc_steps_per_volt_x100 = ADC_STEPS_PER_VOLT_X100;
+		diff = 0;
+	}
+
+	eventlog_write_data(EVT_DATA_CALIBRATE_VOLTAGE, adc_steps_per_volt_x100);
+
+	return diff;
 }
 
 
@@ -454,7 +480,7 @@ static int configure(uint16_t max_current_mA, uint8_t lvc_V)
 
 	system_delay_ms(4);
 
-	send_request(OPCODE_LVC, ((uint16_t)lvc_V * ADC_STEPS_PER_VOLT_X10) / 10u);
+	send_request(OPCODE_LVC, (uint32_t)(((uint32_t)lvc_V * adc_steps_per_volt_x100) / 100u));
 	if (!read_response(OPCODE_LVC, 0))
 	{
 		return 0;
@@ -657,7 +683,8 @@ static void process_com_state_machine()
 	case COM_STATE_READ_VOLTAGE:
 		if (try_read_response(OPCODE_READ_VOLTAGE, &data))
 		{
-			battery_volt_x10 = (uint16_t)(((uint32_t)data * 100) / ADC_STEPS_PER_VOLT_X10);
+			battery_adc_steps = data;
+			battery_volt_x10 = (uint16_t)(((uint32_t)battery_adc_steps * 1000) / adc_steps_per_volt_x100);
 		}
 		else
 		{

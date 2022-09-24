@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Management;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,6 +41,7 @@ namespace BBSFW.Model
 		private const int OPCODE_WRITE_EVTLOG_ENABLE =	0xf0;
 		private const int OPCODE_WRITE_CONFIG =			0xf1;
 		private const int OPCODE_WRITE_RESET_CONFIG =	0xf2;
+		private const int OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION = 0xf3;
 
 		private const int Keep = 0;
 		private const int Discard = -1;
@@ -57,6 +57,7 @@ namespace BBSFW.Model
 		private CompletionQueue<Configuration> _readConfigCq = new CompletionQueue<Configuration>();
 		private CompletionQueue<bool> _writeConfigCq = new CompletionQueue<bool>();
 		private CompletionQueue<bool> _writeResetConfigCq = new CompletionQueue<bool>();
+		private CompletionQueue<bool> _writeVoltageCalibrationCq = new CompletionQueue<bool>();
 
 
 		private int ConfigVersion = 0;
@@ -166,6 +167,12 @@ namespace BBSFW.Model
 		{
 			SendWriteResetConfigRequest();
 			return await _writeResetConfigCq.WaitResponse(timeout);
+		}
+
+		public async Task<RequestResult<bool>> CalibrateBatteryVoltage(float actualVolts, TimeSpan timeout)
+		{
+			SendWriteVoltageCalibration(actualVolts);
+			return await _writeVoltageCalibrationCq.WaitResponse(timeout);
 		}
 
 
@@ -410,6 +417,8 @@ namespace BBSFW.Model
 					return ProcessWriteResponseConfig();
 				case OPCODE_WRITE_RESET_CONFIG:
 					return ProcessWriteResponseResetConfig();
+				case OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION:
+					return ProcessWriteResponseVoltageCalibration();
 			}
 
 			return Discard;
@@ -457,6 +466,19 @@ namespace BBSFW.Model
 			return MessageSize;
 		}
 
+		private int ProcessWriteResponseVoltageCalibration()
+		{
+			const int MessageSize = 5;
+
+			if (_rxBuffer.Count < MessageSize)
+			{
+				return Keep;
+			}
+
+			_writeVoltageCalibrationCq.Complete(true);
+
+			return MessageSize;
+		}
 
 		private int ProcessEventLogEntry()
 		{
@@ -558,6 +580,19 @@ namespace BBSFW.Model
 			_port.Write(buf.ToArray(), 0, buf.Count);
 		}
 
+		private void SendWriteVoltageCalibration(float volts)
+		{
+			uint volts_x100 = (uint)(volts * 100);
+
+			var buf = new List<byte>();
+			buf.Add(REQUEST_TYPE_WRITE);
+			buf.Add(OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION);
+			buf.Add((byte)(volts_x100 >> 8));
+			buf.Add((byte)volts_x100);
+			buf.Add(ComputeChecksum(buf, buf.Count));
+
+			_port.Write(buf.ToArray(), 0, buf.Count);
+		}
 
 		private bool SetupConnection(TimeSpan timeout)
 		{

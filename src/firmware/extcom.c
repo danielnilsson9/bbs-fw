@@ -40,10 +40,12 @@
 #define OPCODE_READ_FW_VERSION					0x01
 #define OPCODE_READ_EVTLOG_ENABLE				0x02
 #define OPCODE_READ_CONFIG						0x03
+#define OPCODE_READ_STATUS						0x04
 
 #define OPCODE_WRITE_EVTLOG_ENABLE				0xf0
 #define OPCODE_WRITE_CONFIG						0xf1
 #define OPCODE_WRITE_RESET_CONFIG				0xf2
+#define OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION	0xf3
 
 
 // Bafang display communication
@@ -92,10 +94,12 @@ static int16_t try_process_bafang_write_request();
 static int16_t process_read_fw_version();
 static int16_t process_read_evtlog_enable();
 static int16_t process_read_config();
+static int16_t process_read_status();
 
 static int16_t process_write_evtlog_enable();
 static int16_t process_write_config();
 static int16_t process_write_reset_config();
+static int16_t process_write_adc_voltage_calibration();
 
 
 static int16_t process_bafang_display_read_status();
@@ -236,6 +240,8 @@ static int16_t try_process_read_request()
 		return process_read_evtlog_enable();
 	case OPCODE_READ_CONFIG:
 		return process_read_config();
+	case OPCODE_READ_STATUS:
+		return process_read_status();
 	}
 
 	return DISCARD;
@@ -256,6 +262,8 @@ static int16_t try_process_write_request()
 		return process_write_config();
 	case OPCODE_WRITE_RESET_CONFIG:
 		return process_write_reset_config();
+	case OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION:
+		return process_write_adc_voltage_calibration();
 	}
 
 	return DISCARD;
@@ -386,6 +394,11 @@ static int16_t process_read_config()
 	return 3;
 }
 
+static int16_t process_read_status()
+{
+	// :TODO:
+	return 0;
+}
 
 static int16_t process_write_evtlog_enable()
 {
@@ -429,7 +442,7 @@ static int16_t process_write_config()
 		if (version == CONFIG_VERSION && length == sizeof(config_t))
 		{
 			memcpy(&g_config, msgbuf + 4, sizeof(config_t));
-			result = cfgstore_save();
+			result = cfgstore_save_config();
 		}
 
 		uint8_t checksum = 0;
@@ -452,7 +465,7 @@ static int16_t process_write_reset_config()
 	if (compute_checksum(msgbuf, 2) == msgbuf[2])
 	{
 
-		bool res = cfgstore_reset();
+		bool res = cfgstore_reset_config();
 
 		uint8_t checksum = 0;
 		write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
@@ -462,6 +475,30 @@ static int16_t process_write_reset_config()
 	}
 
 	return 3;
+}
+
+static int16_t process_write_adc_voltage_calibration()
+{
+	if (msg_len < 5)
+	{
+		return KEEP;
+	}
+
+	if (compute_checksum(msgbuf, 4) == msgbuf[4])
+	{
+		uint16_t actual_volt_x100 = ((uint16_t)msgbuf[2] << 8) | msgbuf[3];
+		g_pstate.adc_voltage_calibration_steps_x100 = motor_calibrate_battery_voltage(actual_volt_x100);
+		cfgstore_save_pstate();
+
+		uint8_t checksum = 0;
+		write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
+		write_uart1_and_increment_checksum(OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION, &checksum);
+		write_uart1_and_increment_checksum(msgbuf[2], &checksum);
+		write_uart1_and_increment_checksum(msgbuf[3], &checksum);
+		uart1_write(checksum);
+	}
+
+	return 5;
 }
 
 

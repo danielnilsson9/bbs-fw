@@ -11,9 +11,15 @@ namespace BBSFW.Model
 
 
 		private const int EVT_MSG_MOTOR_INIT_OK =				1;
-		private const int EVT_MSG_CONFIG_READ =					2;
+		private const int EVT_MSG_CONFIG_READ_DONE =			2;
 		private const int EVT_MSG_CONFIG_RESET =				3;
-		private const int EVT_MSG_CONFIG_WRITTEN=				4;
+		private const int EVT_MSG_CONFIG_WRITE_DONE =			4;
+		private const int EVT_MSG_CONFIG_READ_BEGIN =			5;
+		private const int EVT_MSG_CONFIG_WRITE_BEGIN =			6;
+		private const int EVT_MSG_PSTATE_READ_BEGIN =			7;
+		private const int EVT_MSG_PSTATE_READ_DONE =			8;
+		private const int EVT_MSG_PSTATE_WRITE_BEGIN =			9;
+		private const int EVT_MSG_PSTATE_WRITE_DONE =			10;
 
 		private const int EVT_ERROR_INIT_MOTOR =				64;
 		private const int EVT_ERROR_CHANGE_TARGET_SPEED =		65;
@@ -22,11 +28,11 @@ namespace BBSFW.Model
 		private const int EVT_ERROR_READ_MOTOR_CURRENT =		68;
 		private const int EVT_ERROR_READ_MOTOR_VOLTAGE =		69;
 
-		private const int EVT_ERROR_CONFIG_READ_EEPROM =		70;
-		private const int EVT_ERROR_CONFIG_WRITE_EEPROM =		71;
-		private const int EVT_ERROR_CONFIG_ERASE_EEPROM =		72;
-		private const int EVT_ERROR_CONFIG_VERSION =			73;
-		private const int EVT_ERROR_CONFIG_CHECKSUM =			74;
+		private const int EVT_ERROR_EEPROM_READ =				70;
+		private const int EVT_ERROR_EEPROM_WRITE =				71;
+		private const int EVT_ERROR_EEPROM_ERASE =				72;
+		private const int EVT_ERROR_EEPROM_VERIFY_VERSION =		73;
+		private const int EVT_ERROR_EEPROM_VERIFY_CHECKSUM =	74;
 		private const int EVT_ERROR_THROTTLE_LOW_LIMIT =		75;
 		private const int EVT_ERROR_THROTTLE_HIGH_LIMIT =		76;
 		private const int EVT_ERROR_WATCHDOG_TRIGGERED =		77;
@@ -49,6 +55,7 @@ namespace BBSFW.Model
 		private const int EVT_DATA_SHIFT_SENSOR =				143;
 		private const int EVT_DATA_BBSHD_THERMISTOR =			144;
 		private const int EVT_DATA_VOLTAGE =					145;
+		private const int EVT_DATA_VOLTAGE_CALIBRATION =		146;
 
 
 		public enum LogLevel
@@ -90,13 +97,25 @@ namespace BBSFW.Model
 			{
 				case EVT_MSG_MOTOR_INIT_OK:
 					return "Motor initialization successful.";
-				case EVT_MSG_CONFIG_READ:
+				case EVT_MSG_CONFIG_READ_DONE:
 					return "Successfully read configuration from eeprom.";
 				case EVT_MSG_CONFIG_RESET:
 					Level = LogLevel.Warning;
 					return "Configuration reset performed.";
-				case EVT_MSG_CONFIG_WRITTEN:
-					return "Configuration written to eeprom.";
+				case EVT_MSG_CONFIG_WRITE_DONE:
+					return "Configuration successfully written to eeprom.";
+				case EVT_MSG_CONFIG_READ_BEGIN:
+					return "Reading configuration from eeprom.";
+				case EVT_MSG_CONFIG_WRITE_BEGIN:
+					return "Writing configuration to eeprom.";
+				case EVT_MSG_PSTATE_READ_BEGIN:
+					return "Reading persisted state from eeprom.";
+				case EVT_MSG_PSTATE_READ_DONE:
+					return "Successfully read persisted state from eeprom.";
+				case EVT_MSG_PSTATE_WRITE_BEGIN:
+					return "Writing persisted stated to eeprom.";
+				case EVT_MSG_PSTATE_WRITE_DONE:
+					return "Persisted state successfully written to eeprom.";
 
 				case EVT_ERROR_INIT_MOTOR:
 					return "Failed to perform motor controller initialization.";
@@ -110,16 +129,16 @@ namespace BBSFW.Model
 					return "Failed to read current from motor controller.";
 				case EVT_ERROR_READ_MOTOR_VOLTAGE:
 					return "Failed to read voltage from motor controller.";
-				case EVT_ERROR_CONFIG_READ_EEPROM:
-					return "Failed to read config from eeprom.";
-				case EVT_ERROR_CONFIG_WRITE_EEPROM:
-					return "Failed to write config to eeprom.";
-				case EVT_ERROR_CONFIG_ERASE_EEPROM:
-					return "Failed to erase eeprom before writing config.";
-				case EVT_ERROR_CONFIG_VERSION:
-					return "Configuration read from eeprom is of the wrong version.";
-				case EVT_ERROR_CONFIG_CHECKSUM:
-					return "Failed to verify checksum on configuration read from eeprom.";
+				case EVT_ERROR_EEPROM_READ:
+					return "Failed to read data from eeprom.";
+				case EVT_ERROR_EEPROM_WRITE:
+					return "Failed to write data to eeprom.";
+				case EVT_ERROR_EEPROM_ERASE:
+					return "Failed to erase eeprom before writing data.";
+				case EVT_ERROR_EEPROM_VERIFY_VERSION:
+					return "Data read from eeprom is of the wrong version.";
+				case EVT_ERROR_EEPROM_VERIFY_CHECKSUM:
+					return "Failed to verify checksum on data read from eeprom.";
 				case EVT_ERROR_THROTTLE_LOW_LIMIT:
 					return "Invalid throttle reading, below low limit, check throttle.";
 				case EVT_ERROR_THROTTLE_HIGH_LIMIT:
@@ -203,6 +222,8 @@ namespace BBSFW.Model
 					}
 				case EVT_DATA_VOLTAGE:
 					return $"Battery voltage reading, value={_data / 100f}V.";
+				case EVT_DATA_VOLTAGE_CALIBRATION:
+					return $"Battery voltage calibration updated, adc_steps_per_volt={_data / 100f}.";
 			}
 
 			if (_data.HasValue)

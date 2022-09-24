@@ -17,7 +17,7 @@
 #define MOTOR_ERROR_CURRENT_SENSE	0x0004
 
 void motor_init_pins();
-void motor_init(uint16_t max_current_mA, uint8_t lvc_V);
+void motor_init(uint16_t max_current_mA, uint8_t lvc_V, int16_t adc_calib_volt_steps_x100);
 
 void motor_process();
 
@@ -30,6 +30,8 @@ uint8_t motor_get_target_current();
 
 void motor_set_target_speed(uint8_t percent);
 void motor_set_target_current(uint8_t percent);
+
+int16_t motor_calibrate_battery_voltage(uint16_t actual_voltage_x100);
 
 uint16_t motor_get_battery_lvc_x10();
 uint16_t motor_get_battery_current_x10();

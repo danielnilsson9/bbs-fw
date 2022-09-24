@@ -27,6 +27,7 @@
 #define TEMPERATURE_SENSOR_MOTOR		0x02
 
 #define CONFIG_VERSION					2
+#define PSTATE_VERSION					1
 
 typedef struct
 {
@@ -77,12 +78,21 @@ typedef struct
 	assist_level_t assist_levels[2][10];
 } config_t;
 
+typedef struct
+{
+	int16_t adc_voltage_calibration_steps_x100;
+} pstate_t;
+
 
 extern config_t g_config;
+extern pstate_t g_pstate;
 
 void cfgstore_init();
 
-bool cfgstore_reset();
-bool cfgstore_save();
+bool cfgstore_reset_config();
+bool cfgstore_save_config();
+
+bool cfgstore_reset_pstate();
+bool cfgstore_save_pstate();
 
 #endif

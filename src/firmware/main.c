@@ -59,7 +59,7 @@ void main(void)
 
 	battery_init();
 	throttle_init(g_config.throttle_start_voltage_mv, g_config.throttle_end_voltage_mv);
-	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_v);
+	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_v, g_pstate.adc_voltage_calibration_steps_x100);
 	lights_init();
 
 	app_init();

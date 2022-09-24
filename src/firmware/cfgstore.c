@@ -14,7 +14,19 @@
 #include <string.h>
 
 
-#define CONFIG_EEPROM_PAGE		0
+#define EEPROM_CONFIG_PAGE		0
+#define EEPROM_PSTATE_PAGE		1
+
+
+#define EEPROM_OK					0
+#define EEPROM_ERROR_SELECT_PAGE	1
+#define EEPROM_ERROR_READ			2
+#define EEPROM_ERROR_VERSION		3
+#define EEPROM_ERROR_LENGHT			4
+#define EEPROM_ERROR_CHECKSUM		5
+#define EEPROM_ERROR_ERASE			6
+#define EEPROM_ERROR_WRITE			7
+
 
 
 static const uint8_t default_current_limits[] = { 7, 15, 23, 31, 43, 55, 67, 79, 91 };
@@ -24,31 +36,41 @@ typedef struct
 	uint8_t version;
 	uint8_t length;
 	uint8_t checksum;
-} config_header_t;
+} header_t;
 
 
-static config_header_t header;
+static header_t header;
+
 config_t g_config;
+pstate_t g_pstate;
 
+
+static uint8_t read(uint8_t page, uint8_t version, uint8_t* dst, uint8_t size);
+static uint8_t write(uint8_t page, uint8_t version, uint8_t* src, uint8_t size);
 
 static bool read_config();
 static bool write_config();
 static void load_default_config();
 
+static bool read_pstate();
+static bool write_pstate();
+static void load_default_pstate();
+
 void cfgstore_init()
 {
 	if (!read_config())
 	{
-		cfgstore_reset();
+		cfgstore_reset_config();
 	}
-	else
+
+	if (!read_pstate())
 	{
-		eventlog_write(EVT_MSG_CONFIG_READ);
+		load_default_pstate();
 	}
 }
 
 
-bool cfgstore_reset()
+bool cfgstore_reset_config()
 {
 	load_default_config();
 	if (write_config())
@@ -60,134 +82,67 @@ bool cfgstore_reset()
 	return false;
 }
 
-bool cfgstore_save()
+bool cfgstore_save_config()
 {
 	return write_config();
+}
+
+bool cfgstore_reset_pstate()
+{
+	load_default_pstate();
+	return write_pstate();
+}
+
+bool cfgstore_save_pstate()
+{
+	return write_pstate();
 }
 
 
 static bool read_config()
 {
-	uint8_t read_offset = 0;
-	uint8_t* ptr = 0;
-	uint8_t i = 0;
-	int data;
+	eventlog_write(EVT_MSG_CONFIG_READ_BEGIN);
 
-	if (!eeprom_select_page(CONFIG_EEPROM_PAGE))
+	uint8_t res = read(EEPROM_CONFIG_PAGE, CONFIG_VERSION, (uint8_t*)&g_config, sizeof(config_t));
+	switch (res)
 	{
-		eventlog_write(EVT_ERROR_CONFIG_READ_EEPROM);
-		return false;
+	default:
+		eventlog_write(EVT_ERROR_EEPROM_READ);
+		break;
+	case EEPROM_ERROR_VERSION:
+		eventlog_write(EVT_ERROR_EEPROM_VERIFY_VERSION);
+		break;
+	case EEPROM_ERROR_LENGHT:
+	case EEPROM_ERROR_CHECKSUM:
+		eventlog_write(EVT_ERROR_EEPROM_VERIFY_CHECKSUM);
+		break;
+	case EEPROM_OK:
+		eventlog_write(EVT_MSG_CONFIG_READ_DONE);
+		break;
 	}
 
-	ptr = (uint8_t*)&header;
-	for (i = 0; i < sizeof(config_header_t); ++i)
-	{
-		data = eeprom_read_byte(read_offset);
-		if (data < 0)
-		{
-			eventlog_write(EVT_ERROR_CONFIG_READ_EEPROM);
-			return false;
-		}
-		*ptr = (uint8_t)data;
-		++read_offset;
-		++ptr;
-	}
-
-	// verify header ok
-	if (header.version != CONFIG_VERSION)
-	{
-		eventlog_write(EVT_ERROR_CONFIG_VERSION);
-		return false;
-	}
-
-	if (header.length != sizeof(config_t))
-	{
-		eventlog_write(EVT_ERROR_CONFIG_VERSION);
-		return false;
-	}
-
-	uint8_t checksum = 0;
-
-	ptr = (uint8_t*)&g_config;
-	for (i = 0; i < sizeof(config_t); ++i)
-	{
-		data = eeprom_read_byte(read_offset);
-		if (data < 0)
-		{
-			eventlog_write(EVT_ERROR_CONFIG_READ_EEPROM);
-			return false;
-		}
-
-		checksum += (uint8_t)data;
-		*ptr = (uint8_t)data;
-		++read_offset;
-		++ptr;
-	}
-
-	if (header.checksum != checksum)
-	{
-		eventlog_write(EVT_ERROR_CONFIG_CHECKSUM);
-		return false;
-	}
-
-	return true;
+	return res == EEPROM_OK;
 }
 
 static bool write_config()
 {
-	uint8_t write_offset = 0;
-	uint8_t* ptr = 0;
-	uint8_t i = 0;
+	eventlog_write(EVT_MSG_CONFIG_WRITE_BEGIN);
 
-	header.version = CONFIG_VERSION;
-	header.length = sizeof(config_t);
-	header.checksum = 0;
-
-	if (!eeprom_select_page(CONFIG_EEPROM_PAGE))
+	uint8_t res = write(EEPROM_CONFIG_PAGE, CONFIG_VERSION, (uint8_t*)&g_config, sizeof(config_t));
+	switch (res)
 	{
-		eventlog_write(EVT_ERROR_CONFIG_WRITE_EEPROM);
-		return false;
+	default:
+		eventlog_write(EVT_ERROR_EEPROM_WRITE);
+		break;
+	case EEPROM_ERROR_ERASE:
+		eventlog_write(EVT_ERROR_EEPROM_ERASE);
+		break;
+	case EEPROM_OK:
+		eventlog_write(EVT_MSG_CONFIG_WRITE_DONE);
+		break;
 	}
 
-	if (!eeprom_erase_page())
-	{
-		eventlog_write(EVT_ERROR_CONFIG_ERASE_EEPROM);
-		return false;
-	}
-
-	write_offset += sizeof(config_header_t);
-
-	ptr = (uint8_t*)&g_config;
-	for (i = 0; i < sizeof(config_t); ++i)
-	{
-		if (!eeprom_write_byte(write_offset, *ptr))
-		{
-			eventlog_write(EVT_ERROR_CONFIG_WRITE_EEPROM);
-			return false;
-		}
-
-		header.checksum += *ptr;
-		++write_offset;
-		++ptr;
-	}
-
-	write_offset = 0;
-	ptr = (uint8_t*)&header;
-	for (i = 0; i < sizeof(config_header_t); ++i)
-	{
-		if (!eeprom_write_byte(write_offset, *ptr))
-		{
-			eventlog_write(EVT_ERROR_CONFIG_WRITE_EEPROM);
-			return false;
-		}
-
-		++write_offset;
-		++ptr;
-	}
-
-	eventlog_write(EVT_MSG_CONFIG_WRITTEN);
-
-	return true;
+	return res == EEPROM_OK;
 }
 
 static void load_default_config()
@@ -235,4 +190,171 @@ static void load_default_config()
 		g_config.assist_levels[0][i+1].max_speed_percent = 100;
 		g_config.assist_levels[0][i+1].max_throttle_current_percent = 100;
 	}
+}
+
+
+static bool read_pstate()
+{
+	eventlog_write(EVT_MSG_PSTATE_READ_BEGIN);
+
+	uint8_t res = read(EEPROM_PSTATE_PAGE, PSTATE_VERSION, (uint8_t*)&g_pstate, sizeof(pstate_t));
+	switch (res)
+	{
+	default:
+		eventlog_write(EVT_ERROR_EEPROM_READ);
+		break;
+	case EEPROM_ERROR_VERSION:
+		eventlog_write(EVT_ERROR_EEPROM_VERIFY_VERSION);
+		break;
+	case EEPROM_ERROR_LENGHT:
+	case EEPROM_ERROR_CHECKSUM:
+		eventlog_write(EVT_ERROR_EEPROM_VERIFY_CHECKSUM);
+		break;
+	case EEPROM_OK:
+		eventlog_write(EVT_MSG_PSTATE_READ_DONE);
+		break;
+	}
+
+	return res == EEPROM_OK;
+}
+
+static bool write_pstate()
+{
+	eventlog_write(EVT_MSG_PSTATE_WRITE_BEGIN);
+
+	uint8_t res = write(EEPROM_PSTATE_PAGE, PSTATE_VERSION, (uint8_t*)&g_pstate, sizeof(pstate_t));
+	switch (res)
+	{
+	default:
+		eventlog_write(EVT_ERROR_EEPROM_WRITE);
+		break;
+	case EEPROM_ERROR_ERASE:
+		eventlog_write(EVT_ERROR_EEPROM_ERASE);
+		break;
+	case EEPROM_OK:
+		eventlog_write(EVT_MSG_PSTATE_WRITE_DONE);
+		break;
+	}
+
+	return res == EEPROM_OK;
+
+}
+
+static void load_default_pstate()
+{
+	g_pstate.adc_voltage_calibration_steps_x100 = 0;
+}
+
+
+
+static uint8_t read(uint8_t page, uint8_t version, uint8_t* dst, uint8_t size)
+{
+	uint8_t read_offset = 0;
+	uint8_t* ptr = 0;
+	uint8_t i = 0;
+	int data;
+
+	if (!eeprom_select_page(page))
+	{
+		return EEPROM_ERROR_SELECT_PAGE;
+	}
+
+	ptr = (uint8_t*)&header;
+	for (i = 0; i < sizeof(header_t); ++i)
+	{
+		data = eeprom_read_byte(read_offset);
+		if (data < 0)
+		{
+			return EEPROM_ERROR_READ;
+		}
+		*ptr = (uint8_t)data;
+		++read_offset;
+		++ptr;
+	}
+
+	// verify header ok
+	if (header.version != version)
+	{
+		return EEPROM_ERROR_VERSION;
+	}
+
+	if (header.length != size)
+	{
+		return EEPROM_ERROR_LENGHT;
+	}
+
+	uint8_t checksum = 0;
+
+	ptr = dst;
+	for (i = 0; i < size; ++i)
+	{
+		data = eeprom_read_byte(read_offset);
+		if (data < 0)
+		{
+			return EEPROM_ERROR_READ;
+		}
+
+		checksum += (uint8_t)data;
+		*ptr = (uint8_t)data;
+		++read_offset;
+		++ptr;
+	}
+
+	if (header.checksum != checksum)
+	{
+		return EEPROM_ERROR_CHECKSUM;
+	}
+
+	return EEPROM_OK;
+}
+
+static uint8_t write(uint8_t page, uint8_t version, uint8_t* src, uint8_t size)
+{
+	uint8_t write_offset = 0;
+	uint8_t* ptr = 0;
+	uint8_t i = 0;
+
+	header.version = version;
+	header.length = size;
+	header.checksum = 0;
+
+	if (!eeprom_select_page(page))
+	{
+		return EEPROM_ERROR_SELECT_PAGE;
+	}
+
+	if (!eeprom_erase_page())
+	{
+		return EEPROM_ERROR_ERASE;
+	}
+
+	write_offset += sizeof(header_t);
+
+	ptr = src;
+	for (i = 0; i < size; ++i)
+	{
+		if (!eeprom_write_byte(write_offset, *ptr))
+		{
+			return EEPROM_ERROR_WRITE;
+		}
+
+		header.checksum += *ptr;
+		++write_offset;
+		++ptr;
+	}
+
+	write_offset = 0;
+	ptr = (uint8_t*)&header;
+	for (i = 0; i < sizeof(header_t); ++i)
+	{
+		if (!eeprom_write_byte(write_offset, *ptr))
+		{
+			return EEPROM_ERROR_WRITE;
+		}
+
+		++write_offset;
+		++ptr;
+	}
+
+	return EEPROM_OK;
 }
