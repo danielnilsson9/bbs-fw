@@ -33,8 +33,10 @@ If you find this project useful, consider sending a small [donation](https://www
 
 ![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
 
-## Limitations
+## Known Issues
 * "Keep Current" option available in original firmware not yet implemented.
+* Infrequent reset/crash occurs on BBS02 during unknown conditions.
+* Not compatible with wiring harness with 2-pin e-brake signal on early BBS02 versions.
 
 
 ## Supported Hardware
