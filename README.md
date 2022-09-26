@@ -35,8 +35,7 @@ If you find this project useful, consider sending a small [donation](https://www
 
 ## Known Issues
 * "Keep Current" option available in original firmware not yet implemented.
-* Infrequent reset/crash occurs on BBS02 during unknown conditions.
-* Not compatible with wiring harness with 2-pin e-brake signal on early BBS02 versions.
+* Infrequent reset/crash occurs on BBS02 during some conditions.
 
 
 ## Supported Hardware
