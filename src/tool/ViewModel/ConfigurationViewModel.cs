@@ -159,7 +159,7 @@ namespace BBSFW.ViewModel
 				if (_config.MaxSpeedKph != MphToKph(value))
 				{
 					_config.MaxSpeedKph = MphToKph(value);
-					OnPropertyChanged(nameof(MaxSpeedMph));
+					OnPropertyChanged(nameof(MaxSpeedKph));
 					OnPropertyChanged(nameof(MaxSpeedMph));
 				}
 			}
@@ -454,12 +454,12 @@ namespace BBSFW.ViewModel
 
 		private static uint KphToMph(uint kph)
 		{
-			return (uint)Math.Round(kph / 1.609344);
+			return (uint)Math.Round(kph * 0.621371192);
 		}
 
 		private static uint MphToKph(uint mph)
 		{
-			return (uint)Math.Round(mph * 0.621371);
+			return (uint)Math.Round(mph * 1.609344);
 		}
 
 	}
