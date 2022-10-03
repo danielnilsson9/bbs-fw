@@ -28,6 +28,7 @@ If you find this project useful, consider sending a small [donation](https://www
 * Support cruise assist levels (i.e. motor power without pedal or throttle input).
 * Thermal limiting gradual ramp down.
 * Low voltage gradual ramp down.
+* Voltage calibration for accurate LVC and low voltage ramp down.
 * Display motor/controller temperature on standard display.
 * Use of speed sensor is optional.
 
