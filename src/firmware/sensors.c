@@ -24,7 +24,8 @@
 // interrupt runs at 100us interval, see timer0 in timers.c
 // timer0 is shared between system and sensors modules
 
-#define NUM_SIGNALS		24
+#define PAS_SENSOR_NUM_SIGNALS			24
+#define PAS_SENSOR_MIN_PULSE_MS_X10		50	// 500rpm limit
 
 #define SPEED_SENSOR_MIN_PULSE_MS_X10	500
 #define SPEED_SENSOR_TIMEOUT_MS_X10		25000
@@ -161,7 +162,7 @@ void pas_set_stop_delay(uint16_t delay_ms)
 	pas_stop_delay_periods = delay_ms * 10;
 }
 
-uint8_t pas_get_cadence_rpm()
+uint16_t pas_get_cadence_rpm_x10()
 {
 	uint16_t tmp;
 	ET0 = 0; // disable timer0 interrupts
@@ -170,7 +171,7 @@ uint8_t pas_get_cadence_rpm()
 
 	if (tmp > 0)
 	{
-		return (uint8_t)((600000ul / NUM_SIGNALS) / tmp);
+		return (uint16_t)((6000000ul / PAS_SENSOR_NUM_SIGNALS) / tmp);
 	}
 	else
 	{
@@ -333,7 +334,7 @@ bool brake_is_activated()
 	return !GET_PIN_STATE(PIN_BRAKE);
 }
 
-bool  shift_sensor_is_activated()
+bool shift_sensor_is_activated()
 {
 	return !GET_PIN_STATE(PIN_SHIFT_SENSOR);
 }
@@ -352,7 +353,7 @@ void sensors_timer0_isr() // runs every 100us, see timers.c
 		bool pas1 = GET_PIN_STATE(PIN_PAS1);
 		bool pas2 = GET_PIN_STATE(PIN_PAS2);
 
-		if (pas1 && !pas_prev1)
+		if (pas1 && !pas_prev1 /* && pas_period_counter > PAS_SENSOR_MIN_PULSE_MS_X10 */)
 		{
 			pas_pulse_counter++;
 
@@ -404,21 +405,18 @@ void sensors_timer0_isr() // runs every 100us, see timers.c
 	{
 		bool spd = GET_PIN_STATE(PIN_SPEED_SENSOR);
 
-		if (spd && !speed_prev_state)
+		if (spd && !speed_prev_state && speed_period_counter > SPEED_SENSOR_MIN_PULSE_MS_X10)
 		{
-			if (speed_period_counter > SPEED_SENSOR_MIN_PULSE_MS_X10)
+			if (speed_period_counter <= SPEED_SENSOR_TIMEOUT_MS_X10)
 			{
-				if (speed_period_counter <= SPEED_SENSOR_TIMEOUT_MS_X10)
-				{
-					speed_ticks_period_length = speed_period_counter;
-				}
-				else
-				{
-					speed_ticks_period_length = 0;
-				}
-				
-				speed_period_counter = 0;
+				speed_ticks_period_length = speed_period_counter;
 			}
+			else
+			{
+				speed_ticks_period_length = 0;
+			}
+				
+			speed_period_counter = 0;
 		}
 		else
 		{

@@ -10,12 +10,13 @@ namespace BBSFW.Model
 	[XmlRoot("BBSFW", Namespace ="https://github.com/danielnilsson9/bbshd-fw")]
 	public class Configuration
 	{
-		public const int CurrentVersion = 2;
+		public const int CurrentVersion = 3;
 		public const int MinVersion = 1;
 		public const int MaxVersion = CurrentVersion;
 
 		public const int ByteSizeV1 = 120;
 		public const int ByteSizeV2 = 124;
+		public const int ByteSizeV3 = 126;
 
 
 
@@ -27,6 +28,8 @@ namespace BBSFW.Model
 					return ByteSizeV1;
 				case 2:
 					return ByteSizeV2;
+				case 3:
+					return ByteSizeV3;
 			}
 
 			return 0;
@@ -100,6 +103,8 @@ namespace BBSFW.Model
 		// pas options
 		public uint PasStartDelayPulses;
 		public uint PasStopDelayMilliseconds;
+		public uint PasKeepCurrentPercent;
+		public uint PasKeepCurrentCadenceRpm;
 
 		// throttle options
 		public uint ThrottleStartMillivolts;
@@ -136,6 +141,8 @@ namespace BBSFW.Model
 
 			PasStartDelayPulses = 0;
 			PasStopDelayMilliseconds = 0;
+			PasKeepCurrentPercent = 0;
+			PasKeepCurrentCadenceRpm = 0;
 
 			ThrottleStartMillivolts = 0;
 			ThrottleEndMillivolts = 0;
@@ -215,6 +222,8 @@ namespace BBSFW.Model
 			MaxBatteryVolts = 0f;
 			UseTemperatureSensor = TemperatureSensor.All;
 			ShowTemperatureOnPushWalk = false;
+			PasKeepCurrentPercent = 100;
+			PasKeepCurrentCadenceRpm = 255;
 
 			return true;
 		}
@@ -248,6 +257,75 @@ namespace BBSFW.Model
 
 				PasStartDelayPulses = br.ReadByte();
 				PasStopDelayMilliseconds = br.ReadByte() * 10u;
+				PasKeepCurrentCadenceRpm = 255;
+				PasKeepCurrentPercent = 100;
+
+				ThrottleStartMillivolts = br.ReadUInt16();
+				ThrottleEndMillivolts = br.ReadUInt16();
+				ThrottleStartPercent = br.ReadByte();
+
+				ShowTemperatureOnPushWalk = br.ReadBoolean();
+
+				AssistModeSelection = (AssistModeSelect)br.ReadByte();
+				AssistStartupLevel = br.ReadByte();
+
+				for (int i = 0; i < 10; ++i)
+				{
+					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
+					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
+					StandardAssistLevels[i].MaxThrottlePercent = br.ReadByte();
+					StandardAssistLevels[i].MaxCadencePercent = br.ReadByte();
+					StandardAssistLevels[i].MaxSpeedPercent = br.ReadByte();
+				}
+
+				for (int i = 0; i < 10; ++i)
+				{
+					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
+					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
+					SportAssistLevels[i].MaxThrottlePercent = br.ReadByte();
+					SportAssistLevels[i].MaxCadencePercent = br.ReadByte();
+					SportAssistLevels[i].MaxSpeedPercent = br.ReadByte();
+				}
+			}
+
+			// apply sane default settings for non existing options in version
+			PasKeepCurrentPercent = 100;
+			PasKeepCurrentCadenceRpm = 255;
+
+			return true;
+		}
+
+		public bool ParseFromBufferV3(byte[] buffer)
+		{
+			if (buffer.Length != ByteSizeV3)
+			{
+				return false;
+			}
+
+			using (var s = new MemoryStream(buffer))
+			{
+				var br = new BinaryReader(s);
+
+				UseFreedomUnits = br.ReadBoolean();
+
+				MaxCurrentAmps = br.ReadByte();
+				CurrentRampAmpsSecond = br.ReadByte();
+				MaxBatteryVolts = br.ReadUInt16() / 100f;
+				LowCutoffVolts = br.ReadByte();
+				MaxSpeedKph = br.ReadByte();
+
+				UseSpeedSensor = br.ReadBoolean();
+				UseDisplay = br.ReadBoolean();
+				UsePushWalk = br.ReadBoolean();
+				UseTemperatureSensor = (TemperatureSensor)br.ReadByte();
+
+				WheelSizeInch = br.ReadUInt16() / 10f;
+				NumWheelSensorSignals = br.ReadByte();
+
+				PasStartDelayPulses = br.ReadByte();
+				PasStopDelayMilliseconds = br.ReadByte() * 10u;
+				PasKeepCurrentPercent = br.ReadByte();
+				PasKeepCurrentCadenceRpm = br.ReadByte();
 
 				ThrottleStartMillivolts = br.ReadUInt16();
 				ThrottleEndMillivolts = br.ReadUInt16();
@@ -304,6 +382,8 @@ namespace BBSFW.Model
 
 				bw.Write((byte)PasStartDelayPulses);
 				bw.Write((byte)(PasStopDelayMilliseconds / 10u));
+				bw.Write((byte)PasKeepCurrentPercent);
+				bw.Write((byte)PasKeepCurrentCadenceRpm);
 
 				bw.Write((UInt16)ThrottleStartMillivolts);
 				bw.Write((UInt16)ThrottleEndMillivolts);
@@ -352,6 +432,8 @@ namespace BBSFW.Model
 			MaxSpeedKph = cfg.MaxSpeedKph;
 			PasStartDelayPulses = cfg.PasStartDelayPulses;
 			PasStopDelayMilliseconds = cfg.PasStopDelayMilliseconds;
+			PasKeepCurrentPercent = cfg.PasKeepCurrentPercent;
+			PasKeepCurrentCadenceRpm = cfg.PasKeepCurrentCadenceRpm;
 			ThrottleStartMillivolts = cfg.ThrottleStartMillivolts;
 			ThrottleEndMillivolts = cfg.ThrottleEndMillivolts;
 			ThrottleStartPercent = cfg.ThrottleStartPercent;
@@ -413,6 +495,8 @@ namespace BBSFW.Model
 
 			ValidateLimits(PasStartDelayPulses, 0, 24, "Pas Delay (pulses)");
 			ValidateLimits(PasStopDelayMilliseconds, 50, 1000, "Pas Stop Delay (ms)");
+			ValidateLimits(PasKeepCurrentPercent, 10, 100, "Pas Keep Current (%)");
+			ValidateLimits(PasKeepCurrentCadenceRpm, 0, 255, "Pas Keep Current Cadence (rpm)");
 
 			ValidateLimits(ThrottleStartMillivolts, 200, 2500, "Throttle Start (mV)");
 			ValidateLimits(ThrottleEndMillivolts, 2500, 5000, "Throttle End (mV)");

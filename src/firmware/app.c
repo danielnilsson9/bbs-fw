@@ -33,6 +33,8 @@
 // max temperature.
 #define MAX_TEMPERATURE_LOW_CURRENT_PERCENT		20
 
+// Measured on BBSHD at 48V
+#define MAX_CADENCE_RPM_X10						1680
 
 // Current ramp down starts at LVC + (LVC * LVC_RAMP_DOWN_OFFSET_PERCENT / 100)
 // Example:
@@ -68,14 +70,35 @@
 // How long the power interrupt will last when gear sensor is triggered.
 #define SHIFT_SENSOR_INTERRUPT_PERIOD_MS		600
 
+// Target speed in km/h when walk mode is engaged
+#define WALK_MODE_SPEED_KPH						4
+
+
+typedef struct
+{
+	assist_level_t level;
+
+	// cached precomputed values
+	// ---------------------------------
+
+	// speed
+	int32_t max_wheel_speed_rpm_x10;
+	int16_t speed_ramp_low_limit_rpm_x10;
+	int16_t speed_ramp_high_limit_rpm_x10;
+
+	// pas
+	uint8_t keep_current_target_percent;
+	uint16_t keep_current_ramp_start_rpm_x10;
+	uint16_t keep_current_ramp_end_rpm_x10;
+
+} assist_level_data_t;
 
 static uint8_t assist_level;
 static uint8_t operation_mode;
 static uint16_t global_max_speed_rpm;
 static uint16_t lvc_ramp_down_offset_volt_x10;
 
-static assist_level_t assist_level_data;
-static int32_t assist_max_wheel_speed_rpm_x10;
+static assist_level_data_t assist_level_data;
 static uint16_t speed_limit_ramp_interval_rpm_x10;
 
 static bool cruise_paused;
@@ -158,7 +181,7 @@ void app_process()
 
 	apply_shift_sensor_interrupt(&target_current);
 
-	motor_set_target_speed(assist_level_data.max_cadence_percent);
+	motor_set_target_speed(assist_level_data.level.max_cadence_percent);
 	motor_set_target_current(target_current);
 	
 	if (target_current > 0 && !brake_is_activated())
@@ -310,13 +333,13 @@ uint8_t app_get_temperature()
 
 void apply_pas(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if (assist_level_data.flags & ASSIST_FLAG_PAS)
+	if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 	{
 		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
 		{
-			if (assist_level_data.flags & ASSIST_FLAG_VARPAS)
+			if (assist_level_data.level.flags & ASSIST_FLAG_VARPAS)
 			{
-				uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, 0, assist_level_data.target_current_percent);
+				uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, 0, assist_level_data.level.target_current_percent);
 				if (current > *target_current)
 				{
 					*target_current = current;
@@ -324,11 +347,27 @@ void apply_pas(uint8_t* target_current, uint8_t throttle_percent)
 			}
 			else
 			{
-				if (assist_level_data.target_current_percent > *target_current)
+				if (assist_level_data.level.target_current_percent > *target_current)
 				{
-					*target_current = assist_level_data.target_current_percent;
+					*target_current = assist_level_data.level.target_current_percent;
 				}
-			}	
+			}
+
+			// apply keep current ramp
+			if (g_config.pas_keep_current_percent < 100)
+			{
+				if (pas_get_cadence_rpm_x10() > assist_level_data.keep_current_ramp_start_rpm_x10)
+				{
+					uint32_t cadence = MIN(pas_get_cadence_rpm_x10(), assist_level_data.keep_current_ramp_end_rpm_x10);
+
+					*target_current = MAP32(
+						cadence,	// in
+						assist_level_data.keep_current_ramp_start_rpm_x10,		// in_min
+						assist_level_data.keep_current_ramp_end_rpm_x10,		// in_max
+						*target_current,										// out_min
+						assist_level_data.keep_current_target_percent);			// out_max
+				}
+			}
 		}
 	}
 }
@@ -337,7 +376,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 {
 	static bool cruise_block_throttle_return = false;
 
-	if ((assist_level_data.flags & ASSIST_FLAG_CRUISE) && throttle_ok())
+	if ((assist_level_data.level.flags & ASSIST_FLAG_CRUISE) && throttle_ok())
 	{
 		// pause cruise if brake activated
 		if (brake_is_activated())
@@ -379,9 +418,9 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 		}
 		else
 		{
-			if (assist_level_data.target_current_percent > *target_current)
+			if (assist_level_data.level.target_current_percent > *target_current)
 			{
-				*target_current = assist_level_data.target_current_percent;
+				*target_current = assist_level_data.level.target_current_percent;
 			}
 		}
 	}
@@ -389,9 +428,9 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if ((assist_level_data.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
+	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
 	{
-		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.max_throttle_current_percent);
+		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.level.max_throttle_current_percent);
 		if (current > *target_current)
 		{
 			*target_current = current;
@@ -473,14 +512,11 @@ void apply_speed_limit(uint8_t* target_current)
 {
 	static bool speed_limiting = false;
 
-	if (g_config.use_speed_sensor && assist_max_wheel_speed_rpm_x10 > 0)
+	if (g_config.use_speed_sensor && assist_level_data.max_wheel_speed_rpm_x10 > 0)
 	{
 		int16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
 
-		int16_t high_limit_rpm = assist_max_wheel_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
-		int16_t low_limit_rpm = assist_max_wheel_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
-	
-		if (current_speed_rpm_x10 < low_limit_rpm)
+		if (current_speed_rpm_x10 < assist_level_data.speed_ramp_low_limit_rpm_x10)
 		{
 			// no limiting
 			if (speed_limiting)
@@ -491,7 +527,7 @@ void apply_speed_limit(uint8_t* target_current)
 		}		
 		else
 		{
-			if (current_speed_rpm_x10 > high_limit_rpm)
+			if (current_speed_rpm_x10 > assist_level_data.speed_ramp_high_limit_rpm_x10)
 			{
 				if (*target_current > 1)
 				{
@@ -501,7 +537,7 @@ void apply_speed_limit(uint8_t* target_current)
 			else
 			{
 				// linear ramp down when approaching max speed.
-				uint8_t tmp = (uint8_t)MAP32(current_speed_rpm_x10, low_limit_rpm, high_limit_rpm, *target_current, 1);
+				uint8_t tmp = (uint8_t)MAP32(current_speed_rpm_x10, assist_level_data.speed_ramp_low_limit_rpm_x10, assist_level_data.speed_ramp_high_limit_rpm_x10, *target_current, 1);
 				if (*target_current > tmp)
 				{
 					*target_current = tmp;
@@ -675,29 +711,39 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 }
 
 
-
 void reload_assist_params()
 {
 	if (assist_level < ASSIST_PUSH)
 	{
-		assist_level_data = g_config.assist_levels[operation_mode][assist_level];
-		assist_max_wheel_speed_rpm_x10 = ((uint32_t)((uint32_t)global_max_speed_rpm * assist_level_data.max_speed_percent) / 10);
+		assist_level_data.level = g_config.assist_levels[operation_mode][assist_level];
 
+		assist_level_data.max_wheel_speed_rpm_x10 = ((uint32_t)((uint32_t)global_max_speed_rpm * assist_level_data.level.max_speed_percent) / 10);
+
+		if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
+		{
+			assist_level_data.keep_current_target_percent = (uint8_t)((uint16_t)g_config.pas_keep_current_percent * assist_level_data.level.target_current_percent / 100);
+			assist_level_data.keep_current_ramp_start_rpm_x10 = g_config.pas_keep_current_cadence_rpm * 10;
+			assist_level_data.keep_current_ramp_end_rpm_x10 = (uint16_t)(((uint32_t)assist_level_data.level.max_cadence_percent * MAX_CADENCE_RPM_X10) / 100);
+		}
+		
 		// pause cruise if swiching level
 		cruise_paused = true;
 	}
 	else if (assist_level == ASSIST_PUSH)
 	{
-		assist_level_data.flags = 0;
-		assist_level_data.target_current_percent = 0;
-		assist_level_data.max_speed_percent = 0;
-		assist_level_data.max_cadence_percent = 15;
-		assist_level_data.max_throttle_current_percent = 0;
+		assist_level_data.level.flags = 0;
+		assist_level_data.level.target_current_percent = 0;
+		assist_level_data.level.max_speed_percent = 0;
+		assist_level_data.level.max_cadence_percent = 15;
+		assist_level_data.level.max_throttle_current_percent = 0;
 		
-		assist_max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(6) * 10;
+		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH) * 10;
 	}
 
-	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
+	// compute speed ramp intervals
+	uint16_t speed_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
+	assist_level_data.speed_ramp_low_limit_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
+	assist_level_data.speed_ramp_high_limit_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
 }
 
 uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)

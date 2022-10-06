@@ -170,6 +170,8 @@ static void load_default_config()
 
 	g_config.pas_start_delay_pulses = 5;
 	g_config.pas_stop_delay_x100s = 20;
+	g_config.pas_keep_current_percent = 60;
+	g_config.pas_keep_current_cadence_rpm = 40;
 
 	g_config.throttle_start_voltage_mv = 900;
 	g_config.throttle_end_voltage_mv = 3600;

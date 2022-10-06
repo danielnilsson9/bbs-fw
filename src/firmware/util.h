@@ -17,6 +17,7 @@
 #define ABS(x) (x) < 0 ? -(x) : (x)
 
 #define MAX(x, y) (x) > (y) ? (x) : (y)
+#define MIN(x, y) (x) < (y) ? (x) : (y)
 
 // Low pass filter
 // value + (new_value - value) / n;

@@ -11,9 +11,6 @@ namespace BBSFW.ViewModel
 	{
 		private Configuration _config;
 
-
-		
-
 		public static List<uint> PasStartDelayOptions { get; } =
 			new List<uint>() {
 				0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180,
@@ -282,6 +279,32 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public uint PasKeepCurrentPercent
+		{
+			get { return _config.PasKeepCurrentPercent; }
+			set
+			{
+				if (_config.PasKeepCurrentPercent != value)
+				{
+					_config.PasKeepCurrentPercent = value;
+					OnPropertyChanged(nameof(PasKeepCurrentPercent));
+				}
+			}
+		}
+
+		public uint PasKeepCurrentCadenceRpm
+		{
+			get { return _config.PasKeepCurrentCadenceRpm; }
+			set
+			{
+				if (_config.PasKeepCurrentCadenceRpm != value)
+				{
+					_config.PasKeepCurrentCadenceRpm = value;
+					OnPropertyChanged(nameof(PasKeepCurrentCadenceRpm));
+				}
+			}
+		}
+
 		public float WheelSizeInch
 		{
 			get { return _config.WheelSizeInch; }
@@ -442,6 +465,8 @@ namespace BBSFW.ViewModel
 			OnPropertyChanged(nameof(ThrottleStartCurrentPercent));
 			OnPropertyChanged(nameof(PasStartDelayDegrees));
 			OnPropertyChanged(nameof(PasStopDelayMilliseconds));
+			OnPropertyChanged(nameof(PasKeepCurrentPercent));
+			OnPropertyChanged(nameof(PasKeepCurrentCadenceRpm));
 			OnPropertyChanged(nameof(WheelSizeInch));
 			OnPropertyChanged(nameof(SpeedSensorSignals));
 			OnPropertyChanged(nameof(ShowTemperatureOnPushWalk));

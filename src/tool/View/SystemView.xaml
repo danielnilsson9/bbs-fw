@@ -105,6 +105,7 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 
 			<TextBlock Grid.Row="0" Text="Pedal Assist" FontSize="18" FontWeight="Bold" />
@@ -114,6 +115,26 @@
 
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Stop Delay (ms):" />
 			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PasStopDelayMilliseconds, UpdateSourceTrigger=PropertyChanged}" />
+
+			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Keep Current (%):">
+				<TextBlock.ToolTip>
+					<TextBlock Width="300" TextWrapping="Wrap">
+						Keep this motor current in percent of assist level target current when target cadence of assist level has been reached.
+						The assist level current will start ramp down towards this value when cadence hits the limit configured in 'Keep Current Cadence (rpm)'. 
+					</TextBlock>
+				</TextBlock.ToolTip>
+			</TextBlock>
+			<TextBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PasKeepCurrentPercent, UpdateSourceTrigger=PropertyChanged}" />
+
+			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Keep Current Cadence (rpm):">
+				<TextBlock.ToolTip>
+					<TextBlock Width="300" TextWrapping="Wrap">
+						Lower cadence limit for when 'Keep Current %' ramp starts, configured in rpm.
+						When cadence gets above this value the motor current will decrease towards the current calculated using configured value of 'Keep Current %'.
+					</TextBlock>
+				</TextBlock.ToolTip>
+			</TextBlock>
+			<TextBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PasKeepCurrentCadenceRpm, UpdateSourceTrigger=PropertyChanged}" />
 
 		</Grid>
 

@@ -26,7 +26,7 @@
 #define TEMPERATURE_SENSOR_CONTR		0x01
 #define TEMPERATURE_SENSOR_MOTOR		0x02
 
-#define CONFIG_VERSION					2
+#define CONFIG_VERSION					3
 #define PSTATE_VERSION					1
 
 typedef struct
@@ -63,6 +63,8 @@ typedef struct
 	// pas options
 	uint8_t pas_start_delay_pulses;
 	uint8_t pas_stop_delay_x100s;
+	uint8_t pas_keep_current_percent;
+	uint8_t pas_keep_current_cadence_rpm;
 
 	// throttle options
 	uint16_t throttle_start_voltage_mv;
