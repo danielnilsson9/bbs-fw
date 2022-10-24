@@ -9,7 +9,7 @@
 #ifndef _EVENTLOG_H_
 #define _EVENTLOG_H_
 
-#include "stc15.h"
+#include "intellisense.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -41,6 +41,7 @@
 #define EVT_ERROR_THROTTLE_LOW_LIMIT		75
 #define EVT_ERROR_THROTTLE_HIGH_LIMIT		76
 #define EVT_ERROR_WATCHDOG_TRIGGERED		77
+#define EVT_ERROR_EXTCOM_CHEKSUM			78
 
 
 #define EVT_DATA_TARGET_CURRENT				128
@@ -62,6 +63,8 @@
 #define EVT_DATA_BBSHD_THERMISTOR			144
 #define EVT_DATA_VOLTAGE					145
 #define EVT_DATA_CALIBRATE_VOLTAGE			146
+#define EVT_DATA_TORQUE_ADC					147
+#define EVT_DATA_TORQUE_ADC_CALIBRATED		148
 
 
 void eventlog_init(bool enabled);

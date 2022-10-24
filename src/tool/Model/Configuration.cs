@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 namespace BBSFW.Model
 {
 
-	[XmlRoot("BBSFW", Namespace ="https://github.com/danielnilsson9/bbshd-fw")]
+	[XmlRoot("BBSFW", Namespace ="https://github.com/danielnilsson9/bbs-fw")]
 	public class Configuration
 	{
 		public const int CurrentVersion = 3;
@@ -16,8 +16,9 @@ namespace BBSFW.Model
 
 		public const int ByteSizeV1 = 120;
 		public const int ByteSizeV2 = 124;
-		public const int ByteSizeV3 = 130;
+		public const int ByteSizeV3 = 150;
 
+		
 		public static int GetByteSize(int version)
 		{
 			switch (version)
@@ -41,14 +42,16 @@ namespace BBSFW.Model
 			Pas0AndLights = 3
 		}
 
-		public enum AssistType
+		[Flags]
+		public enum AssistFlagsType : byte
 		{
-			Disabled = 0x00,
+			None = 0x00,
 			Pas = 0x01,
 			Throttle = 0x02,
-			PasAndThrottle = 0x03,
-			VariablePas = 0x09,
-			Cruise = 0x04
+			Cruise = 0x04,
+
+			PasVariable = 0x08,
+			PasTorque = 0x10
 		};
 
 		public enum TemperatureSensor
@@ -62,7 +65,7 @@ namespace BBSFW.Model
 		public class AssistLevel
 		{
 			[XmlAttribute]
-			public AssistType Type;
+			public AssistFlagsType Type;
 
 			[XmlAttribute]
 			public uint MaxCurrentPercent;
@@ -75,6 +78,9 @@ namespace BBSFW.Model
 
 			[XmlAttribute]
 			public uint MaxSpeedPercent;
+
+			[XmlAttribute]
+			public float TorqueAmplificationFactor;
 		}
 
 		// hmi
@@ -208,7 +214,7 @@ namespace BBSFW.Model
 
 				for (int i = 0; i < StandardAssistLevels.Length; ++i)
 				{
-					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
+					StandardAssistLevels[i].Type = (AssistFlagsType)br.ReadByte();
 					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
 					StandardAssistLevels[i].MaxThrottlePercent = br.ReadByte();
 					StandardAssistLevels[i].MaxCadencePercent = br.ReadByte();
@@ -217,7 +223,7 @@ namespace BBSFW.Model
 
 				for (int i = 0; i < SportAssistLevels.Length; ++i)
 				{
-					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
+					SportAssistLevels[i].Type = (AssistFlagsType)br.ReadByte();
 					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
 					SportAssistLevels[i].MaxThrottlePercent = br.ReadByte();
 					SportAssistLevels[i].MaxCadencePercent = br.ReadByte();
@@ -281,7 +287,7 @@ namespace BBSFW.Model
 
 				for (int i = 0; i < StandardAssistLevels.Length; ++i)
 				{
-					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
+					StandardAssistLevels[i].Type = (AssistFlagsType)br.ReadByte();
 					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
 					StandardAssistLevels[i].MaxThrottlePercent = br.ReadByte();
 					StandardAssistLevels[i].MaxCadencePercent = br.ReadByte();
@@ -290,7 +296,7 @@ namespace BBSFW.Model
 
 				for (int i = 0; i < SportAssistLevels.Length; ++i)
 				{
-					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
+					SportAssistLevels[i].Type = (AssistFlagsType)br.ReadByte();
 					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
 					SportAssistLevels[i].MaxThrottlePercent = br.ReadByte();
 					SportAssistLevels[i].MaxCadencePercent = br.ReadByte();
@@ -355,20 +361,22 @@ namespace BBSFW.Model
 
 				for (int i = 0; i < StandardAssistLevels.Length; ++i)
 				{
-					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
+					StandardAssistLevels[i].Type = (AssistFlagsType)br.ReadByte();
 					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
 					StandardAssistLevels[i].MaxThrottlePercent = br.ReadByte();
 					StandardAssistLevels[i].MaxCadencePercent = br.ReadByte();
 					StandardAssistLevels[i].MaxSpeedPercent = br.ReadByte();
+					StandardAssistLevels[i].TorqueAmplificationFactor = br.ReadByte() / 10f;
 				}
 
 				for (int i = 0; i < SportAssistLevels.Length; ++i)
 				{
-					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
+					SportAssistLevels[i].Type = (AssistFlagsType)br.ReadByte();
 					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
 					SportAssistLevels[i].MaxThrottlePercent = br.ReadByte();
 					SportAssistLevels[i].MaxCadencePercent = br.ReadByte();
 					SportAssistLevels[i].MaxSpeedPercent = br.ReadByte();
+					SportAssistLevels[i].TorqueAmplificationFactor = br.ReadByte() / 10f;
 				}
 			}
 
@@ -422,6 +430,7 @@ namespace BBSFW.Model
 					bw.Write((byte)StandardAssistLevels[i].MaxThrottlePercent);
 					bw.Write((byte)StandardAssistLevels[i].MaxCadencePercent);
 					bw.Write((byte)StandardAssistLevels[i].MaxSpeedPercent);
+					bw.Write((byte)Math.Round(StandardAssistLevels[i].TorqueAmplificationFactor * 10));
 				}
 
 				for (int i = 0; i < SportAssistLevels.Length; ++i)
@@ -431,6 +440,7 @@ namespace BBSFW.Model
 					bw.Write((byte)SportAssistLevels[i].MaxThrottlePercent);
 					bw.Write((byte)SportAssistLevels[i].MaxCadencePercent);
 					bw.Write((byte)SportAssistLevels[i].MaxSpeedPercent);
+					bw.Write((byte)Math.Round(SportAssistLevels[i].TorqueAmplificationFactor * 10));
 				}
 
 				return s.ToArray();
@@ -472,6 +482,7 @@ namespace BBSFW.Model
 				StandardAssistLevels[i].MaxThrottlePercent = cfg.StandardAssistLevels[i].MaxThrottlePercent;
 				StandardAssistLevels[i].MaxCadencePercent = cfg.StandardAssistLevels[i].MaxCadencePercent;
 				StandardAssistLevels[i].MaxSpeedPercent = cfg.StandardAssistLevels[i].MaxSpeedPercent;
+				StandardAssistLevels[i].TorqueAmplificationFactor = cfg.StandardAssistLevels[i].TorqueAmplificationFactor;
 			}
 
 			for (int i = 0; i < Math.Min(cfg.SportAssistLevels.Length, SportAssistLevels.Length); ++i)
@@ -481,6 +492,7 @@ namespace BBSFW.Model
 				SportAssistLevels[i].MaxThrottlePercent = cfg.SportAssistLevels[i].MaxThrottlePercent;
 				SportAssistLevels[i].MaxCadencePercent = cfg.SportAssistLevels[i].MaxCadencePercent;
 				SportAssistLevels[i].MaxSpeedPercent = cfg.SportAssistLevels[i].MaxSpeedPercent;
+				SportAssistLevels[i].TorqueAmplificationFactor = cfg.SportAssistLevels[i].TorqueAmplificationFactor;
 			}
 		}
 

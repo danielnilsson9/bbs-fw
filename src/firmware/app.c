@@ -7,7 +7,7 @@
  */
 
 #include "app.h"
-#include "stc15.h"
+#include "fwconfig.h"
 #include "cfgstore.h"
 #include "motor.h"
 #include "sensors.h"
@@ -20,33 +20,6 @@
 
 // Compile time options
 
-// Applied to both motor and controller tmeperature sensor
-#define MAX_TEMPERATURE							85
-
-// Current ramp down starts at MAX_TEMPERATURE - 5.
-#define MAX_TEMPERATURE_RAMP_DOWN_INTERVAL		5
-
-// Maximum allowed motor current in percent of maximum configured current (A)
-// to still apply when maximum temperature has been reached.
-// Motor current is ramped down linearly until this value when approaching
-// max temperature.
-#define MAX_TEMPERATURE_LOW_CURRENT_PERCENT		20
-
-// Measured on BBSHD at 48V
-#define MAX_CADENCE_RPM_X10						1680
-
-// Current ramp down starts at LVC + (LVC * LVC_RAMP_DOWN_OFFSET_PERCENT / 100)
-// Example:
-// LVC is 42V
-// 42 * 0.06 = 2.5V
-// Ramp down starts at 42V + 2.5V
-#define LVC_RAMP_DOWN_OFFSET_PERCENT			6
-
-// Maximum allowed motor current in percent of maximum configured current (A)
-// to still apply when LVC has been reached.
-// Motor current is ramped down linearly until this value when approacing LVC.
-#define LVC_LOW_CURRENT_PERCENT					20
-
 // Number of PAS sensor pulses to engage cruise mode,
 // there are 24 pulses per revolution.
 #define CRUISE_ENGAGE_PAS_PULSES				12
@@ -55,19 +28,6 @@
 // by pedaling backwards. There are 24 pulses per revolution.
 #define CRUISE_DISENGAGE_PAS_PULSES				4
 
-// Size of speed limit ramp down interval.
-// If max speed is 50 and this is set to 3 then the
-// target current will start ramping down when passing 47
-// and be at 50% of max current when reaching 50.
-#define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH		3
-
-// Current ramp down (e.g. when releasing throttle, stop pedaling etc.) in percent per 10 millisecond.
-// Specifying 1 will make ramp down periond 1 second if releasing from full throttle.
-// Set to 100 to disable
-#define CURRENT_RAMP_DOWN_PERCENT_10MS			5
-
-// Target speed in km/h when walk mode is engaged
-#define WALK_MODE_SPEED_KPH						4
 
 typedef struct
 {
@@ -107,7 +67,11 @@ static uint16_t ramp_up_current_interval_ms;
 static uint8_t ramp_down_target_current;
 static uint32_t last_ramp_down_decrement_ms;
 
-void apply_pas(uint8_t* target_current, uint8_t throttle_percent);
+void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
+#if HAS_TORQUE_SENSOR
+void apply_pas_torque(uint8_t* target_current, uint8_t throttle_percent);
+#endif
+
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
 void apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
 void apply_current_ramp_up(uint8_t* target_current);
@@ -160,7 +124,11 @@ void app_process()
 	{
 		uint8_t throttle_percent = throttle_read();
 
-		apply_pas(&target_current, throttle_percent);
+		apply_pas_cadence(&target_current, throttle_percent);
+#if HAS_TORQUE_SENSOR
+		apply_pas_torque(&target_current, throttle_percent);
+#endif // HAS_TORQUE_SENSOR
+
 		apply_cruise(&target_current, throttle_percent);
 
 		// order is important, ramp up shall not affect throttle
@@ -178,7 +146,7 @@ void app_process()
 
 	motor_set_target_speed(assist_level_data.level.max_cadence_percent);
 	motor_set_target_current(target_current);
-	
+
 	if (target_current > 0 && !brake_is_activated())
 	{
 		motor_enable();
@@ -288,6 +256,11 @@ uint8_t app_get_status_code()
 		return STATUS_ERROR_THROTTLE;
 	}
 
+	if (!torque_sensor_ok())
+	{
+		return STATUS_ERROR_TORQUE_SENSOR;
+	}
+
 	if (temperature_motor_c > MAX_TEMPERATURE)
 	{
 		return STATUS_ERROR_MOTOR_OVER_TEMP;
@@ -300,10 +273,10 @@ uint8_t app_get_status_code()
 
 	// Disable LVC error since it is not shown on display in original firmware
 	// Uncomment if you want to enable
-	/*if (motor & MOTOR_ERROR_LVC)
-	{
-		return STATUS_ERROR_LVC;
-	}*/
+	// if (motor & MOTOR_ERROR_LVC)
+	// {
+	//     return STATUS_ERROR_LVC;
+	// }
 
 	if (brake_is_activated())
 	{
@@ -326,13 +299,13 @@ uint8_t app_get_temperature()
 }
 
 
-void apply_pas(uint8_t* target_current, uint8_t throttle_percent)
+void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
+	if ((assist_level_data.level.flags & ASSIST_FLAG_PAS) && !(assist_level_data.level.flags & ASSIST_FLAG_PAS_TORQUE))
 	{
 		if (pas_is_pedaling_forwards() && pas_get_pulse_counter() > g_config.pas_start_delay_pulses)
 		{
-			if (assist_level_data.level.flags & ASSIST_FLAG_VARPAS)
+			if (assist_level_data.level.flags & ASSIST_FLAG_PAS_VARIABLE)
 			{
 				uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, 0, assist_level_data.level.target_current_percent);
 				if (current > *target_current)
@@ -346,26 +319,74 @@ void apply_pas(uint8_t* target_current, uint8_t throttle_percent)
 				{
 					*target_current = assist_level_data.level.target_current_percent;
 				}
-			}
 
-			// apply keep current ramp
-			if (g_config.pas_keep_current_percent < 100)
-			{
-				if (pas_get_cadence_rpm_x10() > assist_level_data.keep_current_ramp_start_rpm_x10)
+				// apply "keep current" ramp
+				if (g_config.pas_keep_current_percent < 100)
 				{
-					uint32_t cadence = MIN(pas_get_cadence_rpm_x10(), assist_level_data.keep_current_ramp_end_rpm_x10);
+					if (*target_current > assist_level_data.keep_current_target_percent &&
+						pas_get_cadence_rpm_x10() > assist_level_data.keep_current_ramp_start_rpm_x10)
+					{
+						uint32_t cadence = MIN(pas_get_cadence_rpm_x10(), assist_level_data.keep_current_ramp_end_rpm_x10);
 
-					*target_current = MAP32(
-						cadence,	// in
-						assist_level_data.keep_current_ramp_start_rpm_x10,		// in_min
-						assist_level_data.keep_current_ramp_end_rpm_x10,		// in_max
-						*target_current,										// out_min
-						assist_level_data.keep_current_target_percent);			// out_max
+						// ramp down current towards keep_current_target_percent with rpm above keep_current_ramp_start_rpm_x10
+						*target_current = MAP32(
+							cadence,	// in
+							assist_level_data.keep_current_ramp_start_rpm_x10,		// in_min
+							assist_level_data.keep_current_ramp_end_rpm_x10,		// in_max
+							*target_current,										// out_min
+							assist_level_data.keep_current_target_percent);			// out_max
+					}
 				}
 			}
 		}
 	}
 }
+
+#if HAS_TORQUE_SENSOR
+void apply_pas_torque(uint8_t* target_current, uint8_t throttle_percent)
+{
+	if ((assist_level_data.level.flags & ASSIST_FLAG_PAS) && (assist_level_data.level.flags & ASSIST_FLAG_PAS_TORQUE))
+	{
+		if (pas_is_pedaling_forwards() && (pas_get_pulse_counter() > g_config.pas_start_delay_pulses || speed_sensor_is_moving()))
+		{
+			uint16_t torque_nm_x100 = torque_sensor_get_nm_x100();
+			uint16_t cadence_rpm_x10 = pas_get_cadence_rpm_x10();
+			if (cadence_rpm_x10 < TORQUE_POWER_LOWER_RPM_X10)
+			{
+				cadence_rpm_x10 = TORQUE_POWER_LOWER_RPM_X10;
+			}
+
+			uint16_t pedal_power_w_x10 = (uint16_t)(((uint32_t)torque_nm_x100 * cadence_rpm_x10) / 955);
+			uint16_t target_current_amp_x100 = (uint16_t)(((uint32_t)10 * pedal_power_w_x10 *
+				assist_level_data.level.torque_amplification_factor_x10) / motor_get_battery_voltage_x10());
+			uint16_t max_current_amp_x100 = g_config.max_current_amps * 100;
+
+			// limit target to ensure no overflow in map result
+			if (target_current_amp_x100 > max_current_amp_x100)
+			{
+				target_current_amp_x100 = max_current_amp_x100;
+			}
+			uint8_t tmp_percent = (uint8_t)MAP32(target_current_amp_x100, 0, max_current_amp_x100, 0, 100);
+
+			// minimum 1 percent current if pedaling
+			if (tmp_percent < 1)
+			{			
+				tmp_percent = 1;
+			}
+			// limit to maximum assist current for set level
+			else if (tmp_percent > assist_level_data.level.target_current_percent)
+			{
+				tmp_percent = assist_level_data.level.target_current_percent;
+			}
+
+			if (tmp_percent > *target_current)
+			{
+				*target_current = tmp_percent;
+			}
+		}
+	}
+}
+#endif
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 {
@@ -741,6 +762,6 @@ void reload_assist_params()
 
 uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)
 {
-	float radius_mm = g_config.wheel_size_inch_x10 * 1.27f; // g_config.wheel_size_inch_x10 / 2.f * 2.54f;
+	float radius_mm = EXPAND_U16(g_config.wheel_size_inch_x10_u16h, g_config.wheel_size_inch_x10_u16l) * 1.27f; // g_config.wheel_size_inch_x10 / 2.f * 2.54f;
 	return (uint16_t)(25000.f / (3 * 3.14159f * radius_mm) * speed_kph);
 }

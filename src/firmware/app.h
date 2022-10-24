@@ -9,7 +9,7 @@
 #ifndef _APP_H_
 #define _APP_H_
 
-#include "stc15.h"
+#include "intellisense.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -33,7 +33,7 @@
 #define STATUS_NORMAL						0x01
 #define STATUS_BRAKING						0x03
 
-#define STATUS_ERROR_THROTTLE_HIGH			0x04 // todo
+#define STATUS_ERROR_THROTTLE_HIGH			0x04
 #define STATUS_ERROR_THROTTLE				0x05
 #define STATUS_ERROR_LVC					0x06
 #define STATUS_ERROR_HIGH_VOLTAGE			0x07 // not implemented
@@ -49,7 +49,7 @@
 #define STATUS_ERROR_BMS_COMMUNICATION		0x22 // n/a
 #define STATUS_ERROR_HEAD_LIGHT				0x24 // not implemented
 #define STATUS_ERROR_HEAD_LIGHT_SENSOR		0x25 // not implemented
-#define STATUS_ERROR_TORQUE_SENSOR			0x25 // n/a
+#define STATUS_ERROR_TORQUE_SENSOR			0x25
 #define STATUS_ERROR_TORQUE_SPEED			0x26 // n/a
 #define STATUS_ERROR_COMMUNICATION			0x30 // n/a
 

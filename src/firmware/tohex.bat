@@ -1,2 +1,2 @@
 @echo off
-packihx main.ihx > main.hex
+packihx bbs-fw.ihx > bbs-fw.hex

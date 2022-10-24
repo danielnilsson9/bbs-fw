@@ -9,7 +9,7 @@
 #ifndef _LIGHTS_H_
 #define _LIGHTS_H_
 
-#include "stc15.h"
+#include "intellisense.h"
 #include <stdint.h>
 #include <stdbool.h>
 

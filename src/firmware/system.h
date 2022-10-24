@@ -9,11 +9,15 @@
 #ifndef _SYSTEM_H_
 #define _SYSTEM_H_
 
-#include "stc15.h"
-#include "interrupt.h"
+#include "version.h"
+
 #include <stdint.h>
 
-#define CPU_FREQ	20000000L
+#if defined(BBSHD) || defined(BBS02)
+#include "bbsx/cpu.h"
+#elif defined(TSDZ2)
+#include "tsdz2/cpu.h"
+#endif
 
 void system_init();
 

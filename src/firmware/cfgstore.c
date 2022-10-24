@@ -10,6 +10,7 @@
 #include "eeprom.h"
 #include "eventlog.h"
 #include "uart.h"
+#include "fwconfig.h"
 
 #include <string.h>
 
@@ -25,7 +26,9 @@
 #define EEPROM_ERROR_ERASE			6
 #define EEPROM_ERROR_WRITE			7
 
-static const uint8_t default_current_limits[] = { 7, 15, 23, 31, 43, 55, 67, 79, 91 };
+
+static const uint8_t default_current_limits[] = { 7, 10, 14, 19, 26, 36, 50, 70, 98 };
+static const uint8_t default_torque_factors[] = { 10, 15, 23, 44, 57, 74, 88, 105, 126 };
 
 typedef struct
 {
@@ -59,7 +62,7 @@ void cfgstore_init()
 
 	if (!read_pstate())
 	{
-		load_default_pstate();
+		cfgstore_reset_pstate();
 	}
 }
 
@@ -147,8 +150,9 @@ static void load_default_config()
 	g_config.max_current_amps = 20;
 #endif
 
-	g_config.current_ramp_amps_s = 15;
-	g_config.max_battery_x100v = 5460;
+	g_config.current_ramp_amps_s = 10;
+	g_config.max_battery_x100v_u16l = (uint8_t)5460;
+	g_config.max_battery_x100v_u16h = (uint8_t)(5460 >> 8);
 	g_config.low_cut_off_v = 42;
 
 	g_config.use_display = 1;
@@ -157,7 +161,9 @@ static void load_default_config()
 	g_config.use_push_walk = 1;
 	g_config.use_temperature_sensor = TEMPERATURE_SENSOR_CONTR | TEMPERATURE_SENSOR_MOTOR;
 
-	g_config.wheel_size_inch_x10 = 280;
+	g_config.wheel_size_inch_x10_u16l = (uint8_t)280;
+	g_config.wheel_size_inch_x10_u16h = (uint8_t)(280 >> 8);
+
 	g_config.speed_sensor_signals = 1;
 	g_config.max_speed_kph = 100;
 
@@ -166,8 +172,11 @@ static void load_default_config()
 	g_config.pas_keep_current_percent = 60;
 	g_config.pas_keep_current_cadence_rpm = 40;
 
-	g_config.throttle_start_voltage_mv = 900;
-	g_config.throttle_end_voltage_mv = 3600;
+	g_config.throttle_start_voltage_mv_u16l = (uint8_t)900;
+	g_config.throttle_start_voltage_mv_u16h = (uint8_t)(900 >> 8);
+
+	g_config.throttle_end_voltage_mv_u16l = (uint8_t)3600;
+	g_config.throttle_end_voltage_mv_u16h = (uint8_t)(3600 >> 8);
 	g_config.throttle_start_percent = 1;
 
 	g_config.shift_interrupt_duration_ms = 600;
@@ -183,10 +192,18 @@ static void load_default_config()
 	for (uint8_t i = 0; i < 9; ++i)
 	{
 		g_config.assist_levels[0][i+1].flags = ASSIST_FLAG_PAS | ASSIST_FLAG_THROTTLE;
-		g_config.assist_levels[0][i+1].target_current_percent = default_current_limits[i];
 		g_config.assist_levels[0][i+1].max_cadence_percent = 100;
 		g_config.assist_levels[0][i+1].max_speed_percent = 100;
 		g_config.assist_levels[0][i+1].max_throttle_current_percent = 100;
+
+#if HAS_TORQUE_SENSOR
+		g_config.assist_levels[0][i+1].flags |= ASSIST_FLAG_PAS_TORQUE;
+		g_config.assist_levels[0][i+1].target_current_percent = 100;
+		g_config.assist_levels[0][i+1].torque_amplification_factor_x10 = default_torque_factors[i];
+#else
+		g_config.assist_levels[0][i+1].target_current_percent = default_current_limits[i];
+		g_config.assist_levels[0][i+1].torque_amplification_factor_x10 = 0;
+#endif	
 	}
 }
 
@@ -240,7 +257,8 @@ static bool write_pstate()
 
 static void load_default_pstate()
 {
-	g_pstate.adc_voltage_calibration_steps_x100 = 0;
+	g_pstate.adc_voltage_calibration_steps_x100_i16l = 0;
+	g_pstate.adc_voltage_calibration_steps_x100_i16h = 0;
 }
 
 
@@ -333,6 +351,7 @@ static uint8_t write(uint8_t page, uint8_t version, uint8_t* src, uint8_t size)
 	{
 		if (!eeprom_write_byte(write_offset, *ptr))
 		{
+			eeprom_end_write();
 			return EEPROM_ERROR_WRITE;
 		}
 
@@ -347,12 +366,15 @@ static uint8_t write(uint8_t page, uint8_t version, uint8_t* src, uint8_t size)
 	{
 		if (!eeprom_write_byte(write_offset, *ptr))
 		{
+			eeprom_end_write();
 			return EEPROM_ERROR_WRITE;
 		}
 
 		++write_offset;
 		++ptr;
 	}
+
+	eeprom_end_write();
 
 	return EEPROM_OK;
 }

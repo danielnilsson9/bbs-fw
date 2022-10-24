@@ -9,6 +9,8 @@
 #ifndef _WATCHDOG_H_
 #define _WATCHDOG_H_
 
+#include "intellisense.h"
+#include <stdint.h>
 #include <stdbool.h>
 
 void watchdog_init();

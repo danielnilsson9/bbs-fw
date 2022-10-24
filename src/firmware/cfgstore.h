@@ -9,14 +9,15 @@
 #ifndef _CFGSTORE_H_
 #define _CFGSTORE_H_
 
-#include "stc15.h"
+#include "intellisense.h"
 #include <stdint.h>
 #include <stdbool.h>
 
 #define ASSIST_FLAG_PAS					0x01
 #define ASSIST_FLAG_THROTTLE			0x02
 #define ASSIST_FLAG_CRUISE				0x04
-#define ASSIST_FLAG_VARPAS				0x08
+#define ASSIST_FLAG_PAS_VARIABLE		0x08	// pas mode using throttle to set power level
+#define ASSIST_FLAG_PAS_TORQUE			0x10	// pas mode using torque sensor reading
 
 #define ASSIST_MODE_SELECT_OFF			0x00
 #define ASSIST_MODE_SELECT_STANDARD		0x01
@@ -36,8 +37,12 @@ typedef struct
 	uint8_t max_throttle_current_percent;
 	uint8_t max_cadence_percent;
 	uint8_t max_speed_percent;
+
+	// 10 => 1.0: 100w human power gives and additional 100w motor power
+	uint8_t torque_amplification_factor_x10;	
 }  assist_level_t;
 
+// SDCC uses little endian for MCS51 and big endian for STM8...
 typedef struct
 {
 	// hmi units
@@ -46,7 +51,8 @@ typedef struct
 	// global
 	uint8_t max_current_amps;
 	uint8_t current_ramp_amps_s;
-	uint16_t max_battery_x100v;
+	uint8_t max_battery_x100v_u16l;
+	uint8_t max_battery_x100v_u16h;
 	uint8_t low_cut_off_v;
 	uint8_t max_speed_kph;
 
@@ -58,7 +64,8 @@ typedef struct
 	uint8_t use_temperature_sensor;
 
 	// speed sensor
-	uint16_t wheel_size_inch_x10;
+	uint8_t wheel_size_inch_x10_u16l;
+	uint8_t wheel_size_inch_x10_u16h;
 	uint8_t speed_sensor_signals;
 
 	// pas options
@@ -68,8 +75,10 @@ typedef struct
 	uint8_t pas_keep_current_cadence_rpm;
 
 	// throttle options
-	uint16_t throttle_start_voltage_mv;
-	uint16_t throttle_end_voltage_mv;
+	uint8_t throttle_start_voltage_mv_u16l;
+	uint8_t throttle_start_voltage_mv_u16h;
+	uint8_t throttle_end_voltage_mv_u16l;
+	uint8_t throttle_end_voltage_mv_u16h;
 	uint8_t throttle_start_percent;
 
 	// shift interrupt options
@@ -87,7 +96,8 @@ typedef struct
 
 typedef struct
 {
-	int16_t adc_voltage_calibration_steps_x100;
+	uint8_t adc_voltage_calibration_steps_x100_i16l;
+	uint8_t adc_voltage_calibration_steps_x100_i16h;
 } pstate_t;
 
 

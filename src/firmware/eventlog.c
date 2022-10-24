@@ -7,12 +7,9 @@
  */
 
 #include "eventlog.h"
-#include "stc15.h"
 #include "uart.h"
 
-
 static bool is_enabled;
-
 
 void eventlog_init(bool enabled)
 {
@@ -36,9 +33,9 @@ void eventlog_write(uint8_t evt)
 		return;
 	}
 
-	uart1_write(0xee);
-	uart1_write(evt);
-	uart1_write((uint8_t)0xee + evt);
+	uart_write(0xee);
+	uart_write(evt);
+	uart_write((uint8_t)0xee + evt);
 }
 void eventlog_write_data(uint8_t evt, int16_t data)
 {
@@ -49,11 +46,9 @@ void eventlog_write_data(uint8_t evt, int16_t data)
 
 	uint8_t checksum = 0;
 
-	uart1_write(0xed); checksum += (uint8_t)0xed;
-	uart1_write(evt); checksum += evt;
-	uart1_write((uint8_t)(data >> 8)); checksum += (uint8_t)(data >> 8);
-	uart1_write((uint8_t)data); checksum += (uint8_t)data;
-	uart1_write(checksum);
+	uart_write(0xed); checksum += (uint8_t)0xed;
+	uart_write(evt); checksum += evt;
+	uart_write((uint8_t)(data >> 8)); checksum += (uint8_t)(data >> 8);
+	uart_write((uint8_t)data); checksum += (uint8_t)data;
+	uart_write(checksum);
 }
-
-
