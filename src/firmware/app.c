@@ -22,10 +22,10 @@
 // Compile time options
 
 // Applied to both motor and controller tmeperature sensor
-#define MAX_TEMPERATURE							75
+#define MAX_TEMPERATURE							85
 
-// Current ramp down starts at MAX_TEMPERATURE - 4.
-#define MAX_TEMPERATURE_RAMP_DOWN_INTERVAL		4
+// Current ramp down starts at MAX_TEMPERATURE - 5.
+#define MAX_TEMPERATURE_RAMP_DOWN_INTERVAL		5
 
 // Maximum allowed motor current in percent of maximum configured current (A)
 // to still apply when maximum temperature has been reached.
