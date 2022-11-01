@@ -35,8 +35,8 @@ If you find this project useful, consider sending a small [donation](https://www
 ![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
 
 ## Known Issues
+* Compatibility issues reported with some older revisions of the BBS02 controller.
 * "Keep Current" option available in original firmware not yet implemented.
-* Infrequent reset/crash occurs on BBS02 during some conditions.
 
 
 ## Supported Hardware
@@ -49,6 +49,8 @@ V1.4     | STC15W4K56S4 | ~2017       | V1.3 printed on PCB, sticker with 1.4.
 V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
 
 ### BBS02B
+There are compatibility issues reported, this firmware is suspected to be incompatible with older BBS02 controllers.
+If you have a newer BBS02B you are probably fine, if you have an older controller it might not be a good idéa to flash this firmware.
 
 Revision | MCU          | Released    | Comment
 -------- | ------------ | ----------- | --------------------
@@ -56,6 +58,7 @@ V1.?     | STC15F2K60S2 |             | Supported from BBS-FW version 1.1
 V1.?     | IAP15F2K61S2 |             | Supported from BBS-FW version 1.1
 
 BBS02A - No idea, not tested, not recommended to try unless you have an already bricked controller.
+
 
 ### BBS01
 
