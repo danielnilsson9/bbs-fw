@@ -35,7 +35,6 @@
 
 #define READ_TIMEOUT			100
 
-
 #if defined(BBSHD)
 	#define ADC_STEPS_PER_AMP_X10		69
 	#define ADC_STEPS_PER_VOLT_X100		1490 // 1460 in orginal firmware
@@ -56,7 +55,6 @@
 #define COM_STATE_READ_VOLTAGE		0x07
 
 #define MSGBUF_SIZE					8
-
 
 static uint8_t is_connected;
 static uint8_t msgbuf[MSGBUF_SIZE];
@@ -160,7 +158,6 @@ void motor_process()
 	process_com_state_machine();
 }
 
-
 void motor_enable()
 {
 	SET_PIN_HIGH(PIN_MOTOR_POWER_ENABLE);
@@ -261,8 +258,6 @@ uint16_t motor_get_battery_voltage_x10()
 {
 	return battery_volt_x10;
 }
-
-
 
 static uint8_t compute_checksum(uint8_t* msg, uint8_t len)
 {

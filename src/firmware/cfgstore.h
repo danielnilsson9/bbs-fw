@@ -90,6 +90,8 @@ typedef struct
 	uint8_t use_push_walk;
 	uint8_t use_temperature_sensor;
 	uint8_t lights_mode;
+	uint8_t use_pretension;
+	uint8_t pretension_speed_cutoff_kph;
 
 	// speed sensor
 	uint8_t wheel_size_inch_x10_u16l;

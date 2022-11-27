@@ -42,7 +42,7 @@ If you find this project useful, consider sending a small [donation](https://www
 * ✅ Display motor/controller temperature on standard display.
 * ✅ Use of speed sensor is optional.
 
-![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
+![Config Tool](https://github.com/user-attachments/assets/1534c303-b25f-4fa4-8b37-5b74ade4a800)
 
 ## Supported Hardware
 
