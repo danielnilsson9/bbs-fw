@@ -197,6 +197,8 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 
 				<TextBlock Grid.Row="0" Text="Features" FontSize="18" FontWeight="Bold" />
@@ -239,6 +241,40 @@
 					</TextBlock.ToolTip>
 				</TextBlock>
 				<ComboBox Grid.Column="2" Grid.Row="5" Margin="0 8 0 0" Padding="6 2 6 0" Width="100" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.LightsModeOptions}" SelectedItem="{Binding ConfigVm.LightsMode, UpdateSourceTrigger=PropertyChanged}" />
+
+				<TextBlock Grid.Column="0" Grid.Row="6" Margin="0 8 0 0" Text="Pretension Mode:">
+					<TextBlock.ToolTip>
+						<TextBlock Width="300" TextWrapping="Wrap">
+							Apply 1% of Max Current when above a threshold road speed to pre-tension the drivetrain.
+							This makes it nicer for more aggressive PAS / throttle settings since freewheel pawls
+							will not get smacked if there is play in the drivetrain system.
+						</TextBlock>
+					</TextBlock.ToolTip>
+				</TextBlock>
+				<CheckBox Grid.Column="2" Grid.Row="6" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePretension, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ConfigVm.UseSpeedSensor}" />
+
+				<TextBlock Grid.Column="0" Grid.Row="7" Margin="0 10 0 0" Text="Pretension Speed Cutoff (km/h):" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}">
+					<TextBlock.ToolTip>
+						<TextBlock Width="300" TextWrapping="Wrap">
+							Pretension will not be applied at and below this roadspeed. Take caution setting this to zero, as
+							your bike will roll forward as soon as it is powered on and pushed. Recommended to start with ~16kph
+							and lower if necessary once comfortable with the feature.
+					</TextBlock>
+				</TextBlock.ToolTip>
+				</TextBlock>
+				<TextBox Grid.Column="2" Grid.Row="7" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PretensionSpeedCutoffKph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" IsEnabled="{Binding ConfigVm.UseSpeedSensor}" />
+
+				<TextBlock Grid.Column="0" Grid.Row="7" Margin="0 10 0 0" Text="Pretension Speed Cutoff (mph):" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" >
+					<TextBlock.ToolTip>
+						<TextBlock Width="300" TextWrapping="Wrap">
+							Pretension will not be applied at and below this roadspeed. Take caution setting this to zero, as
+							your bike will roll forward as soon as it is powered on and pushed. Recommended to start with ~10mph
+							and lower if necessary once comfortable with the feature.
+					</TextBlock>
+				</TextBlock.ToolTip>
+				</TextBlock>
+				<TextBox Grid.Column="2" Grid.Row="7" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PretensionSpeedCutoffMph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" IsEnabled="{Binding ConfigVm.UseSpeedSensor}" />
+
 			</Grid>
 
 			<Grid Margin="0 20 0 0">
@@ -322,7 +358,6 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
-
 
 				<TextBlock Grid.Row="0" Text="Miscellaneous" FontSize="18" FontWeight="Bold" />
 

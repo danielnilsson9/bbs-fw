@@ -10,7 +10,6 @@ namespace BBSFW.ViewModel.Base
 
 		public event EventHandler CanExecuteChanged;
 
-
 		public DelegateCommand(Action action)
 		{
 			_action = action;
@@ -22,8 +21,6 @@ namespace BBSFW.ViewModel.Base
 			_actionWithParam = action;
 			_action = null;
 		}
-
-
 
 		public bool CanExecute(object parameter)
 		{
