@@ -188,6 +188,19 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public bool UseShiftSensor
+		{
+			get { return _config.UseShiftSensor; }
+			set
+			{
+				if (_config.UseShiftSensor != value)
+				{
+					_config.UseShiftSensor = value;
+					OnPropertyChanged(nameof(UseShiftSensor));
+				}
+			}
+		}
+
 		public bool UsePushWalk
 		{
 			get { return _config.UsePushWalk; }
@@ -331,6 +344,32 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public uint ShiftInterruptDuration
+		{
+			get { return _config.ShiftInterruptDuration; }
+			set
+			{
+				if (_config.ShiftInterruptDuration != value)
+				{
+					_config.ShiftInterruptDuration = value;
+					OnPropertyChanged(nameof(ShiftInterruptDuration));
+				}
+			}
+		}
+
+		public uint ShiftInterruptCurrentThresholdPercent
+		{
+			get { return _config.ShiftInterruptCurrentThresholdPercent; }
+			set
+			{
+				if (_config.ShiftInterruptCurrentThresholdPercent != value)
+				{
+					_config.ShiftInterruptCurrentThresholdPercent = value;
+					OnPropertyChanged(nameof(ShiftInterruptCurrentThresholdPercent));
+				}
+			}
+		}
+
 		public bool ShowTemperatureOnPushWalk
 		{
 			get { return _config.ShowTemperatureOnPushWalk; }
@@ -402,7 +441,6 @@ namespace BBSFW.ViewModel
 			}
 		}
 
-
 		public ConfigurationViewModel()
 		{
 			_config = new Configuration();
@@ -458,11 +496,14 @@ namespace BBSFW.ViewModel
 			OnPropertyChanged(nameof(MaxSpeedMph));
 			OnPropertyChanged(nameof(UseDisplay));
 			OnPropertyChanged(nameof(UseSpeedSensor));
+			OnPropertyChanged(nameof(UseShiftSensor));
 			OnPropertyChanged(nameof(UsePushWalk));
 			OnPropertyChanged(nameof(UseTemperatureSensor));
 			OnPropertyChanged(nameof(ThrottleStartVoltageMillivolts));
 			OnPropertyChanged(nameof(ThrottleEndVoltageMillivolts));
 			OnPropertyChanged(nameof(ThrottleStartCurrentPercent));
+			OnPropertyChanged(nameof(ShiftInterruptDuration));
+			OnPropertyChanged(nameof(ShiftInterruptCurrentThresholdPercent));
 			OnPropertyChanged(nameof(PasStartDelayDegrees));
 			OnPropertyChanged(nameof(PasStopDelayMilliseconds));
 			OnPropertyChanged(nameof(PasKeepCurrentPercent));
@@ -486,6 +527,5 @@ namespace BBSFW.ViewModel
 		{
 			return (uint)Math.Round(mph * 1.609344);
 		}
-
 	}
 }

@@ -61,8 +61,8 @@
 			<TextBlock Grid.Column="0" Grid.Row="5" Margin="0 10 0 0" Text="Max Speed (km/h):" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
 			<TextBox Grid.Column="2" Grid.Row="5" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedKph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="6" Margin="0 10 0 0" Text="Max Speed (mph):" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
-			<TextBox Grid.Column="2" Grid.Row="6" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedMph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
+			<TextBlock Grid.Column="0" Grid.Row="5" Margin="0 10 0 0" Text="Max Speed (mph):" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
+			<TextBox Grid.Column="2" Grid.Row="5" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.MaxSpeedMph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
 		</Grid>
 
 
@@ -154,6 +154,7 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 
 			<TextBlock Grid.Row="0" Text="Features" FontSize="18" FontWeight="Bold" />
@@ -164,10 +165,13 @@
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Speed Sensor:" />
 			<CheckBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseSpeedSensor, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Walk Mode:" />
-			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePushWalk, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Shift Sensor:" />
+			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseShiftSensor, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Temperature Sensor:">
+			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Walk Mode:" />
+			<CheckBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePushWalk, UpdateSourceTrigger=PropertyChanged}" />
+
+			<TextBlock Grid.Column="0" Grid.Row="5" Margin="0 8 0 0" Text="Temperature Sensor:">
 				<TextBlock.ToolTip>
 					<TextBlock Width="300" TextWrapping="Wrap">
 						Select which temperature sensors to use for thermal limiting if motor/controller gets to hot.
@@ -177,7 +181,7 @@
 					</TextBlock>
 				</TextBlock.ToolTip>
 			</TextBlock>
-			<ComboBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" Width="80" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.TemperatureSensorOptions}" SelectedItem="{Binding ConfigVm.UseTemperatureSensor, UpdateSourceTrigger=PropertyChanged}" />
+			<ComboBox Grid.Column="2" Grid.Row="5" Margin="0 8 0 0" Width="80" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.TemperatureSensorOptions}" SelectedItem="{Binding ConfigVm.UseTemperatureSensor, UpdateSourceTrigger=PropertyChanged}" />
 
 		</Grid>
 
@@ -198,7 +202,6 @@
 
 			<TextBlock Grid.Row="0" Text="Speed Sensor" FontSize="18" FontWeight="Bold" />
 
-
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Wheel Size (inch):" />
 			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.WheelSizeInch, UpdateSourceTrigger=LostFocus}" />
 
@@ -218,11 +221,38 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
+				<RowDefinition Height="10" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 
-			<TextBlock Grid.Row="0" Text="Miscellaneous" FontSize="18" FontWeight="Bold" />
+			<TextBlock Grid.Row="0" Text="Shift Sensor" FontSize="18" FontWeight="Bold" />
 
-			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 10 0 0" Text="Show Temperature during Walk Mode:">
+			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 8 0 0" Text="Shift Interrupt Duration (ms):">
+				<TextBlock.ToolTip>
+					<TextBlock Width="300" TextWrapping="Wrap">
+						How long the power interrupt will last when the gear sensor is triggered.
+					</TextBlock>
+				</TextBlock.ToolTip>
+			</TextBlock>	
+			<TextBox Grid.Column="2" Grid.Row="1" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ShiftInterruptDuration, UpdateSourceTrigger=PropertyChanged}" />
+
+			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Shift Current Threshold (%):">
+				<TextBlock.ToolTip>
+					<TextBlock Width="300" TextWrapping="Wrap">
+						Maximum motor current during shifting expressed as a percentage of "Max Current (A)".
+						If motor current is below this threshold, then no power cut will happen.
+						If motor current is higher than this threshold, then current will be reduced to this value during the shift.
+						For example, if Max Current is 30 amps, and Shift Current Threshold is 10%, then current through the motor during
+						shifts will be limited to 3 amps.
+					</TextBlock>
+				</TextBlock.ToolTip>
+			</TextBlock>
+			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ShiftInterruptCurrentThresholdPercent, UpdateSourceTrigger=PropertyChanged}" />
+
+			<TextBlock Grid.Row="4" Text="Miscellaneous" FontSize="18" FontWeight="Bold" />
+
+			<TextBlock Grid.Column="0" Grid.Row="5" Margin="0 10 0 0" Text="Show Temperature during Walk Mode:">
 				<TextBlock.ToolTip>
 					<TextBlock Width="300" TextWrapping="Wrap">
 						Show controller temperature in speed field on display while walk mode is active.
@@ -231,7 +261,7 @@
 					</TextBlock>
 				</TextBlock.ToolTip>
 			</TextBlock>
-			<CheckBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" HorizontalAlignment="Right" IsChecked="{Binding ConfigVm.ShowTemperatureOnPushWalk, UpdateSourceTrigger=PropertyChanged}" />
+			<CheckBox Grid.Column="2" Grid.Row="5" Margin="0 10 0 0" HorizontalAlignment="Right" IsChecked="{Binding ConfigVm.ShowTemperatureOnPushWalk, UpdateSourceTrigger=PropertyChanged}" />
 
 		</Grid>
 

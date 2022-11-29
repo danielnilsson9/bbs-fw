@@ -18,7 +18,6 @@
 #include "util.h"
 #include "system.h"
 
-
 // Compile time options
 
 // Applied to both motor and controller tmeperature sensor
@@ -63,16 +62,12 @@
 #define SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH		3
 
 // Current ramp down (e.g. when releasing throttle, stop pedaling etc.) in percent per 10 millisecond.
-// Specifying 1 will make ramp down periond 1 second if relasing from full throttle.
+// Specifying 1 will make ramp down periond 1 second if releasing from full throttle.
 // Set to 100 to disable
 #define CURRENT_RAMP_DOWN_PERCENT_10MS			5
 
-// How long the power interrupt will last when gear sensor is triggered.
-#define SHIFT_SENSOR_INTERRUPT_PERIOD_MS		600
-
 // Target speed in km/h when walk mode is engaged
 #define WALK_MODE_SPEED_KPH						4
-
 
 typedef struct
 {
@@ -111,7 +106,6 @@ static uint16_t ramp_up_current_interval_ms;
 
 static uint8_t ramp_down_target_current;
 static uint32_t last_ramp_down_decrement_ms;
-
 
 void apply_pas(uint8_t* target_current, uint8_t throttle_percent);
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
@@ -180,7 +174,6 @@ void app_process()
 	apply_speed_limit(&target_current);
 	apply_thermal_limit(&target_current);
 	apply_low_voltage_limit(&target_current);
-
 	apply_shift_sensor_interrupt(&target_current);
 
 	motor_set_target_speed(assist_level_data.level.max_cadence_percent);
@@ -674,6 +667,13 @@ void apply_low_voltage_limit(uint8_t* target_current)
 void apply_shift_sensor_interrupt(uint8_t* target_current)
 {
 	static uint32_t shift_sensor_act_ms = 0;
+	static bool interrupt_necessary = false;
+
+	// Exit immediately if shift interrupts disabled.
+	if (!g_config.use_shift_sensor)
+	{
+		return;
+	}
 
 	bool active = shift_sensor_is_activated();
 	if (active)
@@ -681,37 +681,29 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 		if (shift_sensor_act_ms == 0)
 		{
 			shift_sensor_act_ms = system_ms();
-			eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 1);
+			interrupt_necessary = (*target_current) > g_config.shift_interrupt_current_threshold_percent;
+
+			if (interrupt_necessary)
+			{
+				eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 1);
+			}
 		}
 	}
 
 	uint32_t timediff = system_ms() - shift_sensor_act_ms;
-	if (active || timediff < SHIFT_SENSOR_INTERRUPT_PERIOD_MS)
+	if ((active || timediff < g_config.shift_interrupt_duration_ms) && interrupt_necessary)
 	{
-		if (timediff < SHIFT_SENSOR_INTERRUPT_PERIOD_MS / 4)
-		{
-			// reduce target power to 3/4 of requested (ramp down), shift started
-			*target_current = (uint8_t)(3u * (*target_current) / 4u);
-		}
-		else if (!active && timediff > (3 * SHIFT_SENSOR_INTERRUPT_PERIOD_MS) / 4)
-		{
-			// reduce target power to 3/4 of requested (ramp up), shift finished
-			*target_current = (uint8_t)(3u * (*target_current) / 4u);
-		}
-		else
-		{
-			// keep power at 1/2 requested
-			*target_current = (uint8_t)(*target_current / 2u);
-		}
+		// Set target current based on desired current threshold during shift.
+		*target_current = g_config.shift_interrupt_current_threshold_percent;
 	}
 	else if (!active && shift_sensor_act_ms != 0)
 	{
-		// shifting finished, force ramp up
+		// Shift is finished, reset function state.
 		shift_sensor_act_ms = 0;
+		interrupt_necessary = false;
 		eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 0);
 	}
 }
-
 
 void reload_assist_params()
 {

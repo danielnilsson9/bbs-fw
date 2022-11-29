@@ -16,9 +16,7 @@ namespace BBSFW.Model
 
 		public const int ByteSizeV1 = 120;
 		public const int ByteSizeV2 = 124;
-		public const int ByteSizeV3 = 126;
-
-
+		public const int ByteSizeV3 = 130;
 
 		public static int GetByteSize(int version)
 		{
@@ -91,8 +89,9 @@ namespace BBSFW.Model
 		public uint MaxSpeedKph;
 
 		// externals
-		public bool UseSpeedSensor;
 		public bool UseDisplay;
+		public bool UseSpeedSensor;
+		public bool UseShiftSensor;
 		public bool UsePushWalk;
 		public TemperatureSensor UseTemperatureSensor;
 
@@ -110,6 +109,10 @@ namespace BBSFW.Model
 		public uint ThrottleStartMillivolts;
 		public uint ThrottleEndMillivolts;
 		public uint ThrottleStartPercent;
+
+		// shift interrupt options
+		public uint ShiftInterruptDuration;
+		public uint ShiftInterruptCurrentThresholdPercent;
 
 		// misc
 		public bool ShowTemperatureOnPushWalk;
@@ -130,8 +133,9 @@ namespace BBSFW.Model
 			MaxBatteryVolts = 0;
 			LowCutoffVolts = 0;
 
-			UseSpeedSensor = false;
 			UseDisplay = false;
+			UseSpeedSensor = false;
+			UseShiftSensor = false;
 			UsePushWalk = false;
 			UseTemperatureSensor = TemperatureSensor.All;
 
@@ -147,6 +151,9 @@ namespace BBSFW.Model
 			ThrottleStartMillivolts = 0;
 			ThrottleEndMillivolts = 0;
 			ThrottleStartPercent = 0;
+
+			ShiftInterruptDuration = 0;
+			ShiftInterruptCurrentThresholdPercent = 0;
 
 			ShowTemperatureOnPushWalk = false;
 
@@ -218,12 +225,15 @@ namespace BBSFW.Model
 				}
 			}
 
-			// apply sane default settings for non existing options in version
+			// apply same default settings for non existing options in version
 			MaxBatteryVolts = 0f;
 			UseTemperatureSensor = TemperatureSensor.All;
 			ShowTemperatureOnPushWalk = false;
 			PasKeepCurrentPercent = 100;
 			PasKeepCurrentCadenceRpm = 255;
+			UseShiftSensor = true;
+			ShiftInterruptDuration = 600;
+			ShiftInterruptCurrentThresholdPercent = 10;
 
 			return true;
 		}
@@ -288,9 +298,12 @@ namespace BBSFW.Model
 				}
 			}
 
-			// apply sane default settings for non existing options in version
+			// apply same default settings for non existing options in version
 			PasKeepCurrentPercent = 100;
 			PasKeepCurrentCadenceRpm = 255;
+			UseShiftSensor = true;
+			ShiftInterruptDuration = 600;
+			ShiftInterruptCurrentThresholdPercent = 10;
 
 			return true;
 		}
@@ -314,8 +327,9 @@ namespace BBSFW.Model
 				LowCutoffVolts = br.ReadByte();
 				MaxSpeedKph = br.ReadByte();
 
-				UseSpeedSensor = br.ReadBoolean();
 				UseDisplay = br.ReadBoolean();
+				UseSpeedSensor = br.ReadBoolean();
+				UseShiftSensor = br.ReadBoolean();
 				UsePushWalk = br.ReadBoolean();
 				UseTemperatureSensor = (TemperatureSensor)br.ReadByte();
 
@@ -330,6 +344,9 @@ namespace BBSFW.Model
 				ThrottleStartMillivolts = br.ReadUInt16();
 				ThrottleEndMillivolts = br.ReadUInt16();
 				ThrottleStartPercent = br.ReadByte();
+
+				ShiftInterruptDuration = br.ReadUInt16();
+				ShiftInterruptCurrentThresholdPercent = br.ReadByte();
 
 				ShowTemperatureOnPushWalk = br.ReadBoolean();
 
@@ -372,8 +389,9 @@ namespace BBSFW.Model
 				bw.Write((byte)LowCutoffVolts);
 				bw.Write((byte)MaxSpeedKph);
 
-				bw.Write(UseSpeedSensor);
 				bw.Write(UseDisplay);
+				bw.Write(UseSpeedSensor);
+				bw.Write(UseShiftSensor);
 				bw.Write(UsePushWalk);
 				bw.Write((byte)UseTemperatureSensor);
 
@@ -388,6 +406,9 @@ namespace BBSFW.Model
 				bw.Write((UInt16)ThrottleStartMillivolts);
 				bw.Write((UInt16)ThrottleEndMillivolts);
 				bw.Write((byte)ThrottleStartPercent);
+
+				bw.Write((UInt16)ShiftInterruptDuration);
+				bw.Write((byte)ShiftInterruptCurrentThresholdPercent);
 
 				bw.Write(ShowTemperatureOnPushWalk);
 
@@ -423,8 +444,9 @@ namespace BBSFW.Model
 			CurrentRampAmpsSecond = cfg.CurrentRampAmpsSecond;
 			MaxBatteryVolts = cfg.MaxBatteryVolts;
 			LowCutoffVolts = cfg.LowCutoffVolts;
-			UseSpeedSensor = cfg.UseSpeedSensor;
 			UseDisplay = cfg.UseDisplay;
+			UseSpeedSensor = cfg.UseSpeedSensor;
+			UseShiftSensor = cfg.UseShiftSensor;
 			UsePushWalk = cfg.UsePushWalk;
 			UseTemperatureSensor = cfg.UseTemperatureSensor;
 			WheelSizeInch = cfg.WheelSizeInch;
@@ -437,6 +459,8 @@ namespace BBSFW.Model
 			ThrottleStartMillivolts = cfg.ThrottleStartMillivolts;
 			ThrottleEndMillivolts = cfg.ThrottleEndMillivolts;
 			ThrottleStartPercent = cfg.ThrottleStartPercent;
+			ShiftInterruptDuration = cfg.ShiftInterruptDuration;
+			ShiftInterruptCurrentThresholdPercent = cfg.ShiftInterruptCurrentThresholdPercent;
 			ShowTemperatureOnPushWalk = cfg.ShowTemperatureOnPushWalk;
 			AssistModeSelection = cfg.AssistModeSelection;
 			AssistStartupLevel = cfg.AssistStartupLevel;
@@ -481,7 +505,6 @@ namespace BBSFW.Model
 			}
 		}
 
-
 		public void Validate()
 		{
 			ValidateLimits(MaxCurrentAmps, 5, 33, "Max Current (A)");
@@ -502,6 +525,9 @@ namespace BBSFW.Model
 			ValidateLimits(ThrottleEndMillivolts, 2500, 5000, "Throttle End (mV)");
 			ValidateLimits(ThrottleStartPercent, 0, 100, "Throttle Start (%)");
 
+			ValidateLimits(ShiftInterruptDuration, 50, 2000, "Shift Interrupt Duration (ms)");
+			ValidateLimits(ShiftInterruptCurrentThresholdPercent, 0, 100, "Shift Interrupt Current Threshold (%)");
+
 			ValidateLimits(AssistStartupLevel, 0, 9, "Assist Startup Level");
 
 			for (int i = 0; i < StandardAssistLevels.Length; ++i)
@@ -520,7 +546,6 @@ namespace BBSFW.Model
 				ValidateLimits(SportAssistLevels[i].MaxSpeedPercent, 0, 100, "Sport (Level " + i.ToString() + "): Max Speed (%)");
 			}
 		}
-
 
 		private void ValidateLimits(uint value, uint min, uint max, string name)
 		{
