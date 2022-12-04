@@ -141,6 +141,8 @@ void app_init()
 	last_ramp_up_increment_ms = 0;
 	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
 
+	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
+
 	cruise_paused = true;
 
 	operation_mode = OPERATION_MODE_DEFAULT;
@@ -741,7 +743,6 @@ void reload_assist_params()
 	}
 
 	// compute speed ramp intervals
-	uint16_t speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
 	assist_level_data.speed_ramp_low_limit_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
 	assist_level_data.speed_ramp_high_limit_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
 }
