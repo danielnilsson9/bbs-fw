@@ -199,7 +199,7 @@ namespace BBSFW.Model
 				AssistModeSelection = (AssistModeSelect)br.ReadByte();
 				AssistStartupLevel = br.ReadByte();
 
-				for (int i = 0; i < 10; ++i)
+				for (int i = 0; i < StandardAssistLevels.Length; ++i)
 				{
 					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
 					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
@@ -208,7 +208,7 @@ namespace BBSFW.Model
 					StandardAssistLevels[i].MaxSpeedPercent = br.ReadByte();
 				}
 
-				for (int i = 0; i < 10; ++i)
+				for (int i = 0; i < SportAssistLevels.Length; ++i)
 				{
 					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
 					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
@@ -269,7 +269,7 @@ namespace BBSFW.Model
 				AssistModeSelection = (AssistModeSelect)br.ReadByte();
 				AssistStartupLevel = br.ReadByte();
 
-				for (int i = 0; i < 10; ++i)
+				for (int i = 0; i < StandardAssistLevels.Length; ++i)
 				{
 					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
 					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
@@ -278,7 +278,7 @@ namespace BBSFW.Model
 					StandardAssistLevels[i].MaxSpeedPercent = br.ReadByte();
 				}
 
-				for (int i = 0; i < 10; ++i)
+				for (int i = 0; i < SportAssistLevels.Length; ++i)
 				{
 					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
 					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
@@ -336,7 +336,7 @@ namespace BBSFW.Model
 				AssistModeSelection = (AssistModeSelect)br.ReadByte();
 				AssistStartupLevel = br.ReadByte();
 
-				for (int i = 0; i < 10; ++i)
+				for (int i = 0; i < StandardAssistLevels.Length; ++i)
 				{
 					StandardAssistLevels[i].Type = (AssistType)br.ReadByte();
 					StandardAssistLevels[i].MaxCurrentPercent = br.ReadByte();
@@ -345,7 +345,7 @@ namespace BBSFW.Model
 					StandardAssistLevels[i].MaxSpeedPercent = br.ReadByte();
 				}
 
-				for (int i = 0; i < 10; ++i)
+				for (int i = 0; i < SportAssistLevels.Length; ++i)
 				{
 					SportAssistLevels[i].Type = (AssistType)br.ReadByte();
 					SportAssistLevels[i].MaxCurrentPercent = br.ReadByte();
@@ -394,7 +394,7 @@ namespace BBSFW.Model
 				bw.Write((byte)AssistModeSelection);
 				bw.Write((byte)AssistStartupLevel);
 
-				for (int i = 0; i < 10; ++i)
+				for (int i = 0; i < StandardAssistLevels.Length; ++i)
 				{
 					bw.Write((byte)StandardAssistLevels[i].Type);
 					bw.Write((byte)StandardAssistLevels[i].MaxCurrentPercent);
@@ -403,7 +403,7 @@ namespace BBSFW.Model
 					bw.Write((byte)StandardAssistLevels[i].MaxSpeedPercent);
 				}
 
-				for (int i = 0; i < 10; ++i)
+				for (int i = 0; i < SportAssistLevels.Length; ++i)
 				{
 					bw.Write((byte)SportAssistLevels[i].Type);
 					bw.Write((byte)SportAssistLevels[i].MaxCurrentPercent);
@@ -441,7 +441,7 @@ namespace BBSFW.Model
 			AssistModeSelection = cfg.AssistModeSelection;
 			AssistStartupLevel = cfg.AssistStartupLevel;
 
-			for (int i = 0; i < Math.Min(cfg.StandardAssistLevels.Length, 10); ++i)
+			for (int i = 0; i < Math.Min(cfg.StandardAssistLevels.Length, StandardAssistLevels.Length); ++i)
 			{
 				StandardAssistLevels[i].Type = cfg.StandardAssistLevels[i].Type;
 				StandardAssistLevels[i].MaxCurrentPercent = cfg.StandardAssistLevels[i].MaxCurrentPercent;
@@ -450,7 +450,7 @@ namespace BBSFW.Model
 				StandardAssistLevels[i].MaxSpeedPercent = cfg.StandardAssistLevels[i].MaxSpeedPercent;
 			}
 
-			for (int i = 0; i < Math.Min(cfg.SportAssistLevels.Length, 10); ++i)
+			for (int i = 0; i < Math.Min(cfg.SportAssistLevels.Length, SportAssistLevels.Length); ++i)
 			{
 				SportAssistLevels[i].Type = cfg.SportAssistLevels[i].Type;
 				SportAssistLevels[i].MaxCurrentPercent = cfg.SportAssistLevels[i].MaxCurrentPercent;
@@ -503,6 +503,22 @@ namespace BBSFW.Model
 			ValidateLimits(ThrottleStartPercent, 0, 100, "Throttle Start (%)");
 
 			ValidateLimits(AssistStartupLevel, 0, 9, "Assist Startup Level");
+
+			for (int i = 0; i < StandardAssistLevels.Length; ++i)
+			{
+				ValidateLimits(StandardAssistLevels[i].MaxCurrentPercent, 0, 100, "Standard (Level " + i.ToString() + "): Target Power (%)");
+				ValidateLimits(StandardAssistLevels[i].MaxThrottlePercent, 0, 100, "Standard (Level " + i.ToString() + "): Max Throttle (%)");
+				ValidateLimits(StandardAssistLevels[i].MaxCadencePercent, 0, 100, "Standard (Level " + i.ToString() + "): Max Cadence (%)");
+				ValidateLimits(StandardAssistLevels[i].MaxSpeedPercent, 0, 100, "Standard (Level " + i.ToString() + "): Max Speed (%)");
+			}
+
+			for (int i = 0; i < SportAssistLevels.Length; ++i)
+			{
+				ValidateLimits(SportAssistLevels[i].MaxCurrentPercent, 0, 100, "Sport (Level " + i.ToString() + "): Target Power (%)");
+				ValidateLimits(SportAssistLevels[i].MaxThrottlePercent, 0, 100, "Sport (Level " + i.ToString() + "): Max Throttle (%)");
+				ValidateLimits(SportAssistLevels[i].MaxCadencePercent, 0, 100, "Sport (Level " + i.ToString() + "): Max Cadence (%)");
+				ValidateLimits(SportAssistLevels[i].MaxSpeedPercent, 0, 100, "Sport (Level " + i.ToString() + "): Max Speed (%)");
+			}
 		}
 
 
