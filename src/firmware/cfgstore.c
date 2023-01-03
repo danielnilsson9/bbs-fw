@@ -28,7 +28,10 @@
 
 
 static const uint8_t default_current_limits[] = { 7, 10, 14, 19, 26, 36, 50, 70, 98 };
+
+#if HAS_TORQUE_SENSOR
 static const uint8_t default_torque_factors[] = { 10, 15, 23, 44, 57, 74, 88, 105, 126 };
+#endif
 
 typedef struct
 {

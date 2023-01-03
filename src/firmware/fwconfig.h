@@ -76,9 +76,6 @@
 // Set to 100 to disable
 #define CURRENT_RAMP_DOWN_PERCENT_10MS			5
 
-// How long the power interrupt will last when gear sensor is triggered.
-#define SHIFT_SENSOR_INTERRUPT_PERIOD_MS		600
-
 // Target speed in km/h when walk mode is engaged
 #define WALK_MODE_SPEED_KPH						4
 
