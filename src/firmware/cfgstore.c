@@ -13,10 +13,8 @@
 
 #include <string.h>
 
-
 #define EEPROM_CONFIG_PAGE		0
 #define EEPROM_PSTATE_PAGE		1
-
 
 #define EEPROM_OK					0
 #define EEPROM_ERROR_SELECT_PAGE	1
@@ -27,8 +25,6 @@
 #define EEPROM_ERROR_ERASE			6
 #define EEPROM_ERROR_WRITE			7
 
-
-
 static const uint8_t default_current_limits[] = { 7, 15, 23, 31, 43, 55, 67, 79, 91 };
 
 typedef struct
@@ -38,12 +34,10 @@ typedef struct
 	uint8_t checksum;
 } header_t;
 
-
 static header_t header;
 
 config_t g_config;
 pstate_t g_pstate;
-
 
 static uint8_t read(uint8_t page, uint8_t version, uint8_t* dst, uint8_t size);
 static uint8_t write(uint8_t page, uint8_t version, uint8_t* src, uint8_t size);
@@ -68,7 +62,6 @@ void cfgstore_init()
 		load_default_pstate();
 	}
 }
-
 
 bool cfgstore_reset_config()
 {
@@ -97,7 +90,6 @@ bool cfgstore_save_pstate()
 {
 	return write_pstate();
 }
-
 
 static bool read_config()
 {
@@ -159,8 +151,9 @@ static void load_default_config()
 	g_config.max_battery_x100v = 5460;
 	g_config.low_cut_off_v = 42;
 
-	g_config.use_speed_sensor = 1;
 	g_config.use_display = 1;
+	g_config.use_speed_sensor = 1;
+	g_config.use_shift_sensor = 1;
 	g_config.use_push_walk = 1;
 	g_config.use_temperature_sensor = TEMPERATURE_SENSOR_CONTR | TEMPERATURE_SENSOR_MOTOR;
 
@@ -176,6 +169,9 @@ static void load_default_config()
 	g_config.throttle_start_voltage_mv = 900;
 	g_config.throttle_end_voltage_mv = 3600;
 	g_config.throttle_start_percent = 1;
+
+	g_config.shift_interrupt_duration_ms = 600;
+	g_config.shift_interrupt_current_threshold_percent = 10;
 
 	g_config.show_temperature_push_walk = 0;
 

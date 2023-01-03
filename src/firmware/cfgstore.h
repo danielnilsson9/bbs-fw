@@ -51,8 +51,9 @@ typedef struct
 	uint8_t max_speed_kph;
 
 	// externals
-	uint8_t use_speed_sensor;
 	uint8_t use_display;
+	uint8_t use_speed_sensor;
+	uint8_t use_shift_sensor;
 	uint8_t use_push_walk;
 	uint8_t use_temperature_sensor;
 
@@ -70,6 +71,10 @@ typedef struct
 	uint16_t throttle_start_voltage_mv;
 	uint16_t throttle_end_voltage_mv;
 	uint8_t throttle_start_percent;
+
+	// shift interrupt options
+	uint16_t shift_interrupt_duration_ms;
+	uint8_t shift_interrupt_current_threshold_percent;
 
 	// misc
 	uint8_t show_temperature_push_walk;
