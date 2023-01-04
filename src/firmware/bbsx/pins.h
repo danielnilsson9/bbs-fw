@@ -11,13 +11,6 @@
 
 // PORT, PIN
 
-// define BBSHD for intellisense support
-#if !defined (SDCC) && !defined (__SDCC)
-	#if !defined(BBSHD) && !defined(BBS02)
-		#define BBSHD
-	#endif
-#endif
-
 #if defined(BBSHD)
 
 	#define PIN_MOTOR_POWER_ENABLE			2, 0

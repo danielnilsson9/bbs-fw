@@ -1,20 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30503.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bbs-fw", "bbs-fw.vcxproj", "{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|8051 = Debug|8051
-		Release|8051 = Release|8051
+		BBS02|8051 = BBS02|8051
+		BBSHD|8051 = BBSHD|8051
+		TSDZ2|8051 = TSDZ2|8051
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Debug|8051.ActiveCfg = Debug|x64
-		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Debug|8051.Build.0 = Debug|x64
-		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Release|8051.ActiveCfg = Release|x64
-		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.Release|8051.Build.0 = Release|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.BBS02|8051.ActiveCfg = BBS02|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.BBS02|8051.Build.0 = BBS02|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.BBSHD|8051.ActiveCfg = BBSHD|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.BBSHD|8051.Build.0 = BBSHD|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.TSDZ2|8051.ActiveCfg = TSDZ2|x64
+		{1D7732D0-C5BC-4E67-9A24-EFF8000C007D}.TSDZ2|8051.Build.0 = TSDZ2|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
