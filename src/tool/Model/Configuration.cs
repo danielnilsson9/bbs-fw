@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -17,6 +18,14 @@ namespace BBSFW.Model
 		public const int ByteSizeV1 = 120;
 		public const int ByteSizeV2 = 124;
 		public const int ByteSizeV3 = 150;
+
+		public enum Feature
+		{
+			ShiftSensor,
+			TorqueSensor,
+			ControllerTemperatureSensor,
+			MotorTemperatureSensor
+		}
 
 		
 		public static int GetByteSize(int version)
@@ -83,6 +92,28 @@ namespace BBSFW.Model
 			public float TorqueAmplificationFactor;
 		}
 
+
+		[XmlIgnore]
+		public BbsfwConnection.Controller Target { get; private set; }
+
+		public uint MaxCurrentLimitAmps
+		{
+			get
+			{
+				switch (Target)
+				{
+					case BbsfwConnection.Controller.BBSHD:
+						return 33;
+					case BbsfwConnection.Controller.BBS02:
+						return 30;
+					case BbsfwConnection.Controller.TSDZ2:
+						return 20;
+				}
+
+				return 50;
+			}
+		}
+
 		// hmi
 		[XmlIgnore]
 		public bool UseFreedomUnits;
@@ -131,8 +162,10 @@ namespace BBSFW.Model
 		public AssistLevel[] SportAssistLevels = new AssistLevel[10];
 
 
-		public Configuration()
+		public Configuration(BbsfwConnection.Controller target)
 		{
+			Target = target;
+
 			UseFreedomUnits = Properties.Settings.Default.UseFreedomUnits;
 			MaxCurrentAmps = 0;
 			CurrentRampAmpsSecond = 0;
@@ -175,6 +208,28 @@ namespace BBSFW.Model
 			{
 				SportAssistLevels[i] = new AssistLevel();
 			}
+		}
+
+		public bool IsFeatureSupported(Feature feature)
+		{
+			if (Target == BbsfwConnection.Controller.Unknown)
+			{
+				return true;
+			}
+
+			switch (feature)
+			{
+				case Feature.ShiftSensor:
+					return new[] { BbsfwConnection.Controller.BBSHD, BbsfwConnection.Controller.BBS02 }.Contains(Target);
+				case Feature.TorqueSensor:
+					return new[] { BbsfwConnection.Controller.TSDZ2 }.Contains(Target);
+				case Feature.ControllerTemperatureSensor:
+					return new[] { BbsfwConnection.Controller.BBSHD, BbsfwConnection.Controller.BBS02 }.Contains(Target);
+				case Feature.MotorTemperatureSensor:
+					return new[] { BbsfwConnection.Controller.BBSHD }.Contains(Target);
+			}
+
+			return false;
 		}
 
 		public bool ParseFromBufferV1(byte[] buffer)
@@ -449,6 +504,8 @@ namespace BBSFW.Model
 
 		public void CopyFrom(Configuration cfg)
 		{
+			Target = cfg.Target;
+
 			UseFreedomUnits = cfg.UseFreedomUnits;
 			MaxCurrentAmps = cfg.MaxCurrentAmps;
 			CurrentRampAmpsSecond = cfg.CurrentRampAmpsSecond;
@@ -519,7 +576,7 @@ namespace BBSFW.Model
 
 		public void Validate()
 		{
-			ValidateLimits(MaxCurrentAmps, 5, 33, "Max Current (A)");
+			ValidateLimits(MaxCurrentAmps, 5, MaxCurrentLimitAmps, "Max Current (A)");
 			ValidateLimits(CurrentRampAmpsSecond, 1, 255, "Current Ramp (A/s)");
 			ValidateLimits((uint)MaxBatteryVolts, 1, 100, "Max Battery Voltage (V)");
 			ValidateLimits(LowCutoffVolts, 1, 100, "Low Voltage Cut Off (V)");
@@ -544,20 +601,23 @@ namespace BBSFW.Model
 
 			for (int i = 0; i < StandardAssistLevels.Length; ++i)
 			{
-				ValidateLimits(StandardAssistLevels[i].MaxCurrentPercent, 0, 100, "Standard (Level " + i.ToString() + "): Target Power (%)");
-				ValidateLimits(StandardAssistLevels[i].MaxThrottlePercent, 0, 100, "Standard (Level " + i.ToString() + "): Max Throttle (%)");
-				ValidateLimits(StandardAssistLevels[i].MaxCadencePercent, 0, 100, "Standard (Level " + i.ToString() + "): Max Cadence (%)");
-				ValidateLimits(StandardAssistLevels[i].MaxSpeedPercent, 0, 100, "Standard (Level " + i.ToString() + "): Max Speed (%)");
+				ValidateLimits(StandardAssistLevels[i].MaxCurrentPercent, 0, 100, $"Standard (Level {i}): Target Power (%)");
+				ValidateLimits(StandardAssistLevels[i].MaxThrottlePercent, 0, 100, $"Standard (Level {i}): Max Throttle (%)");
+				ValidateLimits(StandardAssistLevels[i].MaxCadencePercent, 0, 100, $"Standard (Level {i}): Max Cadence (%)");
+				ValidateLimits(StandardAssistLevels[i].MaxSpeedPercent, 0, 100, $"Standard (Level {i}): Max Speed (%)");
+				ValidateLimits((uint)StandardAssistLevels[i].TorqueAmplificationFactor, 0, 25, $"Standard (Level {i}): Torque Amplification");
 			}
 
 			for (int i = 0; i < SportAssistLevels.Length; ++i)
 			{
-				ValidateLimits(SportAssistLevels[i].MaxCurrentPercent, 0, 100, "Sport (Level " + i.ToString() + "): Target Power (%)");
-				ValidateLimits(SportAssistLevels[i].MaxThrottlePercent, 0, 100, "Sport (Level " + i.ToString() + "): Max Throttle (%)");
-				ValidateLimits(SportAssistLevels[i].MaxCadencePercent, 0, 100, "Sport (Level " + i.ToString() + "): Max Cadence (%)");
-				ValidateLimits(SportAssistLevels[i].MaxSpeedPercent, 0, 100, "Sport (Level " + i.ToString() + "): Max Speed (%)");
+				ValidateLimits(SportAssistLevels[i].MaxCurrentPercent, 0, 100, $"Sport (Level {i}): Target Power (%)");
+				ValidateLimits(SportAssistLevels[i].MaxThrottlePercent, 0, 100, $"Sport (Level {i}): Max Throttle (%)");
+				ValidateLimits(SportAssistLevels[i].MaxCadencePercent, 0, 100, $"Sport (Level {i}): Max Cadence (%)");
+				ValidateLimits(SportAssistLevels[i].MaxSpeedPercent, 0, 100, $"Sport (Level {i}): Max Speed (%)");
+				ValidateLimits((uint)SportAssistLevels[i].TorqueAmplificationFactor, 0, 25, $"Sport (Level {i}): Torque Amplification");
 			}
 		}
+
 
 		private void ValidateLimits(uint value, uint min, uint max, string name)
 		{

@@ -7,6 +7,7 @@ namespace BBSFW.ViewModel
 {
 	public class AssistLevelViewModel : ObservableObject
 	{
+		private ConfigurationViewModel _configVm;
 		private Configuration.AssistLevel _level;
 
 
@@ -26,7 +27,7 @@ namespace BBSFW.ViewModel
 		}
 
 
-		public static List<ValueItemViewModel<AssistBaseType>> AssistBaseTypeOptions { get; } =
+		public List<ValueItemViewModel<AssistBaseType>> AssistBaseTypeOptions { get; } =
 			new List<ValueItemViewModel<AssistBaseType>>()
 			{
 				new ValueItemViewModel<AssistBaseType>(AssistBaseType.Disabled, "Motor Disabled"),
@@ -35,13 +36,26 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<AssistBaseType>(AssistBaseType.Cruise, "Cruise")
 			};
 
-		public static List<ValueItemViewModel<AssistPasVariant>> AssistPasVariantOptions { get; } =
-			new List<ValueItemViewModel<AssistPasVariant>>()
+		public List<ValueItemViewModel<AssistPasVariant>> AssistPasVariantOptions
+		{
+			get
 			{
-				new ValueItemViewModel<AssistPasVariant>(AssistPasVariant.Cadence, "Cadence"),
-				new ValueItemViewModel<AssistPasVariant>(AssistPasVariant.Torque, "Torque"),
-				new ValueItemViewModel<AssistPasVariant>(AssistPasVariant.Variable, "Variable")
-			};
+				var variants = new List<ValueItemViewModel<AssistPasVariant>>
+				{
+					new ValueItemViewModel<AssistPasVariant>(AssistPasVariant.Cadence, "Cadence")
+				};
+
+				if (_configVm.IsTorqueSensorSupported)
+				{
+					variants.Add(new ValueItemViewModel<AssistPasVariant>(AssistPasVariant.Torque, "Torque"));
+				}
+
+				variants.Add(new ValueItemViewModel<AssistPasVariant>(AssistPasVariant.Variable, "Variable"));
+
+				return variants;
+			}
+		}
+			
 
 
 
@@ -235,8 +249,9 @@ namespace BBSFW.ViewModel
 		}
 
 
-		public AssistLevelViewModel(int id, Configuration.AssistLevel level)
+		public AssistLevelViewModel(ConfigurationViewModel configVm, int id, Configuration.AssistLevel level)
 		{
+			_configVm = configVm;
 			_id = id;
 			_level = level;
 		}
@@ -306,7 +321,6 @@ namespace BBSFW.ViewModel
 
 			return result;
 		}
-
 
 	}
 }

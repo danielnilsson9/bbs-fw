@@ -3,7 +3,6 @@ using BBSFW.ViewModel.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace BBSFW.ViewModel
 {
@@ -38,6 +37,22 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Lights, "Lights Button"),
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas0AndLights, "PAS 0 + Lights Button")
 			};
+
+
+		// support 
+
+		public bool IsTorqueSensorSupported
+		{
+			get { return _config.IsFeatureSupported(Configuration.Feature.TorqueSensor); }
+		}
+
+		public bool IsShiftSensorSupported
+		{
+			get { return _config.IsFeatureSupported(Configuration.Feature.ShiftSensor); }
+		}
+
+
+		// configuration
 
 		public bool UseMetricUnits
 		{
@@ -80,6 +95,7 @@ namespace BBSFW.ViewModel
 				}
 			}
 		}
+
 
 
 		public uint MaxCurrentAmps
@@ -383,6 +399,7 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+
 		public uint StartupAssistLevel
 		{
 			get { return _config.AssistStartupLevel; }
@@ -441,21 +458,22 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+
 		public ConfigurationViewModel()
 		{
-			_config = new Configuration();
+			_config = new Configuration(BbsfwConnection.Controller.Unknown);
 
 			StandardAssistLevels = new List<AssistLevelViewModel>();
 			SportAssistLevels = new List<AssistLevelViewModel>();
 			
 			for (int i = 0; i < _config.StandardAssistLevels.Length; ++i)
 			{
-				_standardAssistLevels.Add(new AssistLevelViewModel(i, _config.StandardAssistLevels[i]));
+				_standardAssistLevels.Add(new AssistLevelViewModel(this, i, _config.StandardAssistLevels[i]));
 			}
 
 			for (int i = 0; i < _config.SportAssistLevels.Length; ++i)
 			{
-				_sportAssistLevels.Add(new AssistLevelViewModel(i, _config.SportAssistLevels[i]));
+				_sportAssistLevels.Add(new AssistLevelViewModel(this, i, _config.SportAssistLevels[i]));
 			}
 		}
 
@@ -484,40 +502,6 @@ namespace BBSFW.ViewModel
 		}
 
 
-		private void TriggerPropertyChanges()
-		{
-			OnPropertyChanged(nameof(UseMetricUnits));
-			OnPropertyChanged(nameof(UseImperialUnits));
-			OnPropertyChanged(nameof(MaxCurrentAmps));
-			OnPropertyChanged(nameof(CurrentRampAmpsSecond));
-			OnPropertyChanged(nameof(MaxBatteryVolts));
-			OnPropertyChanged(nameof(LowCutoffVolts));
-			OnPropertyChanged(nameof(MaxSpeedKph));
-			OnPropertyChanged(nameof(MaxSpeedMph));
-			OnPropertyChanged(nameof(UseDisplay));
-			OnPropertyChanged(nameof(UseSpeedSensor));
-			OnPropertyChanged(nameof(UseShiftSensor));
-			OnPropertyChanged(nameof(UsePushWalk));
-			OnPropertyChanged(nameof(UseTemperatureSensor));
-			OnPropertyChanged(nameof(ThrottleStartVoltageMillivolts));
-			OnPropertyChanged(nameof(ThrottleEndVoltageMillivolts));
-			OnPropertyChanged(nameof(ThrottleStartCurrentPercent));
-			OnPropertyChanged(nameof(ShiftInterruptDuration));
-			OnPropertyChanged(nameof(ShiftInterruptCurrentThresholdPercent));
-			OnPropertyChanged(nameof(PasStartDelayDegrees));
-			OnPropertyChanged(nameof(PasStopDelayMilliseconds));
-			OnPropertyChanged(nameof(PasKeepCurrentPercent));
-			OnPropertyChanged(nameof(PasKeepCurrentCadenceRpm));
-			OnPropertyChanged(nameof(WheelSizeInch));
-			OnPropertyChanged(nameof(SpeedSensorSignals));
-			OnPropertyChanged(nameof(ShowTemperatureOnPushWalk));
-			OnPropertyChanged(nameof(StartupAssistLevel));	
-			OnPropertyChanged(nameof(AssistModeSelection));
-			StandardAssistLevels = StandardAssistLevels.ToList();
-			SportAssistLevels = SportAssistLevels.ToList();
-		}
-
-
 		private static uint KphToMph(uint kph)
 		{
 			return (uint)Math.Round(kph * 0.621371192);
@@ -527,5 +511,22 @@ namespace BBSFW.ViewModel
 		{
 			return (uint)Math.Round(mph * 1.609344);
 		}
+
+		private void TriggerPropertyChanges()
+		{
+			foreach (var prop in typeof(ConfigurationViewModel).GetProperties())
+			{
+				if (prop.GetGetMethod(false) != null)
+				{
+					OnPropertyChanged(prop.Name);
+				}
+			}
+
+			// force update by creating new list
+			StandardAssistLevels = StandardAssistLevels.ToList();
+			SportAssistLevels = SportAssistLevels.ToList();
+		}
+
+
 	}
 }

@@ -24,6 +24,13 @@ namespace BBSFW.Model
 
 	public class BbsfwConnection
 	{
+		public enum Controller
+		{
+			Unknown = 0,
+			BBSHD = 1,
+			BBS02 = 2,
+			TSDZ2 = 3
+		}
 
 		private const int REQUEST_TYPE_READ =			0x01;
 		private const int REQUEST_TYPE_WRITE =			0x02;
@@ -49,6 +56,7 @@ namespace BBSFW.Model
 		private SerialPort _port = null;
 		private volatile bool _isConnecting = false;
 		private volatile bool _isConnected = false;
+		private Controller _controllerType = Controller.Unknown;
 
 		private DateTime _lastRecv = DateTime.Now;
 		private List<byte> _rxBuffer = new List<byte>();
@@ -62,11 +70,7 @@ namespace BBSFW.Model
 
 		private int ConfigVersion = 0;
 
-		public enum Controller
-		{
-			BBSHD = 1,
-			BBS02 = 2
-		}
+
 
 		public bool IsConnected
 		{
@@ -76,13 +80,19 @@ namespace BBSFW.Model
 			}
 		}
 
+		public Controller ControllerType
+		{
+			get
+			{
+				return _controllerType;
+			}
+		}
 
 		public event Action<Controller, string, int>	Connected;
 		public event Action								Disconnected;
 
 
 		public event Action<EventLogEntry>		EventLog;
-
 
 
 		public static List<ComPort> GetComPorts()
@@ -115,6 +125,7 @@ namespace BBSFW.Model
 
 		public async Task<bool> Connect(ComPort port, TimeSpan timeout)
 		{
+			_controllerType = Controller.Unknown;
 			_isConnected = false;
 			_isConnecting = true;
 			_port = new SerialPort(port.Name, 1200);
@@ -327,7 +338,9 @@ namespace BBSFW.Model
 				{
 					_isConnecting = false;
 					_isConnected = true;
-					Connected?.Invoke(size == MessageSizeV1 ? Controller.BBSHD : (Controller)_rxBuffer[6] ,String.Format("{0}.{1}.{2}", major, minor, patch), ConfigVersion); ;
+					_controllerType = (size == MessageSizeV1 ? Controller.BBSHD : (Controller)_rxBuffer[6]);
+
+					Connected?.Invoke(ControllerType, String.Format("{0}.{1}.{2}", major, minor, patch), ConfigVersion); ;
 
 					SendEventLogEnableRequest(true);
 				}
@@ -379,7 +392,7 @@ namespace BBSFW.Model
 
 			if (ComputeChecksum(_rxBuffer, MessageSize - 1) == _rxBuffer[MessageSize - 1])
 			{
-				var cfg = new Configuration();
+				var cfg = new Configuration(ControllerType);
 
 				switch(version)
 				{

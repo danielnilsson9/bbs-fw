@@ -166,7 +166,7 @@
 			<CheckBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseSpeedSensor, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Shift Sensor:" />
-			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseShiftSensor, UpdateSourceTrigger=PropertyChanged}" />
+			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseShiftSensor, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ConfigVm.IsShiftSensorSupported}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Walk Mode:" />
 			<CheckBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePushWalk, UpdateSourceTrigger=PropertyChanged}" />
@@ -235,7 +235,9 @@
 					</TextBlock>
 				</TextBlock.ToolTip>
 			</TextBlock>	
-			<TextBox Grid.Column="2" Grid.Row="1" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ShiftInterruptDuration, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBox Grid.Column="2" Grid.Row="1" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right"
+					 IsEnabled="{Binding ConfigVm.IsShiftSensorSupported}"
+					 Text="{Binding ConfigVm.ShiftInterruptDuration, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Shift Current Threshold (%):">
 				<TextBlock.ToolTip>
@@ -248,7 +250,9 @@
 					</TextBlock>
 				</TextBlock.ToolTip>
 			</TextBlock>
-			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ShiftInterruptCurrentThresholdPercent, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right"
+					 IsEnabled="{Binding ConfigVm.IsShiftSensorSupported}"
+					 Text="{Binding ConfigVm.ShiftInterruptCurrentThresholdPercent, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Row="4" Text="Miscellaneous" FontSize="18" FontWeight="Bold" />
 
