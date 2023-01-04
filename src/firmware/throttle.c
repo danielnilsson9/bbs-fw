@@ -104,7 +104,8 @@ uint8_t throttle_read()
 
 	if (value < min_voltage_adc)
 	{
-		// throttle is considered not working until it has given a signal below minimum value
+		// throttle is considered not working until it has given a signal below minimum
+		// configured value but more than 0.
 		throttle_low_ok = true;
 
 		// hysteresis

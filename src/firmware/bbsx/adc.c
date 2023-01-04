@@ -47,7 +47,6 @@ void adc_init()
 	// Arrange adc result for 8bit reading
 	CLEAR_BIT(PCON2, 5);
 
-	// enable adc power
 	ADC_CONTR = (uint8_t)((1 << 7));
 
 	no_adc_reading_counter = 0;
@@ -55,6 +54,18 @@ void adc_init()
 	temperature_contr_value = 0;
 	temperature_motor_value = 0;
 	next_channel = GET_PIN_NUM(PIN_THROTTLE);
+
+
+	// throttle is read during init since a valid value must be
+	// needs to be available for fir throttle_process to not mess
+	// up safeguard logic
+
+	// enable adc power and read throttle
+	ADC_CONTR = (uint8_t)((1 << 7) | (1 << 3) | next_channel);
+
+	// wait for throttle reading and process
+	while (!IS_BIT_SET(ADC_CONTR, 4));
+	adc_process();
 }
 
 void adc_process()
