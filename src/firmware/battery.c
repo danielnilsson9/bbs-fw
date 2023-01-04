@@ -23,7 +23,7 @@ static uint8_t compute_battery_percent()
 	// Compute battery percent using linear interpolation between lvc and configure max voltage under no load.
 
 	// Consider battery full if above 98% of configure max voltage
-	int32_t full_x1000v = 98l * g_config.max_battery_x100v / 10;
+	int32_t full_x1000v = 98l * EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l) / 10;
 
 	// Consider battery empty at 5% above configured low voltage cutoff
 	int32_t empty_x1000v = 105l * g_config.low_cut_off_v * 10;

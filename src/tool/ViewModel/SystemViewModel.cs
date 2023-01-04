@@ -15,15 +15,10 @@ namespace BBSFW.ViewModel
 			get { return _configVm; }
 		}
 
-
-
 		public SystemViewModel(ConfigurationViewModel config)
 		{
 			_configVm = config;
 		}
-
-
-
 
 	}
 }

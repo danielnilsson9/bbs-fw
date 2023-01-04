@@ -36,6 +36,7 @@ namespace BBSFW.Model
 		private const int EVT_ERROR_THROTTLE_LOW_LIMIT =		75;
 		private const int EVT_ERROR_THROTTLE_HIGH_LIMIT =		76;
 		private const int EVT_ERROR_WATCHDOG_TRIGGERED =		77;
+		private const int EVT_ERROR_EXTCOM_CHECKSUM =			78;
 
 		private const int EVT_DATA_TARGET_CURRENT =				128;
 		private const int EVT_DATA_TARGET_SPEED =				129;
@@ -56,6 +57,8 @@ namespace BBSFW.Model
 		private const int EVT_DATA_BBSHD_THERMISTOR =			144;
 		private const int EVT_DATA_VOLTAGE =					145;
 		private const int EVT_DATA_VOLTAGE_CALIBRATION =		146;
+		private const int EVT_DATA_TORQUE_ADC =					147;
+		private const int EVT_DATA_TORQUE_ADC_CALIBRATED =		148;
 
 
 		public enum LogLevel
@@ -145,6 +148,8 @@ namespace BBSFW.Model
 					return "Invalid throttle reading, above high limit, check throttle.";
 				case EVT_ERROR_WATCHDOG_TRIGGERED:
 					return "Software reset by watchdog, software error.";
+				case EVT_ERROR_EXTCOM_CHECKSUM:
+					return "Message received with invalid checksum.";
 
 				case EVT_DATA_TARGET_CURRENT:
 					return $"Motor target current changed to {_data}%.";
@@ -224,14 +229,18 @@ namespace BBSFW.Model
 					return $"Battery voltage reading, value={_data / 100f}V.";
 				case EVT_DATA_VOLTAGE_CALIBRATION:
 					return $"Battery voltage calibration updated, adc_steps_per_volt={_data / 100f}.";
+				case EVT_DATA_TORQUE_ADC:
+					return $"Torque adc, value={_data}.";
+				case EVT_DATA_TORQUE_ADC_CALIBRATED:
+					return $"Torque sensor calibrated, adc_bias={_data}.";
 			}
 
 			if (_data.HasValue)
 			{
-				return $"Unknown ({_data.Value})";
+				return $"Unknown ({_event}, value={_data.Value})";
 			}
 
-			return "Unknown";
+			return $"Unknown ({_event})";
 		}
 
 

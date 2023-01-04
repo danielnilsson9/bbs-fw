@@ -1,91 +1,63 @@
 .PHONY: all clean
 
-# Compiler
-CC = sdcc
-
-#Platform
-PLATFORM = mcs51
-
-# Target name
-PNAME = main
-
 # Select target controller:
 TARGET_CONTROLLER = BBSHD
 #TARGET_CONTROLLER = BBS02
+#TARGET_CONTROLLER = TSDZ2
 
+# Compiler
+CC = sdcc
 
-XRAM_SIZE = 1792
-ifeq ($(TARGET_CONTROLLER), BBSHD)
-	XRAM_SIZE = 3840
-endif
-
-# External libraries
-IDIR = 
-SDIR = 
+# Target name
+TARGET = bbs-fw
 
 MAINSRC = main.c
-
-EXTRASRCS = \
-	adc.c \
-	app.c \
-	battery.c \
-	cfgstore.c \
-	eeprom.c \
-	eventlog.c \
-	extcom.c \
-	timers.c \
-	lights.c \
-	motor.c \
-	uart.c \
-	system.c \
-	throttle.c \
-	watchdog.c \
-	sensors.c
+SUBDIRS = 
+		
+CFLAGS = -Ddouble=float --std-c99 -D$(TARGET_CONTROLLER)
 	
-HEADERS = \
-	adc.h \
-	app.h \
-	battery.h \
-	cfgstore.h \
-	eventlog.h \
-	eeprom.h \
-	extcom.h \
-	timers.h \
-	lights.h \
-	motor.h \
-	uart.h \
-	system.h \
-	throttle.h \
-	util.h \
-	version.h \
-	watchdog.h \
-	sensors.h \
-	pins.h
+# Target Specific
+ifeq ($(TARGET_CONTROLLER), BBSHD)
+	CFLAGS += -mmcs51 --model-large --xram-size 3840	
+	SUBDIRS += bbsx	
+endif
 
-# The list of .rel files can be derived from the list of their source files
-RELS = $(EXTRASRCS:.c=.rel)
+ifeq ($(TARGET_CONTROLLER), BBS02)
+	CFLAGS += -mmcs51 --model-large --xram-size 1792
+	SUBDIRS += bbsx
+endif
 
-INCLUDES = -I$(IDIR) -I. -I../
-CFLAGS   = -m$(PLATFORM) --model-large --xram-size $(XRAM_SIZE) -Ddouble=float --std-c99 -D$(TARGET_CONTROLLER)
-ELF_FLAGS = 
-LIBS     = 
+ifeq ($(TARGET_CONTROLLER), TSDZ2)
+	CFLAGS += -mstm8
+	SUBDIRS += tsdz2
+endif
+	
+	
+INCS = $(wildcard *.h $(foreach fd, $(SUBDIRS), $(fd)/*.h))
+SRCS = $(filter-out main.c, $(wildcard *.c $(foreach fd, $(SUBDIRS), $(fd)/*.c)))
+RELS := $(SRCS:.c=.rel)
 
-all: $(PNAME) hex
+INC_DIRS = -I./ $(addprefix -I, $(SUBDIRS))
 
-$(PNAME): $(MAINSRC) $(RELS)
-	$(CC) $(INCLUDES) $(CFLAGS) $(ELF_FLAGS) $(LIBS) $(MAINSRC) $(RELS)
+all: $(TARGET) hex
 
-# Build .rel file from .c file
-%.rel: %.c $(HEADERS)
-	$(CC) -c $(INCLUDES) $(CFLAGS) $(ELF_FLAGS) $(LIBS) $<
+$(TARGET): $(MAINSRC) $(RELS)
+	$(CC) -o $(TARGET).ihx $(INC_DIRS) $(CFLAGS) $(MAINSRC) $(RELS)
 
-# Suffixes appearing in suffix rules we care about.
-# Necessary because .rel is not one of the standard suffixes.
-.SUFFIXES: .c .rel
+%.rel: %.c $(INCS)
+	$(CC) -o $@ -c $(INC_DIRS) $(CFLAGS) $<
+
+echo:
+	@echo SRCS: $(SRCS)
+	@echo RELS: $(RELS)
+	@echo INCS: $(INCS)
 
 hex:
 	@cmd /C tohex.bat
 	
 clean:
 	@cmd /C clean.bat
-	@echo "Clean Finished"
+	@echo Clean Finished
+
+.PHONY = all hex clean
+.SUFFIXES: .c .rel

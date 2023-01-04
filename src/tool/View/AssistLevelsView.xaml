@@ -60,7 +60,7 @@
 							</TextBlock>
 
 							<TextBlock>
-							<Run Text="{Binding Type, Mode=OneWay}" />
+							<Run Text="{Binding SelectedType, Mode=OneWay}" />
 							</TextBlock>
 						</StackPanel>
 					</DataTemplate>
@@ -90,7 +90,7 @@
 							</TextBlock>
 
 							<TextBlock>
-							<Run Text="{Binding Type, Mode=OneWay}" />
+							<Run Text="{Binding SelectedType, Mode=OneWay}" />
 							</TextBlock>
 						</StackPanel>
 					</DataTemplate>
@@ -107,7 +107,6 @@
 				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 
-
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition />
@@ -115,9 +114,6 @@
 				</Grid.ColumnDefinitions>
 
 				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto" />
-					<RowDefinition Height="Auto" />
-					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
@@ -129,73 +125,43 @@
 					<Run Text="{Binding SelectedAssistLevel.Id, Mode=OneWay}" />
 				</TextBlock>
 
-
 				<TextBlock Grid.Column="0" Grid.Row="1" Text="Type:" VerticalAlignment="Center" Margin="0 10 0 0" />
-				<ComboBox Grid.Column="1" Grid.Row="1" Margin="10 10 0 0" ItemsSource="{Binding SelectedAssistLevel.AssistTypeOptions}" SelectedValue="{Binding SelectedAssistLevel.Type, UpdateSourceTrigger=PropertyChanged}" />
+				<ComboBox Grid.Column="1" Grid.Row="1" Margin="10 10 0 0" ItemsSource="{Binding SelectedAssistLevel.AssistBaseTypeOptions}" SelectedValue="{Binding SelectedAssistLevel.SelectedType, UpdateSourceTrigger=PropertyChanged}" />
 
-				<TextBlock Grid.Column="0" Grid.Row="2" Text="Target Power (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
-				<TextBox Grid.Column="1" Grid.Row="2" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.TargetCurrentPercent, UpdateSourceTrigger=PropertyChanged}">
-					<TextBox.Style>
-						<Style TargetType="{x:Type TextBox}">
+				<ContentControl Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Content="{Binding SelectedAssistLevel}">
+					<ContentControl.Resources>
+						<DataTemplate x:Key="EmptyTemplate" DataType="{x:Type vm:AssistLevelViewModel}">
+							<Grid />
+						</DataTemplate>
+						
+						<DataTemplate x:Key="PasTemplate" DataType="{x:Type vm:AssistLevelViewModel}">
+							<local:AssistLevelPasView />
+						</DataTemplate>
+						<DataTemplate x:Key="ThrottleTemplate" DataType="{x:Type vm:AssistLevelViewModel}">
+							<local:AssistLevelThrottleView />
+						</DataTemplate>
+						<DataTemplate x:Key="CruiseTemplate" DataType="{x:Type vm:AssistLevelViewModel}">
+							<local:AssistLevelCruiseView />
+						</DataTemplate>
+					</ContentControl.Resources>
+
+					<ContentControl.Style>
+						<Style TargetType="ContentControl">
+							<Setter Property="ContentTemplate" Value="{StaticResource EmptyTemplate}" />
 							<Style.Triggers>
-								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Throttle">
-									<Setter Property="IsEnabled" Value="False" />
+								<DataTrigger Binding="{Binding SelectedAssistLevel.SelectedType.Value}" Value="Pas">
+									<Setter Property="ContentTemplate" Value="{StaticResource PasTemplate}" />
 								</DataTrigger>
-								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
-									<Setter Property="IsEnabled" Value="False" />
+								<DataTrigger Binding="{Binding SelectedAssistLevel.SelectedType.Value}" Value="Throttle">
+									<Setter Property="ContentTemplate" Value="{StaticResource ThrottleTemplate}" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding SelectedAssistLevel.SelectedType.Value}" Value="Cruise">
+									<Setter Property="ContentTemplate" Value="{StaticResource CruiseTemplate}" />
 								</DataTrigger>
 							</Style.Triggers>
 						</Style>
-					</TextBox.Style>
-				</TextBox>
-
-				<TextBlock Grid.Column="0" Grid.Row="3" Text="Max Throttle (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
-				<TextBox Grid.Column="1" Grid.Row="3" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxThrottlePercent, UpdateSourceTrigger=PropertyChanged}">
-					<TextBox.Style>
-						<Style TargetType="{x:Type TextBox}">
-							<Style.Triggers>
-								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Pas">
-									<Setter Property="IsEnabled" Value="False" />
-								</DataTrigger>
-								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="VariablePas">
-									<Setter Property="IsEnabled" Value="False" />
-								</DataTrigger>
-								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Cruise">
-									<Setter Property="IsEnabled" Value="False" />
-								</DataTrigger>
-								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
-									<Setter Property="IsEnabled" Value="False" />
-								</DataTrigger>
-							</Style.Triggers>
-						</Style>
-					</TextBox.Style>
-				</TextBox>
-
-				<TextBlock Grid.Column="0" Grid.Row="4" Text="Max Cadence (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
-				<TextBox Grid.Column="1" Grid.Row="4" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxCadencePercent, UpdateSourceTrigger=PropertyChanged}">
-					<TextBox.Style>
-						<Style TargetType="{x:Type TextBox}">
-							<Style.Triggers>
-								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
-									<Setter Property="IsEnabled" Value="False" />
-								</DataTrigger>
-							</Style.Triggers>
-						</Style>
-					</TextBox.Style>
-				</TextBox>
-
-				<TextBlock Grid.Column="0" Grid.Row="5" Text="Max Speed (%):" VerticalAlignment="Center" Margin="0 8 0 0" />
-				<TextBox Grid.Column="1" Grid.Row="5" Margin="10 8 0 0" Text="{Binding SelectedAssistLevel.MaxSpeedPercent, UpdateSourceTrigger=PropertyChanged}">
-					<TextBox.Style>
-						<Style TargetType="{x:Type TextBox}">
-							<Style.Triggers>
-								<DataTrigger Binding="{Binding SelectedAssistLevel.Type.Value}" Value="Disabled">
-									<Setter Property="IsEnabled" Value="False" />
-								</DataTrigger>
-							</Style.Triggers>
-						</Style>
-					</TextBox.Style>
-				</TextBox>
+					</ContentControl.Style>
+				</ContentControl>
 
 			</Grid>
 

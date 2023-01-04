@@ -6,10 +6,11 @@
  * Released under the GPL License, Version 3
  */
 
-#include "eeprom.h"
-#include "cfgstore.h"
+#include "interrupt.h" // IMPORTANT: interrupt vector declarations must be included from main.c!
 #include "timers.h"
 #include "system.h"
+#include "eeprom.h"
+#include "cfgstore.h"
 #include "eventlog.h"
 #include "app.h"
 #include "battery.h"
@@ -20,17 +21,14 @@
 #include "sensors.h"
 #include "throttle.h"
 #include "lights.h"
-#include "pins.h"
 #include "uart.h"
+#include "util.h"
 
-
-//#define DEBUG_LOOP_TIME_PIN
-//#define DEBUG_LOOP_TIME_EVENTLOG
-
+#define APP_PROCESS_INTERVAL_MS		5
 
 void main(void)
 {
-	motor_init_pins();
+	motor_pre_init();
 
 	watchdog_init();
 	timers_init();
@@ -58,46 +56,36 @@ void main(void)
 	pas_set_stop_delay((uint16_t)g_config.pas_stop_delay_x100s * 10);
 
 	battery_init();
-	throttle_init(g_config.throttle_start_voltage_mv, g_config.throttle_end_voltage_mv);
-	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_v, g_pstate.adc_voltage_calibration_steps_x100);
+	throttle_init(
+		EXPAND_U16(g_config.throttle_start_voltage_mv_u16h, g_config.throttle_start_voltage_mv_u16l),
+		EXPAND_U16(g_config.throttle_end_voltage_mv_u16h, g_config.throttle_end_voltage_mv_u16l)
+	);
+
+	motor_init(g_config.max_current_amps * 1000, g_config.low_cut_off_v,
+		EXPAND_I16(g_pstate.adc_voltage_calibration_steps_x100_i16h, g_pstate.adc_voltage_calibration_steps_x100_i16l));
+
 	lights_init();
 
 	app_init();
 
-
-#ifdef DEBUG_LOOP_TIME_PIN
-	SET_PIN_OUTPUT(PIN_SHIFT_SENSOR);
-#endif
-
-#ifdef DEBUG_LOOP_TIME_EVENTLOG
-	uint16_t prev_loop_ms = (uint16_t)system_ms();
-	uint8_t loop_counter = 0;
-#endif
-
+	uint32_t next_app_proccess = system_ms();
 	while (1)
 	{
-#ifdef DEBUG_LOOP_TIME_PIN
-		SET_PIN_HIGH(PIN_SHIFT_SENSOR);
-#endif
+		uint32_t now = system_ms();
+	
 		adc_process();
-		battery_process();
 		motor_process();
-		extcom_process();
-		app_process();
 
-#ifdef DEBUG_LOOP_TIME_PIN
-		SET_PIN_LOW(PIN_SHIFT_SENSOR);
-#endif
-
-#ifdef DEBUG_LOOP_TIME_EVENTLOG
-		if (++loop_counter == 0)
+		if (now >= next_app_proccess)
 		{
-			eventlog_write_data(EVT_DATA_MAIN_LOOP_TIME, (uint16_t)system_ms() - prev_loop_ms);	
-		}
-		prev_loop_ms = (uint16_t)system_ms();
-#endif
+			next_app_proccess = now + APP_PROCESS_INTERVAL_MS;
 
-		system_delay_ms(2);
+			battery_process();
+			sensors_process();
+			extcom_process();
+			app_process();
+		}
+
 		watchdog_yeild();
 	}
 }

@@ -7,8 +7,7 @@
  */
 
 #include "throttle.h"
-#include "stc15.h"
-#include "pins.h"
+#include "intellisense.h"
 #include "system.h"
 #include "eventlog.h"
 #include "util.h"
@@ -18,8 +17,6 @@
 
 static uint8_t min_voltage_adc;
 static uint8_t max_voltage_adc;
-
-static uint8_t start_percent;
 
 static bool throttle_detected;
 static bool throttle_low_ok;
@@ -44,7 +41,6 @@ void throttle_init(uint16_t min_mv, uint16_t max_mv)
 {
 	min_voltage_adc = (uint8_t)(((uint32_t)min_mv * 256) / ADC_VOLTAGE_MV);
 	max_voltage_adc = (uint8_t)(((uint32_t)max_mv * 256) / ADC_VOLTAGE_MV);
-	start_percent = 0;
 	throttle_detected = false;
 	throttle_low_ok = false;
 	throttle_hard_ok = true;
@@ -58,6 +54,8 @@ bool throttle_ok()
 
 uint8_t throttle_read()
 {
+	static uint8_t throttle_percent = 0;
+
 	int16_t value = adc_get_throttle();
 
 #ifdef LOG_THROTTLE_ADC
@@ -108,7 +106,18 @@ uint8_t throttle_read()
 	{
 		// throttle is considered not working until it has given a signal below minimum value
 		throttle_low_ok = true;
-		return 0;
+
+		// hysteresis
+		if (throttle_percent > 0)
+		{
+			value += 1;
+		}
+
+		if (value < min_voltage_adc)
+		{
+			throttle_percent = 0;
+			return throttle_percent;
+		}
 	}
 
 	if (value > max_voltage_adc)
@@ -116,6 +125,8 @@ uint8_t throttle_read()
 		value = max_voltage_adc;
 	}
 
-	return (uint8_t)MAP16(value, min_voltage_adc, max_voltage_adc, 0, 100);
+	throttle_percent = (uint8_t)MAP16(value, min_voltage_adc, max_voltage_adc, 1, 100);
+
+	return throttle_percent;
 }
 

@@ -9,9 +9,11 @@
 #ifndef  _INTERRUPT_H_
 #define _INTERRUPT_H_
 
-#define IRQ_TIMER0		1
-#define IRQ_UART1		4
-#define IRQ_UART2		8
-#define IRQ_TIMER4		20
+// Interrupt rouines declarations required to be included from main.c
+#if defined(BBSHD) || defined(BBS02)
+#include "bbsx/interrupt.h"
+#elif defined(TSDZ2)
+#include "tsdz2/interrupt.h"
+#endif
 
 #endif

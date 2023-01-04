@@ -9,7 +9,6 @@
 #include "extcom.h"
 #include "cfgstore.h"
 #include "eventlog.h"
-#include "stc15.h"
 #include "uart.h"
 #include "system.h"
 #include "sensors.h"
@@ -18,6 +17,7 @@
 #include "app.h"
 #include "util.h"
 #include "version.h"
+#include "intellisense.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -82,7 +82,7 @@ static uint32_t last_recv;
 
 
 static uint8_t compute_checksum(uint8_t* buf, uint8_t length);
-static void write_uart1_and_increment_checksum(uint8_t data, uint8_t* checksum);
+static void write_uart_and_increment_checksum(uint8_t data, uint8_t* checksum);
 
 static int16_t try_process_request();
 static int16_t try_process_read_request();
@@ -123,7 +123,7 @@ void extcom_init()
 	last_recv = 0;
 
 	// bafang standard baudrate
-	uart1_open(1200);
+	uart_open(1200);
 
 
 	// Wait one second for config tool connection.
@@ -141,17 +141,17 @@ void extcom_process()
 {
 	uint32_t now = system_ms();
 
-	while (uart1_available())
+	while (uart_available())
 	{
 		if (msg_len == BUFFER_SIZE)
 		{
 			// communication error, reset
 			msg_len = 0;
-			while (uart1_available()) uart1_read();
+			while (uart_available()) uart_read();
 		}
 		else
 		{
-			msgbuf[msg_len++] = uart1_read();
+			msgbuf[msg_len++] = uart_read();
 			last_recv = now;
 		}	
 	}
@@ -197,10 +197,10 @@ static uint8_t compute_checksum(uint8_t* buf, uint8_t length)
 	return result;
 }
 
-static void write_uart1_and_increment_checksum(uint8_t data, uint8_t* checksum)
+static void write_uart_and_increment_checksum(uint8_t data, uint8_t* checksum)
 {
 	*checksum += data;
-	uart1_write(data);
+	uart_write(data);
 }
 
 static int16_t try_process_request()
@@ -335,14 +335,18 @@ static int16_t process_read_fw_version()
 	if (compute_checksum(msgbuf, 2) == msgbuf[2])
 	{
 		uint8_t checksum = 0;
-		write_uart1_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
-		write_uart1_and_increment_checksum(OPCODE_READ_FW_VERSION, &checksum);
-		write_uart1_and_increment_checksum(VERSION_MAJOR, &checksum);
-		write_uart1_and_increment_checksum(VERSION_MINOR, &checksum);
-		write_uart1_and_increment_checksum(VERSION_PATCH, &checksum);
-		write_uart1_and_increment_checksum(CONFIG_VERSION, &checksum);
-		write_uart1_and_increment_checksum(CTRL_TYPE, &checksum);
-		uart1_write(checksum);
+		write_uart_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
+		write_uart_and_increment_checksum(OPCODE_READ_FW_VERSION, &checksum);
+		write_uart_and_increment_checksum(VERSION_MAJOR, &checksum);
+		write_uart_and_increment_checksum(VERSION_MINOR, &checksum);
+		write_uart_and_increment_checksum(VERSION_PATCH, &checksum);
+		write_uart_and_increment_checksum(CONFIG_VERSION, &checksum);
+		write_uart_and_increment_checksum(CTRL_TYPE, &checksum);
+		uart_write(checksum);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
 	}
 
 	return 3;
@@ -358,10 +362,14 @@ static int16_t process_read_evtlog_enable()
 	if (compute_checksum(msgbuf, 2) == msgbuf[2])
 	{
 		uint8_t checksum = 0;
-		write_uart1_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
-		write_uart1_and_increment_checksum(OPCODE_READ_EVTLOG_ENABLE, &checksum);
-		write_uart1_and_increment_checksum((uint8_t)eventlog_is_enabled(), &checksum);
-		uart1_write(checksum);
+		write_uart_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
+		write_uart_and_increment_checksum(OPCODE_READ_EVTLOG_ENABLE, &checksum);
+		write_uart_and_increment_checksum((uint8_t)eventlog_is_enabled(), &checksum);
+		uart_write(checksum);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
 	}
 
 	return 3;
@@ -377,18 +385,22 @@ static int16_t process_read_config()
 	if (compute_checksum(msgbuf, 2) == msgbuf[2])
 	{
 		uint8_t checksum = 0;
-		write_uart1_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
-		write_uart1_and_increment_checksum(OPCODE_READ_CONFIG, &checksum);
-		write_uart1_and_increment_checksum(CONFIG_VERSION, &checksum);
-		write_uart1_and_increment_checksum(sizeof(config_t), &checksum);
+		write_uart_and_increment_checksum(REQUEST_TYPE_READ, &checksum);
+		write_uart_and_increment_checksum(OPCODE_READ_CONFIG, &checksum);
+		write_uart_and_increment_checksum(CONFIG_VERSION, &checksum);
+		write_uart_and_increment_checksum(sizeof(config_t), &checksum);
 
 		uint8_t* cfg = (uint8_t*)&g_config;
 		for (uint8_t i = 0; i < sizeof(config_t); ++i)
 		{
-			write_uart1_and_increment_checksum(*(cfg + i), &checksum);
+			write_uart_and_increment_checksum(*(cfg + i), &checksum);
 		}
 
-		uart1_write(checksum);
+		uart_write(checksum);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
 	}
 
 	return 3;
@@ -412,10 +424,14 @@ static int16_t process_write_evtlog_enable()
 		eventlog_set_enabled((bool)msgbuf[2]);
 
 		uint8_t checksum = 0;
-		write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
-		write_uart1_and_increment_checksum(OPCODE_WRITE_EVTLOG_ENABLE, &checksum);
-		write_uart1_and_increment_checksum(msgbuf[2], &checksum);
-		uart1_write(checksum);
+		write_uart_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
+		write_uart_and_increment_checksum(OPCODE_WRITE_EVTLOG_ENABLE, &checksum);
+		write_uart_and_increment_checksum(msgbuf[2], &checksum);
+		uart_write(checksum);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
 	}
 
 	return 4;
@@ -446,10 +462,14 @@ static int16_t process_write_config()
 		}
 
 		uint8_t checksum = 0;
-		write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
-		write_uart1_and_increment_checksum(OPCODE_WRITE_CONFIG, &checksum);
-		write_uart1_and_increment_checksum(result, &checksum);
-		uart1_write(checksum);
+		write_uart_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
+		write_uart_and_increment_checksum(OPCODE_WRITE_CONFIG, &checksum);
+		write_uart_and_increment_checksum(result, &checksum);
+		uart_write(checksum);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
 	}
 
 	return 4 + length + 1;
@@ -468,10 +488,14 @@ static int16_t process_write_reset_config()
 		bool res = cfgstore_reset_config();
 
 		uint8_t checksum = 0;
-		write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
-		write_uart1_and_increment_checksum(OPCODE_WRITE_RESET_CONFIG, &checksum);
-		write_uart1_and_increment_checksum((uint8_t)res, &checksum);
-		uart1_write(checksum);
+		write_uart_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
+		write_uart_and_increment_checksum(OPCODE_WRITE_RESET_CONFIG, &checksum);
+		write_uart_and_increment_checksum((uint8_t)res, &checksum);
+		uart_write(checksum);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
 	}
 
 	return 3;
@@ -487,15 +511,23 @@ static int16_t process_write_adc_voltage_calibration()
 	if (compute_checksum(msgbuf, 4) == msgbuf[4])
 	{
 		uint16_t actual_volt_x100 = ((uint16_t)msgbuf[2] << 8) | msgbuf[3];
-		g_pstate.adc_voltage_calibration_steps_x100 = motor_calibrate_battery_voltage(actual_volt_x100);
+
+		int16_t calibration_offset = motor_calibrate_battery_voltage(actual_volt_x100);
+		g_pstate.adc_voltage_calibration_steps_x100_i16l = (uint8_t)(calibration_offset);
+		g_pstate.adc_voltage_calibration_steps_x100_i16h = (uint8_t)(calibration_offset >> 8);
+
 		cfgstore_save_pstate();
 
 		uint8_t checksum = 0;
-		write_uart1_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
-		write_uart1_and_increment_checksum(OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION, &checksum);
-		write_uart1_and_increment_checksum(msgbuf[2], &checksum);
-		write_uart1_and_increment_checksum(msgbuf[3], &checksum);
-		uart1_write(checksum);
+		write_uart_and_increment_checksum(REQUEST_TYPE_WRITE, &checksum);
+		write_uart_and_increment_checksum(OPCODE_WRITE_ADC_VOLTAGE_CALIBRATION, &checksum);
+		write_uart_and_increment_checksum(msgbuf[2], &checksum);
+		write_uart_and_increment_checksum(msgbuf[3], &checksum);
+		uart_write(checksum);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
 	}
 
 	return 5;
@@ -509,7 +541,7 @@ static int16_t process_bafang_display_read_status()
 		return KEEP;
 	}
 
-	uart1_write(app_get_status_code());
+	uart_write(app_get_status_code());
 
 	return 2;
 }
@@ -523,8 +555,8 @@ static int16_t process_bafang_display_read_current()
 
 	uint8_t amp_x2 = (uint8_t)((motor_get_battery_current_x10() * 2) / 10);
 
-	uart1_write(amp_x2);
-	uart1_write(amp_x2); // checksum
+	uart_write(amp_x2);
+	uart_write(amp_x2); // checksum
 
 	return 2;
 }
@@ -538,8 +570,8 @@ static int16_t process_bafang_display_read_battery()
 
 	uint8_t value = battery_get_percent();
 
-	uart1_write(value);
-	uart1_write(value); // checksum
+	uart_write(value);
+	uart_write(value); // checksum
 
 	return 2;
 }
@@ -564,7 +596,7 @@ static int16_t process_bafang_display_read_speed()
 		}
 
 		// T_kph -> rpm
-		speed = (uint16_t)(25000.f / (3 * 3.14159f * 1.27f * g_config.wheel_size_inch_x10) * temp);
+		speed = (uint16_t)(25000.f / (3 * 3.14159f * 1.27f * EXPAND_U16(g_config.wheel_size_inch_x10_u16h, g_config.wheel_size_inch_x10_u16l)) * temp);
 	}
 	else
 	{
@@ -573,9 +605,9 @@ static int16_t process_bafang_display_read_speed()
 
 	uint8_t checksum = 0;
 
-	write_uart1_and_increment_checksum(speed >> 8, &checksum);
-	write_uart1_and_increment_checksum((uint8_t)speed, &checksum);
-	uart1_write(checksum + (uint8_t)0x20); // weird checksum
+	write_uart_and_increment_checksum(speed >> 8, &checksum);
+	write_uart_and_increment_checksum((uint8_t)speed, &checksum);
+	uart_write(checksum + (uint8_t)0x20); // weird checksum
 
 	return 2;
 }
@@ -587,9 +619,9 @@ static int16_t process_bafang_display_read_unknown1()
 		return KEEP;
 	}
 
-	uart1_write(0x00);
-	uart1_write(0x00);
-	uart1_write(0x00); // checksum
+	uart_write(0x00);
+	uart_write(0x00);
+	uart_write(0x00); // checksum
 
 	return 3;
 }
@@ -614,9 +646,9 @@ static int16_t process_bafang_display_read_range()
 
 	uint8_t checksum = 0;
 
-	write_uart1_and_increment_checksum((uint8_t)(temp >> 8), &checksum);
-	write_uart1_and_increment_checksum((uint8_t)temp, &checksum);
-	uart1_write(checksum); // checksum
+	write_uart_and_increment_checksum((uint8_t)(temp >> 8), &checksum);
+	write_uart_and_increment_checksum((uint8_t)temp, &checksum);
+	uart_write(checksum); // checksum
 
 	return 3;
 }
@@ -633,9 +665,9 @@ static int16_t process_bafang_display_read_calories()
 	// send battery voltage x10 to show in calories field
 	uint16_t volt = motor_get_battery_voltage_x10();
 
-	write_uart1_and_increment_checksum(volt >> 8, & checksum);
-	write_uart1_and_increment_checksum(volt & 0xff, & checksum);
-	uart1_write(checksum); // checksum
+	write_uart_and_increment_checksum(volt >> 8, & checksum);
+	write_uart_and_increment_checksum(volt & 0xff, & checksum);
+	uart_write(checksum); // checksum
 
 	return 3;
 }
@@ -647,11 +679,11 @@ static int16_t process_bafang_display_read_unknown3()
 		return KEEP;
 	}
 
-	uart1_write(0x00);
-	uart1_write(0x00);
-	uart1_write(0x00);
-	uart1_write(0x00);
-	uart1_write(0x00); // checksum
+	uart_write(0x00);
+	uart_write(0x00);
+	uart_write(0x00);
+	uart_write(0x00);
+	uart_write(0x00); // checksum
 
 	return 3;
 }
@@ -664,8 +696,8 @@ static int16_t process_bafang_display_read_moving()
 	}
 
 	uint8_t data = speed_sensor_is_moving() ? 0x30 : 0x31;
-	uart1_write(data);
-	uart1_write(data); // checksum
+	uart_write(data);
+	uart_write(data); // checksum
 
 	return 2;
 }
