@@ -48,16 +48,16 @@ $(TARGET): $(MAINSRC) $(RELS)
 	$(CC) -o $@ -c $(INC_DIRS) $(CFLAGS) $<
 
 echo:
-	@echo SRCS: $(SRCS)
-	@echo RELS: $(RELS)
-	@echo INCS: $(INCS)
+	$(info SRCS: $(SRCS))
+	$(info RELS: $(RELS))
+	$(info INCS: $(INCS))
 
 hex:
 	@cmd /C tohex.bat
 	
 clean:
 	@cmd /C clean.bat
-	@echo Clean Finished
+	$(info Clean Finished)
 
 .PHONY = all hex clean
 .SUFFIXES: .c .rel
