@@ -162,6 +162,9 @@ namespace BBSFW.Model
 		public AssistLevel[] SportAssistLevels = new AssistLevel[10];
 
 
+		public Configuration() : this(BbsfwConnection.Controller.Unknown)
+		{ }
+
 		public Configuration(BbsfwConnection.Controller target)
 		{
 			Target = target;
