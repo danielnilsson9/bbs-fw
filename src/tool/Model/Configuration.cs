@@ -60,7 +60,8 @@ namespace BBSFW.Model
 			Cruise = 0x04,
 
 			PasVariable = 0x08,
-			PasTorque = 0x10
+			PasTorque = 0x10,
+			CadenceOverride = 0x20
 		};
 
 		public enum TemperatureSensor

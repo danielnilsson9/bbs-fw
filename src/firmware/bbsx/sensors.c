@@ -12,6 +12,7 @@
 #include "util.h"
 #include "cfgstore.h"
 #include "eventlog.h"
+#include "fwconfig.h"
 #include "bbsx/pins.h"
 #include "bbsx/stc15.h"
 #include "bbsx/timers.h"
@@ -288,7 +289,7 @@ int16_t temperature_contr_x100()
 int16_t temperature_motor_x100()
 {
 	// Sensor only present in the BBSHD motor
-#ifdef BBSHD
+#if HAS_MOTOR_TEMP_SENSOR
 	const float R1 = 5100.f;
 	const float invBeta = 1.f / 3990.f;
 

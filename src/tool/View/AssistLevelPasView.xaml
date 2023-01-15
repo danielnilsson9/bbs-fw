@@ -21,6 +21,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 			<RowDefinition />
 		</Grid.RowDefinitions>
 
@@ -84,7 +85,13 @@
 			</CheckBox.Style>
 		</CheckBox>
 
-		<TextBlock Grid.Column="0" Grid.Row="6" Text="Max Throttle Current (%):" VerticalAlignment="Center" Margin="0 8 0 0">
+		<TextBlock Grid.Column="0" Grid.Row="6" Text="Cadence Override:" VerticalAlignment="Center" Margin="0 8 0 0">
+			<TextBlock.ToolTip>
+				<TextBlock Width="300" TextWrapping="Wrap">
+					Override configured assist level cadence to 100% when power
+					requested by throttle action surpasses power set by pedal assist level.
+				</TextBlock>
+			</TextBlock.ToolTip>
 			<TextBlock.Style>
 				<Style TargetType="{x:Type TextBlock}">
 					<Style.Triggers>
@@ -95,7 +102,33 @@
 				</Style>
 			</TextBlock.Style>
 		</TextBlock>
-		<TextBox Grid.Column="1" Grid.Row="6" Margin="10 8 0 0" Text="{Binding MaxThrottlePercent, UpdateSourceTrigger=PropertyChanged}">
+		<CheckBox Grid.Column="1" Grid.Row="6" IsChecked="{Binding IsThrottleCadenceOverrideEnabled}" Margin="9 8 0 0">
+			<CheckBox.Style>
+				<Style TargetType="{x:Type CheckBox}">
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding IsThrottleEnabled}" Value="False">
+							<Setter Property="IsEnabled" Value="False" />
+						</DataTrigger>
+						<DataTrigger Binding="{Binding IsPasAssistVariableVariant}" Value="True">
+							<Setter Property="Visibility" Value="Collapsed" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</CheckBox.Style>
+		</CheckBox>
+
+		<TextBlock Grid.Column="0" Grid.Row="7" Text="Max Throttle Current (%):" VerticalAlignment="Center" Margin="0 8 0 0">
+			<TextBlock.Style>
+				<Style TargetType="{x:Type TextBlock}">
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding IsPasAssistVariableVariant}" Value="True">
+							<Setter Property="Visibility" Value="Collapsed" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</TextBlock.Style>
+		</TextBlock>
+		<TextBox Grid.Column="1" Grid.Row="7" Margin="10 8 0 0" Text="{Binding MaxThrottlePercent, UpdateSourceTrigger=PropertyChanged}">
 			<TextBox.Style>
 				<Style TargetType="{x:Type TextBox}">
 					<Style.Triggers>
