@@ -102,6 +102,7 @@ namespace BBSFW.ViewModel
 							MaxSpeedPercent = 0;
 							TorqueAmplificationFactor = 0;
 							_level.Type = ClearThrottleFlag(_level.Type);
+							_level.Type = ClearThrottleCadenceOverrideFlag(_level.Type);
 							_level.Type = ClearPasVariantFlag(_level.Type);
 							break;
 						case AssistBaseType.Throttle:
@@ -109,6 +110,7 @@ namespace BBSFW.ViewModel
 							TorqueAmplificationFactor = 0;
 							TargetCurrentPercent = 0;
 							_level.Type = ClearPasVariantFlag(_level.Type);
+							_level.Type = ClearThrottleCadenceOverrideFlag(_level.Type);
 							break;
 						case AssistBaseType.Pas:
 							MaxThrottlePercent = 0;
@@ -149,6 +151,7 @@ namespace BBSFW.ViewModel
 						case AssistPasVariant.Variable:
 							TorqueAmplificationFactor = 0;
 							IsThrottleEnabled = false;
+							IsThrottleCadenceOverrideEnabled = false;
 							MaxThrottlePercent = 0;
 							break;
 						case AssistPasVariant.Cadence:
@@ -172,6 +175,20 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public bool IsThrottleCadenceOverrideEnabled
+		{
+			get { return _level.Type.HasFlag(Configuration.AssistFlagsType.CadenceOverride); }
+			set
+			{
+				if (value != IsThrottleCadenceOverrideEnabled)
+				{
+					_level.Type = ApplyThrottleCadenceOverrideFlag(value, _level.Type);
+					OnPropertyChanged(nameof(IsThrottleCadenceOverrideEnabled));
+				}
+			}
+		}
+
+
 		public bool IsPasAssistVariableVariant
 		{
 			get { return _level.Type.HasFlag(Configuration.AssistFlagsType.PasVariable); }
@@ -181,6 +198,7 @@ namespace BBSFW.ViewModel
 		{
 			get { return _level.Type.HasFlag(Configuration.AssistFlagsType.PasTorque); }
 		}
+
 
 
 		public uint TargetCurrentPercent
@@ -311,12 +329,31 @@ namespace BBSFW.ViewModel
 			return (Configuration.AssistFlagsType)f;
 		}
 
-		private static Configuration.AssistFlagsType ApplyThrottleFlag(bool throttle, Configuration.AssistFlagsType flags)
+		private static Configuration.AssistFlagsType ApplyThrottleFlag(bool enabled, Configuration.AssistFlagsType flags)
 		{
 			var result = ClearThrottleFlag(flags);
-			if (throttle)
+			if (enabled)
 			{
 				result |= Configuration.AssistFlagsType.Throttle;
+			}
+
+			return result;
+		}
+
+		private static Configuration.AssistFlagsType ClearThrottleCadenceOverrideFlag(Configuration.AssistFlagsType flags)
+		{
+			byte f = (byte)flags;
+			f &= (byte)~(Configuration.AssistFlagsType.CadenceOverride);
+
+			return (Configuration.AssistFlagsType)f;
+		}
+
+		private static Configuration.AssistFlagsType ApplyThrottleCadenceOverrideFlag(bool enabled, Configuration.AssistFlagsType flags)
+		{
+			var result = ClearThrottleCadenceOverrideFlag(flags);
+			if (enabled)
+			{
+				result |= Configuration.AssistFlagsType.CadenceOverride;
 			}
 
 			return result;
