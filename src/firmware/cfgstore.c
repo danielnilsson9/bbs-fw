@@ -158,7 +158,6 @@ static void load_default_config()
 	g_config.max_battery_x100v_u16h = (uint8_t)(5460 >> 8);
 	g_config.low_cut_off_v = 42;
 
-	g_config.use_display = 1;
 	g_config.use_speed_sensor = 1;
 	g_config.use_shift_sensor = 1;
 	g_config.use_push_walk = 1;

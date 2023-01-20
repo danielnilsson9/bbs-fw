@@ -178,19 +178,6 @@ namespace BBSFW.ViewModel
 			}
 		}
 
-		public bool UseDisplay
-		{
-			get { return _config.UseDisplay; }
-			set
-			{
-				if (_config.UseDisplay != value)
-				{
-					_config.UseDisplay = value;
-					OnPropertyChanged(nameof(UseDisplay));
-				}
-			}
-		}
-
 		public bool UseSpeedSensor
 		{
 			get { return _config.UseSpeedSensor; }

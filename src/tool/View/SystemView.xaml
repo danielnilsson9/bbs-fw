@@ -154,24 +154,20 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
-				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 
 			<TextBlock Grid.Row="0" Text="Features" FontSize="18" FontWeight="Bold" />
 
-			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 10 0 0" Text="Display:" />
-			<CheckBox Grid.Column="2" Grid.Row="1" Margin="0 10 0 0" HorizontalAlignment="Right" IsChecked="{Binding ConfigVm.UseDisplay, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 8 0 0" Text="Speed Sensor:" />
+			<CheckBox Grid.Column="2" Grid.Row="1" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseSpeedSensor, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Speed Sensor:" />
-			<CheckBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseSpeedSensor, UpdateSourceTrigger=PropertyChanged}" />
+			<TextBlock Grid.Column="0" Grid.Row="2" Margin="0 8 0 0" Text="Shift Sensor:" />
+			<CheckBox Grid.Column="2" Grid.Row="2" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseShiftSensor, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ConfigVm.IsShiftSensorSupported}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Shift Sensor:" />
-			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UseShiftSensor, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ConfigVm.IsShiftSensorSupported}" />
+			<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Walk Mode:" />
+			<CheckBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePushWalk, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Walk Mode:" />
-			<CheckBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePushWalk, UpdateSourceTrigger=PropertyChanged}" />
-
-			<TextBlock Grid.Column="0" Grid.Row="5" Margin="0 8 0 0" Text="Temperature Sensor:">
+			<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Temperature Sensor:">
 				<TextBlock.ToolTip>
 					<TextBlock Width="300" TextWrapping="Wrap">
 						Select which temperature sensors to use for thermal limiting if motor/controller gets to hot.
@@ -181,7 +177,7 @@
 					</TextBlock>
 				</TextBlock.ToolTip>
 			</TextBlock>
-			<ComboBox Grid.Column="2" Grid.Row="5" Margin="0 8 0 0" Width="80" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.TemperatureSensorOptions}" SelectedItem="{Binding ConfigVm.UseTemperatureSensor, UpdateSourceTrigger=PropertyChanged}" />
+			<ComboBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" Width="80" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.TemperatureSensorOptions}" SelectedItem="{Binding ConfigVm.UseTemperatureSensor, UpdateSourceTrigger=PropertyChanged}" />
 
 		</Grid>
 
