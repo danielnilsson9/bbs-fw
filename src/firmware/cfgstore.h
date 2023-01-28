@@ -82,7 +82,8 @@ typedef struct
 	uint8_t throttle_start_percent;
 
 	// shift interrupt options
-	uint16_t shift_interrupt_duration_ms;
+	uint8_t shift_interrupt_duration_ms_u16l;
+	uint8_t shift_interrupt_duration_ms_u16h;
 	uint8_t shift_interrupt_current_threshold_percent;
 
 	// misc

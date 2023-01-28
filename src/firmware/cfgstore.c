@@ -149,6 +149,8 @@ static void load_default_config()
 
 #if defined(BBSHD)
 	g_config.max_current_amps = 30;
+#elif defined(BBS02)
+	g_config.max_current_amps = 25;
 #else
 	g_config.max_current_amps = 20;
 #endif
@@ -159,7 +161,7 @@ static void load_default_config()
 	g_config.low_cut_off_v = 42;
 
 	g_config.use_speed_sensor = 1;
-	g_config.use_shift_sensor = 1;
+	g_config.use_shift_sensor = HAS_SHIFT_SENSOR_SUPPORT;
 	g_config.use_push_walk = 1;
 	g_config.use_temperature_sensor = TEMPERATURE_SENSOR_CONTR | TEMPERATURE_SENSOR_MOTOR;
 
@@ -181,7 +183,8 @@ static void load_default_config()
 	g_config.throttle_end_voltage_mv_u16h = (uint8_t)(3600 >> 8);
 	g_config.throttle_start_percent = 1;
 
-	g_config.shift_interrupt_duration_ms = 600;
+	g_config.shift_interrupt_duration_ms_u16l = (uint8_t)600;
+	g_config.shift_interrupt_duration_ms_u16h = (uint8_t)(600 >> 8);
 	g_config.shift_interrupt_current_threshold_percent = 10;
 
 	g_config.show_temperature_push_walk = 0;
