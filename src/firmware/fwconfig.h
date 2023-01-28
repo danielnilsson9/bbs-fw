@@ -28,6 +28,11 @@
 	#define HAS_TORQUE_SENSOR					0
 #endif
 
+#if defined(BBSHD) || defined(BSS02)
+	#define HAS_SHIFT_SENSOR_SUPPORT			1
+#else
+	#define HAS_SHIFT_SENSOR_SUPPORT			0
+#endif
 
  // Applied to both motor and controller tmeperature sensor
 #define MAX_TEMPERATURE							85
