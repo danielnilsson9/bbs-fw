@@ -79,6 +79,10 @@
 // Target speed in km/h when walk mode is engaged
 #define WALK_MODE_SPEED_KPH						4
 
+// This value is used when assist level is configured with throttle cadence
+// override flag in config tool. Default is 100%.
+#define THROTTLE_CADENCE_OVERRIDE_PERCENT		100
+
 // Lower limit for cadence rpm in power calculation
 // for torque pas assist. When cadence is below this
 // limit you will get extra power.
