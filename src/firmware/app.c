@@ -143,7 +143,9 @@ void app_process()
 	apply_speed_limit(&target_current);
 	apply_thermal_limit(&target_current);
 	apply_low_voltage_limit(&target_current);
+#if HAS_SHIFT_SENSOR_SUPPORT
 	apply_shift_sensor_interrupt(&target_current);
+#endif
 
 	motor_set_target_speed(target_cadence);
 	motor_set_target_current(target_current);
@@ -693,6 +695,7 @@ void apply_low_voltage_limit(uint8_t* target_current)
 	}
 }
 
+#if HAS_SHIFT_SENSOR_SUPPORT
 void apply_shift_sensor_interrupt(uint8_t* target_current)
 {
 	static uint32_t shift_sensor_act_ms = 0;
@@ -719,8 +722,13 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 		}
 	}
 
+	uint16_t duration_ms = EXPAND_U16(
+		g_config.shift_interrupt_duration_ms_u16h,
+		g_config.shift_interrupt_duration_ms_u16l
+	);
+
 	uint32_t timediff = system_ms() - shift_sensor_act_ms;
-	if ((active || timediff < g_config.shift_interrupt_duration_ms) && interrupt_necessary)
+	if (interrupt_necessary && (active || timediff < duration_ms))
 	{
 		// Set target current based on desired current threshold during shift.
 		*target_current = g_config.shift_interrupt_current_threshold_percent;
@@ -733,6 +741,7 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 		eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 0);
 	}
 }
+#endif
 
 void reload_assist_params()
 {

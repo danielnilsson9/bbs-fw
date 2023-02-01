@@ -12,6 +12,9 @@
 #include "util.h"
 #include "cfgstore.h"
 
+static int16_t battery_empty_x100v;
+static int16_t battery_full_x100v;
+
 static uint8_t battery_percent;
 static uint32_t motor_disabled_at_ms;
 
@@ -20,26 +23,10 @@ static uint32_t motor_disabled_at_ms;
 
 static uint8_t compute_battery_percent()
 {
-	// Compute battery percent using linear interpolation between lvc and configure max voltage under no load.
+	int16_t value_x100v = motor_get_battery_voltage_x10() * 10l;
+	int16_t percent = (int16_t)MAP32(value_x100v, battery_empty_x100v, battery_full_x100v, 0, 100);
 
-	// Consider battery full if above 98% of configure max voltage
-	int32_t full_x1000v = 98l * EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l) / 10;
-
-	// Consider battery empty at 5% above configured low voltage cutoff
-	int32_t empty_x1000v = 105l * g_config.low_cut_off_v * 10;
-
-	int32_t val = MAP32(motor_get_battery_voltage_x10() * 100l, empty_x1000v, full_x1000v, 0, 100);
-
-	if (val > 100)
-	{
-		val = 100;
-	}
-	else if (val < 0)
-	{
-		val = 0;
-	}
-
-	return (uint8_t)val;
+	return (uint8_t)CLAMP(percent, 0, 100);
 }
 
 
@@ -47,6 +34,12 @@ void battery_init()
 {
 	battery_percent = 0;
 	motor_disabled_at_ms = 0;
+
+	// Consider battery full if above 98% of configured max voltage
+	battery_full_x100v = (98l * EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l)) / 100;
+
+	// Consider battery empty at 5% above configured low voltage cutoff
+	battery_empty_x100v = 105l * g_config.low_cut_off_v;
 }
 
 void battery_process()
@@ -64,6 +57,9 @@ void battery_process()
 
 	if (target_current == 0 && (system_ms() - motor_disabled_at_ms) > BATTERY_NO_LOAD_DELAY_MS)
 	{
+		// Compute battery percent using linear interpolation between lvc
+		// and configured max voltage while under no load.
+
 		battery_percent = compute_battery_percent();
 	}
 }
