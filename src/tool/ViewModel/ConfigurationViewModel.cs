@@ -39,6 +39,15 @@ namespace BBSFW.ViewModel
 			};
 
 
+		public static List<ValueItemViewModel<Configuration.WalkModeData>> WalkModeDataDisplayOptions { get; } =
+			new List<ValueItemViewModel<Configuration.WalkModeData>>
+			{
+				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.Speed, "Speed"),
+				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.Temperature, "Temperature (C)"),
+				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.RequestedPower, "Requested Power (%)"),
+			};
+
+
 		// support 
 
 		public bool IsTorqueSensorSupported
@@ -373,15 +382,18 @@ namespace BBSFW.ViewModel
 			}
 		}
 
-		public bool ShowTemperatureOnPushWalk
+		public ValueItemViewModel<Configuration.WalkModeData> WalkModeDataDisplay
 		{
-			get { return _config.ShowTemperatureOnPushWalk; }
+			get
+			{
+				return WalkModeDataDisplayOptions.FirstOrDefault((e) => e.Value == _config.WalkModeDataDisplay);
+			}
 			set
 			{
-				if (_config.ShowTemperatureOnPushWalk != value)
+				if (_config.WalkModeDataDisplay != value.Value)
 				{
-					_config.ShowTemperatureOnPushWalk = value;
-					OnPropertyChanged(nameof(ShowTemperatureOnPushWalk));
+					_config.WalkModeDataDisplay = value.Value;
+					OnPropertyChanged(nameof(WalkModeDataDisplay));
 				}
 			}
 		}

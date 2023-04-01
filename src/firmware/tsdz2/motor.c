@@ -64,7 +64,6 @@
 #define PWM_CYCLES_SECOND						15625U	// 1 / 64us (PWM period)
 #define PWM_DUTY_CYCLE_MAX						254
 #define PWM_DUTY_CYCLE_MIN						20
-#define MIDDLE_PWM_DUTY_CYCLE_MAX				(PWM_DUTY_CYCLE_MAX/2)
 
 #define MOTOR_ROTOR_ANGLE_90					(63  + MOTOR_ROTOR_OFFSET_ANGLE)
 #define MOTOR_ROTOR_ANGLE_150					(106 + MOTOR_ROTOR_OFFSET_ANGLE)
@@ -385,7 +384,7 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V, int16_t adc_calib_volt_s
 		((((uint32_t)MAX_MOTOR_PHASE_CURRENT_AMPS_X10) * 512) / 10) / ADC_10BIT_CURRENT_PER_ADC_STEP_X512
 	);
 
-	adc_low_voltage_limit = (uint8_t)((((uint32_t)lvc_V) * adc_steps_per_volt_x512) / 512);
+	adc_low_voltage_limit = (uint16_t)((((uint32_t)lvc_V) * adc_steps_per_volt_x512) / 512);
 
 	flash_opt2_afr5();
 	timer1_init_motor_pwm();
@@ -495,7 +494,7 @@ void motor_set_target_current(uint8_t percent)
 		target_current_percent = percent;
 		eventlog_write_data(EVT_DATA_TARGET_CURRENT, percent);
 
-		adc_battery_target_current= ((uint16_t)percent * adc_battery_max_current) / 100;
+		adc_battery_target_current = ((uint16_t)percent * adc_battery_max_current) / 100;
 	}
 }
 
@@ -801,10 +800,14 @@ void isr_timer1_cmp(void) __interrupt(ITC_IRQ_TIM1_CAPCOM)
 
 	// reset periodic check counters
 	if (speed_controller_counter > SPEED_CONTROLLER_CHECK_PERIODS)
+	{
 		speed_controller_counter = 0;
+	}
 
 	if (current_controller_counter > CURRENT_CONTROLLER_CHECK_PERIODS)
+	{
 		current_controller_counter = 0;
+	}
 
 
 	// calculate final pwm duty cycle values to be applied to TIMER1

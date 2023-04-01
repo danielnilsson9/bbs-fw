@@ -28,8 +28,15 @@
 #define TEMPERATURE_SENSOR_CONTR		0x01
 #define TEMPERATURE_SENSOR_MOTOR		0x02
 
+#define WALK_MODE_DATA_SPEED			0
+#define WALK_MODE_DATA_TEMPERATURE		1
+#define WALK_MODE_DATA_REQUESTED_POWER	2
+
+
+
 #define CONFIG_VERSION					3
 #define PSTATE_VERSION					1
+
 
 typedef struct
 {
@@ -87,7 +94,7 @@ typedef struct
 	uint8_t shift_interrupt_current_threshold_percent;
 
 	// misc
-	uint8_t show_temperature_push_walk;
+	uint8_t walk_mode_data_display;
 
 	// assist levels
 	uint8_t assist_mode_select;

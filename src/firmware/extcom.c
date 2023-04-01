@@ -585,18 +585,29 @@ static int16_t process_bafang_display_read_speed()
 
 	uint16_t speed = 0;
 
-	if (g_config.show_temperature_push_walk && app_get_assist_level() == ASSIST_PUSH)
+	if (g_config.walk_mode_data_display != WALK_MODE_DATA_SPEED && app_get_assist_level() == ASSIST_PUSH)
 	{
-		uint16_t temp = app_get_temperature();
+		uint16_t data = 0;
+
+		switch (g_config.walk_mode_data_display)
+		{
+		case WALK_MODE_DATA_TEMPERATURE:
+			// Keep temperature in C, farenheit would be out of range
+			data = app_get_temperature();
+			break;
+		case WALK_MODE_DATA_REQUESTED_POWER:
+			data = motor_get_target_current();
+			break;
+		}
+
 		if (g_config.use_freedom_units)
 		{
-			// Keep temperature in C but compensate for kph -> mph conversion display will do.
-			// Farenheit would be out of range, displays will not show anything over 99.
-			temp = (temp * 161) / 100;
+			// Compensate for kph -> mph conversion display will do.
+			data = (data * 161) / 100;
 		}
 
 		// T_kph -> rpm
-		speed = (uint16_t)(25000.f / (3 * 3.14159f * 1.27f * EXPAND_U16(g_config.wheel_size_inch_x10_u16h, g_config.wheel_size_inch_x10_u16l)) * temp);
+		speed = (uint16_t)(25000.f / (3 * 3.14159f * 1.27f * EXPAND_U16(g_config.wheel_size_inch_x10_u16h, g_config.wheel_size_inch_x10_u16l)) * data);
 	}
 	else
 	{

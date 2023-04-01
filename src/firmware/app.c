@@ -114,12 +114,9 @@ void app_process()
 	uint8_t target_current = 0;
 	uint8_t target_cadence = assist_level_data.level.max_cadence_percent;
 
-	if (assist_level == ASSIST_PUSH)
+	if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
 	{
-		if (g_config.use_push_walk)
-		{
-			target_current = 10;
-		}
+		target_current = 10;
 	}
 	else
 	{
@@ -761,7 +758,9 @@ void reload_assist_params()
 		// pause cruise if swiching level
 		cruise_paused = true;
 	}
-	else if (assist_level == ASSIST_PUSH)
+	// only apply push walk params if push walk is active in config,
+	// otherwise data of previous assist level is kept.
+	else if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
 	{
 		assist_level_data.level.flags = 0;
 		assist_level_data.level.target_current_percent = 0;
