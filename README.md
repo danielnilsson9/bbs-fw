@@ -4,7 +4,7 @@ This firmware is intended to replace the original Bafang firmware on the BBSHD/B
 
 This firmware is compatible with all displays that works with the original Bafang firmware. A custom configuration tool is provided since BafangConfigTool is not compatible due to a different set of supported parameters.
 
-The firmware is also compatible with the TSDZ2 controller but requires a custom made cable in order to interface with Bafang compatible displays.
+The firmware is also compatible with the TongSheng TSDZ2 controller but requires a custom made cable in order to interface with Bafang compatible displays.
 
 **Download**  
 https://github.com/danielnilsson9/bbshd-fw/releases
