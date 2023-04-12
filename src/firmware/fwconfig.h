@@ -28,7 +28,7 @@
 	#define HAS_TORQUE_SENSOR					0
 #endif
 
-#if defined(BBSHD) || defined(BSS02)
+#if defined(BBSHD) || defined(BBS02)
 	#define HAS_SHIFT_SENSOR_SUPPORT			1
 #else
 	#define HAS_SHIFT_SENSOR_SUPPORT			0
