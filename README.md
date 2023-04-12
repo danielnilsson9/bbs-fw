@@ -1,8 +1,10 @@
-# BBSHD/BBS02 Open Source Firmware
+# BBSHD/BBS02/TSDZ2 Open Source Firmware
 
 This firmware is intended to replace the original Bafang firmware on the BBSHD/BBS02 motor controller. Almost all functionality of original firmware has been implemented and additional features have been added.
 
-This firmware is compatible with all displays that works with the original firmware. A custom configuration tool is provided since BafangConfigTool is not compatible due to a different set of supported parameters.
+This firmware is compatible with all displays that works with the original Bafang firmware. A custom configuration tool is provided since BafangConfigTool is not compatible due to a different set of supported parameters.
+
+The firmware is also compatible with the TongSheng TSDZ2 controller but requires a custom made cable in order to interface with Bafang compatible displays.
 
 **Download**  
 https://github.com/danielnilsson9/bbshd-fw/releases
@@ -36,7 +38,6 @@ If you find this project useful, consider sending a small [donation](https://www
 
 ## Known Issues
 * Compatibility issues reported with some older revisions of the BBS02 controller.
-* "Keep Current" option available in original firmware not yet implemented.
 
 
 ## Supported Hardware
@@ -59,10 +60,8 @@ V1.?     | IAP15F2K61S2 |             | Supported from BBS-FW version 1.1
 
 BBS02A - No idea, not tested, not recommended to try unless you have an already bricked controller.
 
-
-### BBS01
-
-No, send me a controller and I will add it.
+### TSDZ2
+Compatible with TSDZ2A/B using the STM microcontroller (which is nearly all off them).
 
 ## Legal
 * Installing this firmware will void your warranty.
