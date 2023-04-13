@@ -104,9 +104,15 @@ void app_init()
 	cruise_paused = true;
 
 	operation_mode = OPERATION_MODE_DEFAULT;
+
 	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(g_config.max_speed_kph));
 	app_set_assist_level(g_config.assist_startup_level);
 	reload_assist_params();
+
+	if (g_config.assist_mode_select == ASSIST_MODE_SELECT_BRAKE_BOOT && brake_is_activated())
+	{
+		app_set_operation_mode(OPERATION_MODE_SPORT);
+	}
 }
 
 void app_process()
@@ -205,9 +211,18 @@ void app_set_lights(bool on)
 {
 	static bool last_light_state = false;
 
-	if (
+	if ( // it's ok to write ugly code if you say it's ugly...
 		(g_config.assist_mode_select == ASSIST_MODE_SELECT_LIGHTS) ||
-		(assist_level == ASSIST_0 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS0_LIGHT)
+		(assist_level == ASSIST_0 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS0_LIGHT) ||
+		(assist_level == ASSIST_1 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS1_LIGHT) ||
+		(assist_level == ASSIST_2 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS2_LIGHT) ||
+		(assist_level == ASSIST_3 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS3_LIGHT) ||
+		(assist_level == ASSIST_4 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS4_LIGHT) ||
+		(assist_level == ASSIST_5 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS5_LIGHT) ||
+		(assist_level == ASSIST_6 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS6_LIGHT) ||
+		(assist_level == ASSIST_7 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS7_LIGHT) ||
+		(assist_level == ASSIST_8 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS8_LIGHT) ||
+		(assist_level == ASSIST_9 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS9_LIGHT)
 	)
 	{
 		if (on)

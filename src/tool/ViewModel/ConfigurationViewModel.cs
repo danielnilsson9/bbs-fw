@@ -35,7 +35,17 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Off, "Off"),
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Standard, "Sport Button"),
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Lights, "Lights Button"),
-				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas0AndLights, "PAS 0 + Lights Button")
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.BrakesOnBoot, "Brakes @ Power On"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas0AndLights, "PAS 0 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas1AndLights, "PAS 1 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas2AndLights, "PAS 2 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas3AndLights, "PAS 3 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas4AndLights, "PAS 4 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas5AndLights, "PAS 5 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas6AndLights, "PAS 6 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas7AndLights, "PAS 7 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas8AndLights, "PAS 8 + Lights Button"),
+				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas9AndLights, "PAS 9 + Lights Button"),
 			};
 
 

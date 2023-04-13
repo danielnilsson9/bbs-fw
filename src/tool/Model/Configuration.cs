@@ -48,7 +48,17 @@ namespace BBSFW.Model
 			Off = 0,
 			Standard = 1,
 			Lights = 2,
-			Pas0AndLights = 3
+			Pas0AndLights = 3,
+			Pas1AndLights = 4,
+			Pas2AndLights = 5,
+			Pas3AndLights = 6,
+			Pas4AndLights = 7,
+			Pas5AndLights = 8,
+			Pas6AndLights = 9,
+			Pas7AndLights = 10,
+			Pas8AndLights = 11,
+			Pas9AndLights = 12,
+			BrakesOnBoot = 13
 		}
 
 		[Flags]
