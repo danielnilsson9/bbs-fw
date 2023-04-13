@@ -102,15 +102,17 @@ namespace BBSFW.ViewModel
 							MaxSpeedPercent = 0;
 							TorqueAmplificationFactor = 0;
 							_level.Type = ClearThrottleFlag(_level.Type);
-							_level.Type = ClearThrottleCadenceOverrideFlag(_level.Type);
 							_level.Type = ClearPasVariantFlag(_level.Type);
+							IsThrottleCadenceOverrideEnabled = false;
+							IsThrottleSpeedOverrideEnabled = false;
 							break;
 						case AssistBaseType.Throttle:
 							TargetCurrentPercent = 0;
 							TorqueAmplificationFactor = 0;
 							TargetCurrentPercent = 0;
 							_level.Type = ClearPasVariantFlag(_level.Type);
-							_level.Type = ClearThrottleCadenceOverrideFlag(_level.Type);
+							IsThrottleCadenceOverrideEnabled = false;
+							IsThrottleSpeedOverrideEnabled = false;
 							break;
 						case AssistBaseType.Pas:
 							MaxThrottlePercent = 0;
@@ -152,6 +154,7 @@ namespace BBSFW.ViewModel
 							TorqueAmplificationFactor = 0;
 							IsThrottleEnabled = false;
 							IsThrottleCadenceOverrideEnabled = false;
+							IsThrottleSpeedOverrideEnabled = false;
 							MaxThrottlePercent = 0;
 							break;
 						case AssistPasVariant.Cadence:
@@ -188,6 +191,18 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public bool IsThrottleSpeedOverrideEnabled
+		{
+			get { return _level.Type.HasFlag(Configuration.AssistFlagsType.SpeedOverride); }
+			set
+			{
+				if (value != IsThrottleSpeedOverrideEnabled)
+				{
+					_level.Type = ApplyThrottleSpeedOverrideFlag(value, _level.Type);
+					OnPropertyChanged(nameof(IsThrottleSpeedOverrideEnabled));
+				}
+			}
+		}
 
 		public bool IsPasAssistVariableVariant
 		{
@@ -354,6 +369,25 @@ namespace BBSFW.ViewModel
 			if (enabled)
 			{
 				result |= Configuration.AssistFlagsType.CadenceOverride;
+			}
+
+			return result;
+		}
+
+		private static Configuration.AssistFlagsType ClearThrottleSpeedOverrideFlag(Configuration.AssistFlagsType flags)
+		{
+			byte f = (byte)flags;
+			f &= (byte)~(Configuration.AssistFlagsType.SpeedOverride);
+
+			return (Configuration.AssistFlagsType)f;
+		}
+
+		private static Configuration.AssistFlagsType ApplyThrottleSpeedOverrideFlag(bool enabled, Configuration.AssistFlagsType flags)
+		{
+			var result = ClearThrottleSpeedOverrideFlag(flags);
+			if (enabled)
+			{
+				result |= Configuration.AssistFlagsType.SpeedOverride;
 			}
 
 			return result;

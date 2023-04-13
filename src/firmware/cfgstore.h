@@ -19,6 +19,7 @@
 #define ASSIST_FLAG_PAS_VARIABLE		0x08	// pas mode using throttle to set power level
 #define ASSIST_FLAG_PAS_TORQUE			0x10	// pas mode using torque sensor reading
 #define ASSIST_FLAG_OVERRIDE_CADENCE	0x20	// pas option where max cadence is set to 100% when throttle overrides pas
+#define ASSIST_FLAG_OVERRIDE_SPEED		0x40	// pas option where max speed is set to 100% when throttle overrides pas
 
 #define ASSIST_MODE_SELECT_OFF			0x00
 #define ASSIST_MODE_SELECT_STANDARD		0x01

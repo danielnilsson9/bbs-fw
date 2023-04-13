@@ -61,7 +61,8 @@ namespace BBSFW.Model
 
 			PasVariable = 0x08,
 			PasTorque = 0x10,
-			CadenceOverride = 0x20
+			CadenceOverride = 0x20,
+			SpeedOverride = 0x40
 		};
 
 		public enum TemperatureSensor

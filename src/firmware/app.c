@@ -73,7 +73,7 @@ void apply_pas_torque(uint8_t* target_current);
 #endif
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
-void apply_throttle(uint8_t* target_current, uint8_t* target_cadence, uint8_t throttle_percent);
+bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
 void apply_current_ramp_up(uint8_t* target_current);
 void apply_current_ramp_down(uint8_t* target_current);
 void apply_speed_limit(uint8_t* target_current);
@@ -112,7 +112,7 @@ void app_init()
 void app_process()
 {
 	uint8_t target_current = 0;
-	uint8_t target_cadence = assist_level_data.level.max_cadence_percent;
+	bool throttle_override = false;
 
 	if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
 	{
@@ -132,19 +132,37 @@ void app_process()
 		// order is important, ramp up shall not affect throttle
 		apply_current_ramp_up(&target_current);
 
-		apply_throttle(&target_current, &target_cadence, throttle_percent);
+		throttle_override = apply_throttle(&target_current, throttle_percent);
 	}
 
 	apply_current_ramp_down(&target_current);
 
-	apply_speed_limit(&target_current);
+	// do not apply speed limit if throttle speed override active
+	if (!throttle_override ||
+		!(assist_level_data.level.flags & ASSIST_FLAG_PAS) ||
+		!(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_SPEED))
+	{
+		apply_speed_limit(&target_current);
+	}
+
 	apply_thermal_limit(&target_current);
 	apply_low_voltage_limit(&target_current);
 #if HAS_SHIFT_SENSOR_SUPPORT
 	apply_shift_sensor_interrupt(&target_current);
 #endif
 
-	motor_set_target_speed(target_cadence);
+	// override target cadence if configured in assist level
+	if (throttle_override &&
+		(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
+		(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_CADENCE))
+	{
+		motor_set_target_speed(THROTTLE_CADENCE_OVERRIDE_PERCENT);
+	}
+	else
+	{
+		motor_set_target_speed(assist_level_data.level.max_cadence_percent);
+	}
+
 	motor_set_target_current(target_current);
 
 	if (target_current > 0 && !brake_is_activated())
@@ -442,7 +460,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 	}
 }
 
-void apply_throttle(uint8_t* target_current, uint8_t* target_cadence, uint8_t throttle_percent)
+bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
 	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
 	{
@@ -450,15 +468,12 @@ void apply_throttle(uint8_t* target_current, uint8_t* target_cadence, uint8_t th
 		if (current >= *target_current)
 		{
 			*target_current = current;
-
-			// override target cadence if configured in assist level
-			if ((assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
-				(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_CADENCE))
-			{
-				*target_cadence = THROTTLE_CADENCE_OVERRIDE_PERCENT;
-			}
+		
+			return true; // return true if overrides previous set target current
 		}
 	}
+
+	return false;
 }
 
 void apply_current_ramp_up(uint8_t* target_current)
