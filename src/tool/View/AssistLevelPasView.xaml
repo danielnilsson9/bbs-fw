@@ -63,6 +63,11 @@
 
 
 		<TextBlock Grid.Column="0" Grid.Row="5" Text="Enable Throttle:" VerticalAlignment="Center" Margin="0 16 0 0">
+			<TextBlock.ToolTip>
+				<TextBlock Width="300" TextWrapping="Wrap">
+					Allow the use of throttle while in this assist level.
+				</TextBlock>
+			</TextBlock.ToolTip>
 			<TextBlock.Style>
 				<Style TargetType="{x:Type TextBlock}">
 					<Style.Triggers>
@@ -85,13 +90,7 @@
 			</CheckBox.Style>
 		</CheckBox>
 
-		<TextBlock Grid.Column="0" Grid.Row="6" Text="Cadence Override:" VerticalAlignment="Center" Margin="0 8 0 0">
-			<TextBlock.ToolTip>
-				<TextBlock Width="300" TextWrapping="Wrap">
-					Override configured assist level cadence to 100% when power
-					requested by throttle action surpasses power set by pedal assist level.
-				</TextBlock>
-			</TextBlock.ToolTip>
+		<TextBlock Grid.Column="0" Grid.Row="6" Text="Throttle Overrides:" VerticalAlignment="Center" Margin="0 8 0 0">
 			<TextBlock.Style>
 				<Style TargetType="{x:Type TextBlock}">
 					<Style.Triggers>
@@ -102,21 +101,52 @@
 				</Style>
 			</TextBlock.Style>
 		</TextBlock>
-		<CheckBox Grid.Column="1" Grid.Row="6" IsChecked="{Binding IsThrottleCadenceOverrideEnabled}" Margin="9 8 0 0">
-			<CheckBox.Style>
-				<Style TargetType="{x:Type CheckBox}">
-					<Style.Triggers>
-						<DataTrigger Binding="{Binding IsThrottleEnabled}" Value="False">
-							<Setter Property="IsEnabled" Value="False" />
-						</DataTrigger>
-						<DataTrigger Binding="{Binding IsPasAssistVariableVariant}" Value="True">
-							<Setter Property="Visibility" Value="Collapsed" />
-						</DataTrigger>
-					</Style.Triggers>
-				</Style>
-			</CheckBox.Style>
-		</CheckBox>
 
+		<StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="6" >
+			<CheckBox Content="Cadence" IsChecked="{Binding IsThrottleCadenceOverrideEnabled}" Margin="9 8 0 0">
+				<CheckBox.ToolTip>
+					<TextBlock Width="300" TextWrapping="Wrap">
+					Override configured assist level cadence limit to 100% when power
+					requested by throttle action surpasses power set by pedal assist level.
+					</TextBlock>
+				</CheckBox.ToolTip>
+				<CheckBox.Style>
+					<Style TargetType="{x:Type CheckBox}">
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding IsThrottleEnabled}" Value="False">
+								<Setter Property="IsEnabled" Value="False" />
+							</DataTrigger>
+							<DataTrigger Binding="{Binding IsPasAssistVariableVariant}" Value="True">
+								<Setter Property="Visibility" Value="Collapsed" />
+							</DataTrigger>
+						</Style.Triggers>
+					</Style>
+				</CheckBox.Style>
+			</CheckBox>
+
+			<CheckBox Content="Speed" IsChecked="{Binding IsThrottleSpeedOverrideEnabled}" Margin="16 8 0 0">
+				<CheckBox.ToolTip>
+					<TextBlock Width="300" TextWrapping="Wrap">
+					Override configured assist level speed limit to 100% when power
+					requested by throttle action surpasses power set by pedal assist level.
+					</TextBlock>
+				</CheckBox.ToolTip>
+				<CheckBox.Style>
+					<Style TargetType="{x:Type CheckBox}">
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding IsThrottleEnabled}" Value="False">
+								<Setter Property="IsEnabled" Value="False" />
+							</DataTrigger>
+							<DataTrigger Binding="{Binding IsPasAssistVariableVariant}" Value="True">
+								<Setter Property="Visibility" Value="Collapsed" />
+							</DataTrigger>
+						</Style.Triggers>
+					</Style>
+				</CheckBox.Style>
+			</CheckBox>
+		</StackPanel>
+		
+		
 		<TextBlock Grid.Column="0" Grid.Row="7" Text="Max Throttle Current (%):" VerticalAlignment="Center" Margin="0 8 0 0">
 			<TextBlock.Style>
 				<Style TargetType="{x:Type TextBlock}">
