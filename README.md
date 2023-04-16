@@ -1,10 +1,16 @@
 # BBSHD/BBS02/TSDZ2 Open Source Firmware
 
+![GitHub all releases](https://img.shields.io/github/downloads/danielnilsson9/bbs-fw/total?style=for-the-badge)
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/danielnilsson9/bbs-fw?include_prereleases&style=for-the-badge)
+![GitHub](https://img.shields.io/github/license/danielnilsson9/bbs-fw?style=for-the-badge)
+
 This firmware is intended to replace the original Bafang firmware on the BBSHD/BBS02 motor controller. Almost all functionality of original firmware has been implemented and additional features have been added.
 
 This firmware is compatible with all displays that works with the original Bafang firmware. A custom configuration tool is provided since BafangConfigTool is not compatible due to a different set of supported parameters.
 
 The firmware is also compatible with the TongSheng TSDZ2 controller but requires a custom made cable in order to interface with Bafang compatible displays.
+
+⚠️ Warning: The firmware should NOT be flashed or configured while the eBike battery is charging!
 
 **Download**  
 https://github.com/danielnilsson9/bbshd-fw/releases
@@ -20,24 +26,24 @@ If you find this project useful, consider sending a small [donation](https://www
 
 
 ## Highlights
-* A bit more power without hardware modifications! (max 33A).
-* No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
-* Support lower voltage cutoff for use with e.g. 36V battery.
-* Smooth Throttle/PAS override.
-* Optional separate set of street legal & offroad assist levels which can be toggled by a key combination.
-* Support setting road speed limit per assist level.
-* Support setting cadence limit per assist level.
-* Support cruise assist levels (i.e. motor power without pedal or throttle input).
-* Thermal limiting gradual ramp down.
-* Low voltage gradual ramp down.
-* Voltage calibration for accurate LVC and low voltage ramp down.
-* Display motor/controller temperature on standard display.
-* Use of speed sensor is optional.
+* ✅ A bit more power without hardware modifications! (max 33A). 
+* ✅ No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
+* ✅ Support lower voltage cutoff for use with e.g. 36V battery.
+* ✅ Smooth Throttle/PAS override.
+* ✅ Optional separate set of street legal & offroad assist levels which can be toggled by a key combination.
+* ✅ Support setting road speed limit per assist level.
+* ✅ Support setting cadence limit per assist level.
+* ✅ Support cruise assist levels (i.e. motor power without pedal or throttle input).
+* ✅ Thermal limiting gradual ramp down.
+* ✅ Low voltage gradual ramp down.
+* ✅ Voltage calibration for accurate LVC and low voltage ramp down.
+* ✅ Display motor/controller temperature on standard display.
+* ✅ Use of speed sensor is optional.
 
 ![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
 
 ## Known Issues
-* Compatibility issues reported with some older revisions of the BBS02 controller.
+* ⚠️ Compatibility issues reported with some older revisions of the BBS02 controller.
 
 
 ## Supported Hardware
@@ -51,7 +57,7 @@ V1.5     | IAP15W4K61S4 | ~2019       | V1.4 printed on PCB, sticker with 1.5.
 
 ### BBS02B
 There are compatibility issues reported, this firmware is suspected to be incompatible with older BBS02 controllers.
-If you have a newer BBS02B you are probably fine, if you have an older controller it might not be a good idéa to flash this firmware.
+If you have a newer BBS02B you are probably fine, if you have an older controller it might not be a good idea to flash this firmware.
 
 Revision | MCU          | Released    | Comment
 -------- | ------------ | ----------- | --------------------
