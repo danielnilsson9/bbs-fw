@@ -201,7 +201,7 @@ namespace BBSFW.Model
 				case EVT_DATA_LVC_LIMITING:
 					if (_data.Value != 0)
 					{
-						return $"Low voltage limiting activated, voltage={(_data / 10.0):0.0}";
+						return $"Low voltage limiting activated, voltage={(_data / 100f):0.0}";
 					}
 					else
 					{

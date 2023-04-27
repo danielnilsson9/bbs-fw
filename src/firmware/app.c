@@ -51,7 +51,9 @@ typedef struct
 static uint8_t assist_level;
 static uint8_t operation_mode;
 static uint16_t global_max_speed_rpm;
-static uint16_t lvc_ramp_down_offset_volt_x10;
+
+static uint16_t lvc_voltage_x100;
+static uint16_t lvc_ramp_down_start_voltage_x100;
 
 static assist_level_data_t assist_level_data;
 static uint16_t speed_limit_ramp_interval_rpm_x10;
@@ -90,11 +92,16 @@ void app_init()
 	motor_disable();
 	lights_disable();
 
+	lvc_voltage_x100 = g_config.low_cut_off_v * 100u;
+
+	uint16_t voltage_range_x100 =
+		EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l) - lvc_voltage_x100;
+	lvc_ramp_down_start_voltage_x100 = (uint16_t)(lvc_voltage_x100 +
+		((voltage_range_x100 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100));
+
 	global_max_speed_rpm = 0;
-	lvc_ramp_down_offset_volt_x10 = (uint16_t)((g_config.low_cut_off_v * 10 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100);
 	temperature_contr_c = 0;
 	temperature_motor_c = 0;
-
 	ramp_up_target_current = 0;
 	last_ramp_up_increment_ms = 0;
 	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
@@ -674,45 +681,42 @@ void apply_low_voltage_limit(uint8_t* target_current)
 	if (system_ms() > next_voltage_reading_ms)
 	{
 		next_voltage_reading_ms = system_ms() + 125;
-		int32_t voltage_x100 = motor_get_battery_voltage_x10() * 10ul;
+		int32_t voltage_reading_x100 = motor_get_battery_voltage_x10() * 10ul;
 
-		if (voltage_x100 < flt_min_bat_volt_x100)
+		if (voltage_reading_x100 < flt_min_bat_volt_x100)
 		{
-			flt_min_bat_volt_x100 = EXPONENTIAL_FILTER(flt_min_bat_volt_x100, voltage_x100, 8);
+			flt_min_bat_volt_x100 = EXPONENTIAL_FILTER(flt_min_bat_volt_x100, voltage_reading_x100, 8);
 		}
 
 		if (eventlog_is_enabled() && system_ms() > next_log_volt_ms)
 		{
 			next_log_volt_ms = system_ms() + 10000;
-			eventlog_write_data(EVT_DATA_VOLTAGE, (uint16_t)voltage_x100);
+			eventlog_write_data(EVT_DATA_VOLTAGE, (uint16_t)voltage_reading_x100);
 		}
 	}
 
-	uint16_t voltage_x10 = flt_min_bat_volt_x100 / 10;
-	uint16_t start_limit_v_x10 = motor_get_battery_lvc_x10() + lvc_ramp_down_offset_volt_x10;
+	uint16_t voltage_x100 = flt_min_bat_volt_x100;
 
-	if (voltage_x10 <= start_limit_v_x10)
+	if (voltage_x100 <= lvc_ramp_down_start_voltage_x100)
 	{
-		uint16_t lvc_x10 = motor_get_battery_lvc_x10();
-
 		if (!lvc_limiting)
 		{
-			eventlog_write_data(EVT_DATA_LVC_LIMITING, voltage_x10);
+			eventlog_write_data(EVT_DATA_LVC_LIMITING, voltage_x100);
 			lvc_limiting = true;
 		}
 
-		if (voltage_x10 < lvc_x10)
+		if (voltage_x100 < lvc_voltage_x100)
 		{
-			voltage_x10 = lvc_x10;
+			voltage_x100 = lvc_voltage_x100;
 		}
 
 		// ramp down power until 20% when approaching lvc
 		uint8_t tmp = (uint8_t)MAP32(
-			voltage_x10,					// value
-			lvc_x10,						// in_min
-			start_limit_v_x10,				// in_max
-			LVC_LOW_CURRENT_PERCENT,		// out_min
-			100								// out_max
+			voltage_x100,						// value
+			lvc_voltage_x100,					// in_min
+			lvc_ramp_down_start_voltage_x100,	// in_max
+			LVC_LOW_CURRENT_PERCENT,			// out_min
+			100									// out_max
 		);
 
 		if (*target_current > tmp)

@@ -57,12 +57,12 @@
 #endif
 
 
-// Current ramp down starts at LVC + (LVC * LVC_RAMP_DOWN_OFFSET_PERCENT / 100)
+// Current ramp down starts at LVC + (VOLTAGE_RANGE * LVC_RAMP_DOWN_OFFSET_PERCENT / 100)
 // Example:
-// LVC is 42V
-// 42 * 0.06 = 2.5V
-// Ramp down starts at 42V + 2.5V
-#define LVC_RAMP_DOWN_OFFSET_PERCENT			6
+// LVC is 42V, max voltage at 58.8
+// Range = 58.8 - 42 = 16.8
+// Ramp down starts at 42V + Range * 0.09 = 43.5
+#define LVC_RAMP_DOWN_OFFSET_PERCENT			9
 
 // Maximum allowed motor current in percent of maximum configured current (A)
 // to still apply when LVC has been reached.
