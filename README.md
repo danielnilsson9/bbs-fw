@@ -24,6 +24,8 @@ https://github.com/danielnilsson9/bbshd-fw/wiki/Configuration-Tool
 
 If you find this project useful, consider sending a small [donation](https://www.paypal.com/donate/?business=LVAYFCMQYN8F4&no_recurring=0&item_name=BBSHD-FW&currency_code=USD) to fund further development.
 
+## Known Issues
+* ⚠️ Unstable on BBS02 controllers!
 
 ## Highlights
 * ✅ A bit more power without hardware modifications! (max 33A). 
@@ -41,10 +43,6 @@ If you find this project useful, consider sending a small [donation](https://www
 * ✅ Use of speed sensor is optional.
 
 ![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
-
-## Known Issues
-* ⚠️ Unstable on BBS02 controller!
-
 
 ## Supported Hardware
 
