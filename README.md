@@ -43,7 +43,7 @@ If you find this project useful, consider sending a small [donation](https://www
 ![Config Tool](https://raw.githubusercontent.com/wiki/danielnilsson9/bbshd-fw/img/config_tool/config_tool3.png)
 
 ## Known Issues
-* ⚠️ Compatibility issues reported with some older revisions of the BBS02 controller.
+* ⚠️ Unstable on BBS02 controller!
 
 
 ## Supported Hardware
