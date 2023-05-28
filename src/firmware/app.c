@@ -69,6 +69,8 @@ static uint16_t ramp_up_current_interval_ms;
 static uint8_t ramp_down_target_current;
 static uint32_t last_ramp_down_decrement_ms;
 
+static uint32_t power_blocked_until_ms;
+
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
 #if HAS_TORQUE_SENSOR
 void apply_pas_torque(uint8_t* target_current);
@@ -82,6 +84,9 @@ void apply_speed_limit(uint8_t* target_current);
 void apply_thermal_limit(uint8_t* target_current);
 void apply_low_voltage_limit(uint8_t* target_current);
 void apply_shift_sensor_interrupt(uint8_t* target_current);
+
+bool check_power_block();
+void block_power_for(uint16_t ms);
 
 void reload_assist_params();
 
@@ -106,10 +111,11 @@ void app_init()
 	last_ramp_up_increment_ms = 0;
 	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
 
+	power_blocked_until_ms = 0;
+
 	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
 
 	cruise_paused = true;
-
 	operation_mode = OPERATION_MODE_DEFAULT;
 
 	app_set_wheel_max_speed_rpm(convert_wheel_speed_kph_to_rpm(g_config.max_speed_kph));
@@ -127,7 +133,11 @@ void app_process()
 	uint8_t target_current = 0;
 	bool throttle_override = false;
 
-	if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
+	if (check_power_block())
+	{
+		target_current = 0;
+	}
+	else if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
 	{
 		target_current = 10;
 	}
@@ -208,6 +218,14 @@ void app_set_assist_level(uint8_t level)
 {
 	if (assist_level != level)
 	{
+		if (assist_level == ASSIST_PUSH && g_config.use_push_walk)
+		{
+			// When releasig push walk mode pedals may have been rotating
+			// with the motor, block motor power for 2 seconds to prevent PAS
+			// sensor from incorrectly applying power if returning to a PAS level.
+			block_power_for(1000);
+		}
+
 		assist_level = level;
 		eventlog_write_data(EVT_DATA_ASSIST_LEVEL, assist_level);
 		reload_assist_params();
@@ -773,6 +791,30 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 	}
 }
 #endif
+
+
+bool check_power_block()
+{
+	if (power_blocked_until_ms != 0)
+	{
+		// power block is active, check if time to release
+		if (system_ms() > power_blocked_until_ms)
+		{
+			power_blocked_until_ms = 0;
+			return false;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+void block_power_for(uint16_t ms)
+{
+	power_blocked_until_ms = system_ms() + ms;
+}
+
 
 void reload_assist_params()
 {
