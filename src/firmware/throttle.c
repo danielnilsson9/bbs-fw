@@ -28,7 +28,7 @@ static uint32_t throttle_hard_limit_hit_at;
 
 #define ADC_VOLTAGE_MV						5000ul
 
-#define THROTTLE_HARD_LOW_LIMIT_MV			0500ul
+#define THROTTLE_HARD_LOW_LIMIT_MV			500ul
 #define THROTTLE_HARD_HIGH_LIMIT_MV			4500ul
 
 #define THROTTLE_HARD_LOW_LIMIT_ADC			((THROTTLE_HARD_LOW_LIMIT_MV * 256) / ADC_VOLTAGE_MV)

@@ -59,7 +59,7 @@ void battery_init()
 
 	uint16_t battery_range_x100v = battery_max_voltage_x100v - battery_min_voltage_x100v;
 
-	// Consider battery full if above 95% (100 - BATTERY_FULL_OFFSET_PERCENT)
+	// Consider battery full if above 92% (100 - BATTERY_FULL_OFFSET_PERCENT)
 	// of configured voltage range
 	battery_full_x100v = battery_max_voltage_x100v -
 		((BATTERY_FULL_OFFSET_PERCENT * battery_range_x100v) / 100);
