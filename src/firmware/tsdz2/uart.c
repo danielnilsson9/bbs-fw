@@ -8,17 +8,24 @@
 
 #include "uart.h"
 #include "interrupt.h"
+#include "watchdog.h"
 
 #include <stdint.h>
 
 
+#define RX1_BUFFER_SIZE			64
+#define RX1_BUFFER_MASK			(RX1_BUFFER_SIZE - 1)
+
+#define TX1_BUFFER_SIZE			32
+#define TX1_BUFFER_MASK			(TX1_BUFFER_SIZE - 1)
+
 static volatile uint8_t rx1_head;
 static volatile uint8_t rx1_tail;
-static volatile uint8_t rx1_buf[256];
+static volatile uint8_t rx1_buf[RX1_BUFFER_SIZE];
 static volatile uint8_t tx1_head;
 static volatile uint8_t tx1_tail;
 static volatile uint8_t tx1_sending;
-static volatile uint8_t tx1_buf[256];
+static volatile uint8_t tx1_buf[TX1_BUFFER_SIZE];
 
 void uart_open(uint32_t baudrate)
 {
@@ -76,39 +83,42 @@ void uart_close()
 
 uint8_t uart_available()
 {
-	return (rx1_head - rx1_tail);
+	return (RX1_BUFFER_SIZE + rx1_head - rx1_tail) & RX1_BUFFER_MASK;
 }
 
 uint8_t uart_read()
 {
-	// Disable UART2 rx interrupt
-	UART2->CR2 &= ~UART2_CR2_RIEN;
-
 	uint8_t byte = rx1_buf[rx1_tail];
-	rx1_tail = (rx1_tail + 1);
-
-	// Enable UART1 interrupt
-	UART2->CR2 |= UART2_CR2_RIEN;
-
+	rx1_tail = (rx1_tail + 1) & RX1_BUFFER_MASK;
 	return byte;
 }
 
 void uart_write(uint8_t byte)
 {
-	if (tx1_sending)
+	if (!tx1_sending)
 	{
-		// wait for free space in buffer
-		while ((tx1_head + 1) == tx1_tail);
-
-		tx1_buf[tx1_head] = byte;
-		tx1_head = (tx1_head + 1);
-	}
-	else
-	{
-		tx1_sending = 1;		
+		tx1_sending = 1;
 		UART2->DR = byte;
 		UART2->CR2 |= UART2_CR2_TIEN; // enable tx done interrupt
+
+		return;
 	}
+
+	uint8_t i = (tx1_head + 1) & TX1_BUFFER_MASK;
+
+	// wait for free space in buffer
+	uint8_t prev_tail = tx1_tail;
+	while (i == tx1_tail)
+	{
+		if (tx1_tail != prev_tail)
+		{
+			prev_tail = tx1_tail;
+			watchdog_yeild();
+		}
+	}
+
+	tx1_buf[tx1_head] = byte;
+	tx1_head = i;
 }
 
 void uart_flush()
@@ -122,15 +132,13 @@ void isr_uart2_rx(void) __interrupt(ITC_IRQ_UART2_RX)
 {
 	if (UART2->SR & UART2_SR_RXNE)
 	{
-		if (rx1_head != (rx1_tail - 1))
+		uint8_t c = UART2->DR;
+		uint8_t i = (rx1_head + 1) & RX1_BUFFER_MASK;
+
+		if (i != rx1_tail)
 		{
-			rx1_buf[rx1_head] = UART2->DR;
-			rx1_head = (rx1_head + 1);
-		}
-		else
-		{
-			// buffer full, discard data
-			UART2->SR &= ~UART2_SR_RXNE;
+			rx1_buf[rx1_head] = c;
+			rx1_head = i;
 		}
 	}
 }
@@ -142,8 +150,9 @@ void isr_uart2_tx(void) __interrupt(ITC_IRQ_UART2_TX)
 		if (tx1_head != tx1_tail)
 		{
 			tx1_sending = 1;
+
 			UART2->DR = tx1_buf[tx1_tail];
-			tx1_tail = (tx1_tail + 1);
+			tx1_tail = (tx1_tail + 1) & TX1_BUFFER_MASK;
 		}
 		else
 		{

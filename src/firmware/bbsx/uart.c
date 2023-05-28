@@ -8,6 +8,7 @@
 
 #include "uart.h"
 #include "system.h"
+#include "watchdog.h"
 #include "bbsx/stc15.h"
 #include "bbsx/uart_motor.h"
 #include "bbsx/timers.h"
@@ -19,22 +20,34 @@
 // Variables located in __data are there for atomic access.
 
 // UART1 (main)
+#define RX1_BUFFER_SIZE			64
+#define RX1_BUFFER_MASK			(RX1_BUFFER_SIZE - 1)
+
+#define TX1_BUFFER_SIZE			32
+#define TX1_BUFFER_MASK			(TX1_BUFFER_SIZE - 1)
+
 static volatile __data uint8_t rx1_head;
 static volatile __data uint8_t rx1_tail;
-static volatile uint8_t rx1_buf[256];
+static volatile uint8_t rx1_buf[RX1_BUFFER_SIZE];
 static volatile __data uint8_t tx1_head;
 static volatile __data uint8_t tx1_tail;
 static volatile __data uint8_t tx1_sending;
-static volatile uint8_t tx1_buf[256];
+static volatile uint8_t tx1_buf[TX1_BUFFER_SIZE];
 
 // UART2 (motor)
+#define RX2_BUFFER_SIZE			16
+#define RX2_BUFFER_MASK			(RX2_BUFFER_SIZE - 1)
+
+#define TX2_BUFFER_SIZE			16
+#define TX2_BUFFER_MASK			(TX2_BUFFER_SIZE - 1)
+
 static volatile __data uint8_t rx2_head;
 static volatile __data uint8_t rx2_tail;
-static volatile uint8_t rx2_buf[256];
+static volatile uint8_t rx2_buf[RX2_BUFFER_SIZE];
 static volatile __data uint8_t tx2_head;
 static volatile __data uint8_t tx2_tail;
 static volatile __data uint8_t tx2_sending;
-static volatile uint8_t tx2_buf[256];
+static volatile uint8_t tx2_buf[TX2_BUFFER_SIZE];
 
 
 void uart_open(uint32_t baudrate)
@@ -112,64 +125,81 @@ void uart_motor_close()
 
 uint8_t uart_available()
 {
-	return (rx1_head - rx1_tail);
+	return (RX1_BUFFER_SIZE + rx1_head - rx1_tail) & RX1_BUFFER_MASK;
 }
 
 uint8_t uart_motor_available()
 {
-	return (rx2_head - rx2_tail);
+	return (RX2_BUFFER_SIZE + rx2_head - rx2_tail) & RX2_BUFFER_MASK;
 }
 
 uint8_t uart_read()
 {
-	ES = 0; // Disable UART1 interrupt
 	uint8_t byte = rx1_buf[rx1_tail];
-	rx1_tail = (rx1_tail + 1);
-	ES = 1; // Enable UART1 interrupt
+	rx1_tail = (rx1_tail + 1) & RX1_BUFFER_MASK;
 	return byte;
 }
 
 uint8_t uart_motor_read()
 {
-	IE2 &= ~(1 << 0); // Disable UART2 interrupt
 	uint8_t byte = rx2_buf[rx2_tail];
-	rx2_tail = (rx2_tail + 1);
-	IE2 |= (1 << 0); // Enable UART2 interrupt
+	rx2_tail = (rx2_tail + 1) & RX2_BUFFER_MASK;
 	return byte;
 }
 
 void uart_write(uint8_t byte)
 {
-	if (tx1_sending)
-	{
-		// wait for free space in buffer
-		while ((tx1_head + 1) == tx1_tail);
-
-		tx1_buf[tx1_head] = byte;
-		tx1_head = (tx1_head + 1);
-	}
-	else
+	if (!tx1_sending)
 	{
 		tx1_sending = 1;
 		SBUF = byte;
+
+		return;
 	}
+
+	uint8_t i = (tx1_head + 1) & TX1_BUFFER_MASK;
+
+	// wait for free space in buffer
+	uint8_t prev_tail = tx1_tail;
+	while (i == tx1_tail)
+	{
+		if (tx1_tail != prev_tail)
+		{
+			prev_tail = tx1_tail;
+			watchdog_yeild();
+		}
+	}
+
+	tx1_buf[tx1_head] = byte;
+	tx1_head = i;
+
 }
 
 void uart_motor_write(uint8_t byte)
 {
-	if (tx2_sending)
-	{
-		// wait for free space in buffer
-		while (((tx2_head + 1)) == tx2_tail);
-
-		tx2_buf[tx2_head] = byte;
-		tx2_head = (tx2_head + 1);
-	}
-	else
+	if (!tx2_sending)
 	{
 		tx2_sending = 1;
 		S2BUF = byte;
+
+		return;
 	}
+
+	uint8_t i = (tx2_head + 1) & TX2_BUFFER_MASK;
+
+	// wait for free space in buffer
+	uint8_t prev_tail = tx1_tail;
+	while (i == tx2_tail)
+	{
+		if (tx2_tail != prev_tail)
+		{
+			prev_tail = tx2_tail;
+			watchdog_yeild();
+		}
+	}
+
+	tx2_buf[tx2_head] = byte;
+	tx2_head = i;
 }
 
 void uart_flush()
@@ -187,11 +217,15 @@ INTERRUPT_USING(isr_uart1, IRQ_UART1, 3)
 {
 	if (RI) // rx interrupt
 	{
-		RI = 0;		
-		if (rx1_head != (rx1_tail - 1))
+		RI = 0;
+
+		uint8_t c = SBUF;
+		uint8_t i = (rx1_head + 1) & RX1_BUFFER_MASK;
+
+		if (i != rx1_tail)
 		{
-			rx1_buf[rx1_head] = SBUF;
-			rx1_head = (rx1_head + 1);
+			rx1_buf[rx1_head] = c;
+			rx1_head = i;
 		}
 	}
 
@@ -202,8 +236,9 @@ INTERRUPT_USING(isr_uart1, IRQ_UART1, 3)
 		if (tx1_head != tx1_tail)
 		{
 			tx1_sending = 1;
+
 			SBUF = tx1_buf[tx1_tail];
-			tx1_tail = (tx1_tail + 1);
+			tx1_tail = (tx1_tail + 1) & TX1_BUFFER_MASK;
 		}
 		else
 		{
@@ -218,10 +253,13 @@ INTERRUPT_USING(isr_uart2, IRQ_UART2, 3)
 	{
 		S2CON &= ~(1 << 0);
 
-		if (rx2_head != (rx2_tail - 1))
+		uint8_t c = S2BUF;
+		uint8_t i = (rx2_head + 1) & RX2_BUFFER_MASK;
+
+		if (i != rx2_tail)
 		{
-			rx2_buf[rx2_head] = S2BUF;
-			rx2_head = (rx2_head + 1);
+			rx2_buf[rx2_head] = c;
+			rx2_head = i;
 		}
 	}
 
@@ -232,8 +270,9 @@ INTERRUPT_USING(isr_uart2, IRQ_UART2, 3)
 		if (tx2_head != tx2_tail)
 		{
 			tx2_sending = 1;
+
 			S2BUF = tx2_buf[tx2_tail];
-			tx2_tail = (tx2_tail + 1);
+			tx2_tail = (tx2_tail + 1) & TX2_BUFFER_MASK;
 		}
 		else
 		{
