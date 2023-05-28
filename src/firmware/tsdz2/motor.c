@@ -151,7 +151,13 @@ static const uint8_t sin_table[SIN_TABLE_LEN] =
 
 // motor control state (shared with isr)
 // ------------------------------------------------------
-static volatile bool is_disabled = false;
+#define CONTROL_STATE_DISABLE			0
+#define CONTROL_STATE_PREPARE			1
+#define CONTROL_STATE_START				2
+#define CONTROL_STATE_RUNNING			3
+
+
+static volatile uint8_t control_state = CONTROL_STATE_DISABLE;
 static volatile bool is_lvc_triggered = false;
 static volatile bool hall_sensor_error = false;
 
@@ -175,8 +181,6 @@ static uint8_t adc_phase_max_current = 0;
 
 // ------------------------------------------------------
 
-static bool request_enable = false;
-
 // foc angle filter
 static uint16_t foc_angle_accumulated = 0;
 
@@ -198,25 +202,6 @@ static uint8_t target_current_percent = 0;
 
 static uint16_t adc_steps_per_volt_x512 = ADC_10BIT_STEPS_PER_VOLT_X512;
 
-
-
-void motor_check_enable()
-{
-	if (request_enable && speed_erps == 0)
-	{
-		request_enable = false;
-		is_disabled = false;
-
-		// OC1
-		TIM1->CCER1 |= (uint8_t)(TIM1_CCER1_CC1E | TIM1_CCER1_CC1NE);
-
-		// OC2
-		TIM1->CCER1 |= (uint8_t)(TIM1_CCER1_CC2E | TIM1_CCER1_CC2NE);
-
-		// OC3
-		TIM1->CCER2 |= (uint8_t)(TIM1_CCER2_CC3E | TIM1_CCER2_CC3NE);
-	}
-}
 
 static void flash_opt2_afr5()
 {
@@ -415,7 +400,6 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V, int16_t adc_calib_volt_s
 
 void motor_process()
 {
-	motor_check_enable();
 	read_battery_voltage();
 	read_battery_current();
 	read_phase_current();
@@ -425,25 +409,15 @@ void motor_process()
 
 void motor_enable()
 {
-	if (!request_enable && is_disabled)
+	if (control_state == CONTROL_STATE_DISABLE)
 	{
-		request_enable = true;
+		control_state = CONTROL_STATE_PREPARE;
 	}
 }
 
 void motor_disable()
 {
-	is_disabled = true;
-	request_enable = false;
-
-	// OC1
-	TIM1->CCER1 &= ~(uint8_t)(TIM1_CCER1_CC1E | TIM1_CCER1_CC1NE);
-	
-	// OC2
-	TIM1->CCER1 &= ~(uint8_t)(TIM1_CCER1_CC2E | TIM1_CCER1_CC2NE);
-	
-	// OC3
-	TIM1->CCER2 &= ~(uint8_t)(TIM1_CCER2_CC3E | TIM1_CCER2_CC3NE);
+	control_state = CONTROL_STATE_DISABLE;
 }
 
 uint16_t motor_status()
@@ -599,6 +573,36 @@ void isr_timer1_cmp(void) __interrupt(ITC_IRQ_TIM1_CAPCOM)
 	// atomic write (uint8), current is not expected to exceed adc 255 (40A)
 	adc_battery_current = ADC_10BIT_BATTERY_CURRENT;
 
+	switch (control_state)
+	{
+	case CONTROL_STATE_DISABLE:
+		// disable outputs
+		TIM1->CCER1 &= ~(uint8_t)(TIM1_CCER1_CC1E | TIM1_CCER1_CC1NE);	// OC1
+		TIM1->CCER1 &= ~(uint8_t)(TIM1_CCER1_CC2E | TIM1_CCER1_CC2NE);	// OC2
+		TIM1->CCER2 &= ~(uint8_t)(TIM1_CCER2_CC3E | TIM1_CCER2_CC3NE);	// OC3
+		break;
+	case CONTROL_STATE_PREPARE:
+		if (speed_erps > 0)
+		{
+			// Restart from duty cycle mapped from erps.
+			// This is probably not the correct way to do this, but
+			// it seems to work reasonably well. VESC tracks back-emf
+			// to calculate duty cyle to restart from...
+			pwm_duty_cycle = (uint8_t)MAP32(speed_erps, 0, MAX_MOTOR_SPEED_ERPS, PWM_DUTY_CYCLE_MIN, PWM_DUTY_CYCLE_MAX);
+		}	
+		control_state = CONTROL_STATE_START;
+		break;
+	case CONTROL_STATE_START:
+		// enable outputs
+		TIM1->CCER1 |= (uint8_t)(TIM1_CCER1_CC1E | TIM1_CCER1_CC1NE); 	// OC1
+		TIM1->CCER1 |= (uint8_t)(TIM1_CCER1_CC2E | TIM1_CCER1_CC2NE);	// OC2
+		TIM1->CCER2 |= (uint8_t)(TIM1_CCER2_CC3E | TIM1_CCER2_CC3NE);	// OC3
+		control_state = CONTROL_STATE_RUNNING;
+		break;
+	default:
+		break;
+	}
+
 	// calculate motor current adc value
 	if (pwm_duty_cycle > 0)
 	{
@@ -753,7 +757,7 @@ void isr_timer1_cmp(void) __interrupt(ITC_IRQ_TIM1_CAPCOM)
 	++speed_controller_counter;
 
 	if	(
-			is_disabled ||
+			control_state == CONTROL_STATE_DISABLE ||
 			is_lvc_triggered ||
 			(pwm_duty_cycle_target == 0) ||
 			(GET_PIN_INPUT_STATE(PIN_BRAKE) == 0) //active low
