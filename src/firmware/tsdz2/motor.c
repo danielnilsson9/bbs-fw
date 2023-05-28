@@ -172,7 +172,10 @@ static volatile uint8_t pwm_duty_cycle_target = 0;
 static uint16_t adc_low_voltage_limit = 0;
 static uint8_t adc_battery_max_current = 0;
 static uint8_t adc_phase_max_current = 0;
+
 // ------------------------------------------------------
+
+static bool request_enable = false;
 
 // foc angle filter
 static uint16_t foc_angle_accumulated = 0;
@@ -195,6 +198,25 @@ static uint8_t target_current_percent = 0;
 
 static uint16_t adc_steps_per_volt_x512 = ADC_10BIT_STEPS_PER_VOLT_X512;
 
+
+
+void motor_check_enable()
+{
+	if (request_enable && speed_erps == 0)
+	{
+		request_enable = false;
+		is_disabled = false;
+
+		// OC1
+		TIM1->CCER1 |= (uint8_t)(TIM1_CCER1_CC1E | TIM1_CCER1_CC1NE);
+
+		// OC2
+		TIM1->CCER1 |= (uint8_t)(TIM1_CCER1_CC2E | TIM1_CCER1_CC2NE);
+
+		// OC3
+		TIM1->CCER2 |= (uint8_t)(TIM1_CCER2_CC3E | TIM1_CCER2_CC3NE);
+	}
+}
 
 static void flash_opt2_afr5()
 {
@@ -393,6 +415,7 @@ void motor_init(uint16_t max_current_mA, uint8_t lvc_V, int16_t adc_calib_volt_s
 
 void motor_process()
 {
+	motor_check_enable();
 	read_battery_voltage();
 	read_battery_current();
 	read_phase_current();
@@ -402,21 +425,16 @@ void motor_process()
 
 void motor_enable()
 {
-	is_disabled = false;
-
-	// OC1
-	TIM1->CCER1 |= (uint8_t)(TIM1_CCER1_CC1E | TIM1_CCER1_CC1NE);
-
-	// OC2
-	TIM1->CCER1 |= (uint8_t)(TIM1_CCER1_CC2E | TIM1_CCER1_CC2NE);
-
-	// OC3
-	TIM1->CCER2 |= (uint8_t)(TIM1_CCER2_CC3E | TIM1_CCER2_CC3NE);
+	if (!request_enable && is_disabled)
+	{
+		request_enable = true;
+	}
 }
 
 void motor_disable()
 {
 	is_disabled = true;
+	request_enable = false;
 
 	// OC1
 	TIM1->CCER1 &= ~(uint8_t)(TIM1_CCER1_CC1E | TIM1_CCER1_CC1NE);
@@ -537,8 +555,6 @@ uint16_t motor_get_battery_voltage_x10()
 }
 
 
-
-
 // state variables only used by isr
 // ---------------------------------------------
 static uint8_t hall_sensors_state_last = 0;
@@ -558,7 +574,6 @@ static uint8_t current_controller_counter = 0;
 static uint16_t speed_controller_counter = 0;
 
 static uint8_t adc_battery_ramp_max_current = 0;
-
 
 // Measures did with a 24V Q85 328 RPM motor, rotating motor backwards by hand:
 // Hall sensor A positive to negative transition | BEMF phase B at max value / top of sinewave
@@ -854,7 +869,6 @@ void isr_timer1_cmp(void) __interrupt(ITC_IRQ_TIM1_CAPCOM)
 
 
 	// set final duty cycle value to pwm timers
-
 	// phase B
 	TIM1->CCR3H = phase_b_voltage_msb;
 	TIM1->CCR3L = phase_b_voltage_lsb;
@@ -864,7 +878,7 @@ void isr_timer1_cmp(void) __interrupt(ITC_IRQ_TIM1_CAPCOM)
 	// phase A
 	TIM1->CCR1H = phase_a_voltage_msb;
 	TIM1->CCR1L = phase_a_voltage_lsb;
-
+	
 
 	// ramp up motor current
 	if (adc_battery_target_current > adc_battery_ramp_max_current)
