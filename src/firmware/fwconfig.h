@@ -57,6 +57,15 @@
 #endif
 
 
+// No battery percent mapping
+#define BATTERY_PERCENT_MAP_NONE				0
+// Map battery percent to provide a linear relationship on the
+// 5-bar battery indicator of the SW102 display. 
+#define BATTERY_PERCENT_MAP_SW102				1
+
+// Select battery percent mapping
+#define BATTERY_PERCENT_MAP						BATTERY_PERCENT_MAP_NONE
+
 // Current ramp down starts at LVC + (VOLTAGE_RANGE * LVC_RAMP_DOWN_OFFSET_PERCENT / 100)
 // Example:
 // LVC is 42V, max voltage at 58.8

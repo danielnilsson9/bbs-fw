@@ -87,7 +87,8 @@ namespace BBSFW.Model
 		{
 			Speed = 0,
 			Temperature = 1,
-			RequestedPower = 2
+			RequestedPower = 2,
+			BatteryPercent = 3
 		}
 
 		public class AssistLevel

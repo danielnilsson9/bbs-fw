@@ -568,7 +568,7 @@ static int16_t process_bafang_display_read_battery()
 		return KEEP;
 	}
 
-	uint8_t value = battery_get_percent();
+	uint8_t value = battery_get_mapped_percent();
 
 	uart_write(value);
 	uart_write(value); // checksum
@@ -598,6 +598,9 @@ static int16_t process_bafang_display_read_speed()
 		case WALK_MODE_DATA_REQUESTED_POWER:
 			data = motor_get_target_current();
 			break;
+		case WALK_MODE_DATA_BATTERY_PERCENT:
+			data = battery_get_percent();
+			break;
 		}
 
 		if (g_config.use_freedom_units)
@@ -613,6 +616,7 @@ static int16_t process_bafang_display_read_speed()
 	{
 		speed = speed_sensor_get_rpm_x10() / 10;
 	}
+
 
 	uint8_t checksum = 0;
 

@@ -55,6 +55,7 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.Speed, "Speed"),
 				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.Temperature, "Temperature (C)"),
 				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.RequestedPower, "Requested Power (%)"),
+				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.BatteryPercent, "Battery Level (%)")
 			};
 
 

@@ -15,5 +15,6 @@ void battery_init();
 void battery_process();
 
 uint8_t battery_get_percent();
+uint8_t battery_get_mapped_percent();
 
 #endif

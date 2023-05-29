@@ -11,6 +11,7 @@
 #include "system.h"
 #include "util.h"
 #include "cfgstore.h"
+#include "fwconfig.h"
 
 static int16_t battery_empty_x100v;
 static int16_t battery_full_x100v;
@@ -44,6 +45,45 @@ static uint8_t compute_battery_percent()
 
 	return (uint8_t)CLAMP(percent, 0, 100);
 }
+
+#if (BATTERY_PERCENT_MAP == BATTERY_PERCENT_MAP_SW102)
+static uint8_t map_percent_sw102(uint8_t percent)
+{
+	// Measured on Display
+	// -----------------------
+	// 0bar		0-5
+	// 1bar		5 - 10
+	// 2bar		10 - 30
+	// 3bar		31 - 51
+	// 4bar		52 - 78
+	// 5bar		78 - 100
+
+	if (percent < 5)		// 0bar
+	{
+		return 0;
+	}
+	else if (percent < 21)	// 1bar
+	{
+		return 7;
+	}
+	else if (percent < 41)	// 2bar
+	{
+		return 20;
+	}
+	else if (percent < 61)	// 3bar
+	{
+		return 40;
+	}
+	else if (percent < 81)	// 4bar
+	{
+		return 60;
+	}
+	else					// 5bar
+	{
+		return 100;
+	}
+}
+#endif
 
 
 void battery_init()
@@ -106,4 +146,13 @@ void battery_process()
 uint8_t battery_get_percent()
 {
 	return battery_percent;
+}
+
+uint8_t battery_get_mapped_percent()
+{
+#if (BATTERY_PERCENT_MAP == BATTERY_PERCENT_MAP_SW102)
+	return map_percent_sw102(battery_percent);
+#else
+	return battery_percent;
+#endif
 }
