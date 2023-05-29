@@ -38,8 +38,6 @@ typedef struct
 
 	// speed
 	int32_t max_wheel_speed_rpm_x10;
-	int16_t speed_ramp_low_limit_rpm_x10;
-	int16_t speed_ramp_high_limit_rpm_x10;
 
 	// pas
 	uint8_t keep_current_target_percent;
@@ -50,7 +48,8 @@ typedef struct
 
 static uint8_t assist_level;
 static uint8_t operation_mode;
-static uint16_t global_max_speed_rpm;
+static uint16_t global_speed_limit_rpm;
+static int32_t global_throttle_speed_limit_rpm_x10;
 
 static uint16_t lvc_voltage_x100;
 static uint16_t lvc_ramp_down_start_voltage_x100;
@@ -62,13 +61,7 @@ static bool cruise_paused;
 static int8_t temperature_contr_c;
 static int8_t temperature_motor_c;
 
-static uint8_t ramp_up_target_current;
-static uint32_t last_ramp_up_increment_ms;
 static uint16_t ramp_up_current_interval_ms;
-
-static uint8_t ramp_down_target_current;
-static uint32_t last_ramp_down_decrement_ms;
-
 static uint32_t power_blocked_until_ms;
 
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
@@ -78,13 +71,13 @@ void apply_pas_torque(uint8_t* target_current);
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
-void apply_current_ramp_up(uint8_t* target_current);
-void apply_current_ramp_down(uint8_t* target_current);
-void apply_speed_limit(uint8_t* target_current);
-void apply_thermal_limit(uint8_t* target_current);
-void apply_low_voltage_limit(uint8_t* target_current);
-void apply_shift_sensor_interrupt(uint8_t* target_current);
-void apply_brake(uint8_t* target_current);
+bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool throttle_override);
+bool apply_thermal_limit(uint8_t* target_current);
+bool apply_low_voltage_limit(uint8_t* target_current);
+bool apply_shift_sensor_interrupt(uint8_t* target_current);
+bool apply_brake(uint8_t* target_current);
+void apply_current_ramp_up(uint8_t* target_current, bool enable);
+void apply_current_ramp_down(uint8_t* target_current, bool enable);
 
 bool check_power_block();
 void block_power_for(uint16_t ms);
@@ -106,13 +99,12 @@ void app_init()
 	lvc_ramp_down_start_voltage_x100 = (uint16_t)(lvc_voltage_x100 +
 		((voltage_range_x100 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100));
 
-	global_max_speed_rpm = 0;
+	global_speed_limit_rpm = 0;
+	global_throttle_speed_limit_rpm_x10 = 0;
 	temperature_contr_c = 0;
 	temperature_motor_c = 0;
-	ramp_up_target_current = 0;
-	last_ramp_up_increment_ms = 0;
-	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
 
+	ramp_up_current_interval_ms = (g_config.max_current_amps * 10u) / g_config.current_ramp_amps_s;
 	power_blocked_until_ms = 0;
 
 	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
@@ -133,6 +125,8 @@ void app_init()
 void app_process()
 {
 	uint8_t target_current = 0;
+	uint8_t target_cadence = assist_level_data.level.max_cadence_percent;
+	uint8_t throttle_percent = throttle_read();
 	bool throttle_override = false;
 
 	if (check_power_block())
@@ -145,8 +139,6 @@ void app_process()
 	}
 	else
 	{
-		uint8_t throttle_percent = throttle_read();
-
 		apply_pas_cadence(&target_current, throttle_percent);
 #if HAS_TORQUE_SENSOR
 		apply_pas_torque(&target_current);
@@ -154,42 +146,33 @@ void app_process()
 
 		apply_cruise(&target_current, throttle_percent);
 
-		// order is important, ramp up shall not affect throttle
-		apply_current_ramp_up(&target_current);
-
 		throttle_override = apply_throttle(&target_current, throttle_percent);
+
+		// override target cadence if configured in assist level
+		if (throttle_override &&
+			(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
+			(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_CADENCE))
+		{
+			target_cadence = THROTTLE_CADENCE_OVERRIDE_PERCENT;
+		}
 	}
 
-	apply_current_ramp_down(&target_current);
-
-	// do not apply speed limit if throttle speed override active
-	if (!throttle_override ||
-		!(assist_level_data.level.flags & ASSIST_FLAG_PAS) ||
-		!(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_SPEED))
-	{
-		apply_speed_limit(&target_current);
-	}
-
-	apply_thermal_limit(&target_current);
-	apply_low_voltage_limit(&target_current);
+	bool speed_limiting = apply_speed_limit(&target_current, throttle_percent, throttle_override);
+	bool thermal_limiting = apply_thermal_limit(&target_current);
+	bool lvc_limiting = apply_low_voltage_limit(&target_current);
+	bool shift_limiting =
 #if HAS_SHIFT_SENSOR_SUPPORT
-	apply_shift_sensor_interrupt(&target_current);
+		apply_shift_sensor_interrupt(&target_current);
+#else
+	false;
 #endif
+	bool is_limiting = speed_limiting || thermal_limiting || lvc_limiting || shift_limiting;
+	bool is_braking = apply_brake(&target_current);
+	
+	apply_current_ramp_up(&target_current, is_limiting || !throttle_override);
+	apply_current_ramp_down(&target_current, !is_braking);
 
-	apply_brake(&target_current);
-
-	// override target cadence if configured in assist level
-	if (throttle_override &&
-		(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
-		(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_CADENCE))
-	{
-		motor_set_target_speed(THROTTLE_CADENCE_OVERRIDE_PERCENT);
-	}
-	else
-	{
-		motor_set_target_speed(assist_level_data.level.max_cadence_percent);
-	}
-
+	motor_set_target_speed(target_cadence);
 	motor_set_target_current(target_current);
 
 	if (target_current > 0)
@@ -199,12 +182,6 @@ void app_process()
 	else
 	{
 		motor_disable();
-
-		// force reset current ramps
-		ramp_up_target_current = 0;
-		ramp_down_target_current = 0;
-		last_ramp_up_increment_ms = 0;
-		last_ramp_down_decrement_ms = 0;
 	}
 
 	if (motor_status() & MOTOR_ERROR_LVC)
@@ -291,9 +268,12 @@ void app_set_operation_mode(uint8_t mode)
 
 void app_set_wheel_max_speed_rpm(uint16_t value)
 {
-	if (global_max_speed_rpm != value)
+	if (global_speed_limit_rpm != value)
 	{
-		global_max_speed_rpm = value;
+		global_speed_limit_rpm = value;
+		global_throttle_speed_limit_rpm_x10 = ((int32_t)global_speed_limit_rpm *
+			g_config.throttle_global_spd_lim_percent) / 10;
+
 		eventlog_write_data(EVT_DATA_WHEEL_SPEED_PPM, value);
 		reload_assist_params();
 	}
@@ -521,96 +501,73 @@ bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
 	{
 		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.level.max_throttle_current_percent);
-		if (current >= *target_current)
+
+		// Throttle always overrides PAS if global speed limit is configured for throttle.
+		bool global_throttle_limit_active =
+			g_config.throttle_global_spd_lim_percent > 0 && 
+			(
+				g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
+				(g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
+			);
+
+		if (current >= *target_current || global_throttle_limit_active)
 		{
-			*target_current = current;
-		
-			return true; // return true if overrides previous set target current
+			*target_current = current;	
+			return true;
 		}
 	}
 
 	return false;
 }
 
-void apply_current_ramp_up(uint8_t* target_current)
-{
-	if (*target_current > ramp_up_target_current)
-	{
-		uint32_t now = system_ms();
-		uint16_t time_diff = now - last_ramp_up_increment_ms;
 
-		if (time_diff >= ramp_up_current_interval_ms)
-		{
-			++ramp_up_target_current;
-
-			if (last_ramp_up_increment_ms == 0)
-			{
-				last_ramp_up_increment_ms = now;
-			}
-			else
-			{
-				// offset for time overshoot to not accumulate large ramp error
-				last_ramp_up_increment_ms = now - (uint8_t)(time_diff - ramp_up_current_interval_ms);
-			}
-		}
-
-		*target_current = ramp_up_target_current;
-	}
-	else
-	{
-		ramp_up_target_current = *target_current;
-	}
-}
-
-void apply_current_ramp_down(uint8_t* target_current)
-{
-	// apply fast ramp down if coming from high target current (> 50%)
-	if (*target_current < ramp_down_target_current)
-	{
-		uint32_t now = system_ms();
-		uint16_t time_diff = now - last_ramp_down_decrement_ms;
-
-		if (time_diff >= 10)
-		{
-			uint8_t diff = ramp_down_target_current - *target_current;
-
-			if (diff >= CURRENT_RAMP_DOWN_PERCENT_10MS)
-			{
-				ramp_down_target_current -= CURRENT_RAMP_DOWN_PERCENT_10MS;
-			}
-			else
-			{
-				ramp_down_target_current -= diff;
-			}
-
-			if (last_ramp_down_decrement_ms == 0)
-			{
-				last_ramp_down_decrement_ms = now;
-			}
-			else
-			{
-				// offset for time overshoot to not accumulate large ramp error
-				last_ramp_down_decrement_ms = now - (uint8_t)(time_diff - 10);
-			}
-		}
-
-		*target_current = ramp_down_target_current;
-	}
-	else
-	{
-		ramp_down_target_current = *target_current;
-	}
-}
-
-void apply_speed_limit(uint8_t* target_current)
+bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool throttle_override)
 {
 	static bool speed_limiting = false;
 
-	if (g_config.use_speed_sensor && assist_level_data.max_wheel_speed_rpm_x10 > 0)
+	if (!g_config.use_speed_sensor)
+	{
+		return false;
+	}
+
+	bool global_throttle_limit_active =
+		assist_level != ASSIST_PUSH &&
+		throttle_percent > 0 &&
+		g_config.throttle_global_spd_lim_percent > 0 &&
+		(
+			g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
+			(g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
+		);
+
+	bool throttle_speed_override_active = !global_throttle_limit_active && throttle_override &&
+		(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
+		(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_SPEED);
+
+	int32_t max_speed_rpm_x10;
+	if (global_throttle_limit_active)
+	{
+		// use configured global throttle override speed limit
+		max_speed_rpm_x10 = global_throttle_speed_limit_rpm_x10;
+	}
+	else if (throttle_speed_override_active)
+	{
+		// override assist level speed limit to global speed limit
+		max_speed_rpm_x10 = global_speed_limit_rpm * 10;
+	}
+	else
+	{
+		// normal operation, use configured assist level speed limit
+		max_speed_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10;
+	}
+
+	int32_t max_speed_ramp_low_rpm_x10 = max_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
+	int32_t max_speed_ramp_high_rpm_x10 = max_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
+
+	if (max_speed_rpm_x10 > 0)
 	{
 		int16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
 
-		if (current_speed_rpm_x10 < assist_level_data.speed_ramp_low_limit_rpm_x10)
+		if (current_speed_rpm_x10 < max_speed_ramp_low_rpm_x10)
 		{
 			// no limiting
 			if (speed_limiting)
@@ -621,33 +578,37 @@ void apply_speed_limit(uint8_t* target_current)
 		}		
 		else
 		{
-			if (current_speed_rpm_x10 > assist_level_data.speed_ramp_high_limit_rpm_x10)
-			{
-				if (*target_current > 1)
-				{
-					*target_current = 1;
-				}
-			}
-			else
-			{
-				// linear ramp down when approaching max speed.
-				uint8_t tmp = (uint8_t)MAP32(current_speed_rpm_x10, assist_level_data.speed_ramp_low_limit_rpm_x10, assist_level_data.speed_ramp_high_limit_rpm_x10, *target_current, 1);
-				if (*target_current > tmp)
-				{
-					*target_current = tmp;
-				}
-			}
-
 			if (!speed_limiting)
 			{
 				speed_limiting = true;
 				eventlog_write_data(EVT_DATA_SPEED_LIMITING, 1);
 			}
+
+			if (current_speed_rpm_x10 > max_speed_ramp_high_rpm_x10)
+			{
+				if (*target_current > 1)
+				{
+					*target_current = 1;
+					return true;
+				}
+			}
+			else
+			{
+				// linear ramp down when approaching max speed.
+				uint8_t tmp = (uint8_t)MAP32(current_speed_rpm_x10, max_speed_ramp_low_rpm_x10, max_speed_ramp_high_rpm_x10, *target_current, 1);
+				if (*target_current > tmp)
+				{
+					*target_current = tmp;
+					return true;
+				}
+			}
 		}
 	}
+
+	return false;
 }
 
-void apply_thermal_limit(uint8_t* target_current)
+bool apply_thermal_limit(uint8_t* target_current)
 {
 	static uint32_t next_log_temp_ms = 10000;
 
@@ -692,6 +653,7 @@ void apply_thermal_limit(uint8_t* target_current)
 		if (*target_current > tmp)
 		{
 			*target_current = tmp;
+			return true;
 		}
 	}
 	else
@@ -702,9 +664,11 @@ void apply_thermal_limit(uint8_t* target_current)
 			eventlog_write_data(EVT_DATA_THERMAL_LIMITING, 0);
 		}
 	}
+
+	return false;
 }
 
-void apply_low_voltage_limit(uint8_t* target_current)
+bool apply_low_voltage_limit(uint8_t* target_current)
 {
 	static uint32_t next_log_volt_ms = 10000;
 	static bool lvc_limiting = false;
@@ -756,12 +720,15 @@ void apply_low_voltage_limit(uint8_t* target_current)
 		if (*target_current > tmp)
 		{
 			*target_current = tmp;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 #if HAS_SHIFT_SENSOR_SUPPORT
-void apply_shift_sensor_interrupt(uint8_t* target_current)
+bool apply_shift_sensor_interrupt(uint8_t* target_current)
 {
 	static uint32_t shift_sensor_act_ms = 0;
 	static bool shift_sensor_last = false;
@@ -771,7 +738,7 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 	// Exit immediately if shift interrupts disabled.
 	if (!g_config.use_shift_sensor)
 	{
-		return;
+		return false;
 	}
 
 	bool active = shift_sensor_is_activated();
@@ -801,7 +768,7 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 
 	if (!shift_sensor_interrupting)
 	{
-		return;
+		return false;
 	}
 
 	if (system_ms() >= shift_sensor_act_ms)
@@ -814,7 +781,7 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 			shift_sensor_logged = false;
 			eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 0);
 		}
-		return;
+		return false;
 	}
 
 	if ((*target_current) > g_config.shift_interrupt_current_threshold_percent)
@@ -827,17 +794,103 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 		}
 		// Set target current based on desired current threshold during shift.
 		*target_current = g_config.shift_interrupt_current_threshold_percent;
+
+		return true;
 	}
+
+	return false;
 }
 #endif
 
-void apply_brake(uint8_t* target_current)
+bool apply_brake(uint8_t* target_current)
 {
 	if (brake_is_activated())
 	{
 		*target_current = 0;
+		return true;
+	}
+
+	return false;
+}
+
+void apply_current_ramp_up(uint8_t* target_current, bool enable)
+{
+	static uint8_t ramp_up_target_current = 0;
+	static uint32_t last_ramp_up_increment_ms = 0;
+
+	if (enable && *target_current > ramp_up_target_current)
+	{
+		uint32_t now = system_ms();
+		uint16_t time_diff = now - last_ramp_up_increment_ms;
+
+		if (time_diff >= ramp_up_current_interval_ms)
+		{
+			++ramp_up_target_current;
+
+			if (last_ramp_up_increment_ms == 0)
+			{
+				last_ramp_up_increment_ms = now;
+			}
+			else
+			{
+				// offset for time overshoot to not accumulate large ramp error
+				last_ramp_up_increment_ms = now - (uint8_t)(time_diff - ramp_up_current_interval_ms);
+			}
+		}
+
+		*target_current = ramp_up_target_current;
+	}
+	else
+	{
+		ramp_up_target_current = *target_current;
+		last_ramp_up_increment_ms = 0;
 	}
 }
+
+void apply_current_ramp_down(uint8_t* target_current, bool enable)
+{
+	static uint8_t ramp_down_target_current = 0;
+	static uint32_t last_ramp_down_decrement_ms = 0;
+
+	// apply fast ramp down if coming from high target current (> 50%)
+	if (enable && *target_current < ramp_down_target_current)
+	{
+		uint32_t now = system_ms();
+		uint16_t time_diff = now - last_ramp_down_decrement_ms;
+
+		if (time_diff >= 10)
+		{
+			uint8_t diff = ramp_down_target_current - *target_current;
+
+			if (diff >= CURRENT_RAMP_DOWN_PERCENT_10MS)
+			{
+				ramp_down_target_current -= CURRENT_RAMP_DOWN_PERCENT_10MS;
+			}
+			else
+			{
+				ramp_down_target_current -= diff;
+			}
+
+			if (last_ramp_down_decrement_ms == 0)
+			{
+				last_ramp_down_decrement_ms = now;
+			}
+			else
+			{
+				// offset for time overshoot to not accumulate large ramp error
+				last_ramp_down_decrement_ms = now - (uint8_t)(time_diff - 10);
+			}
+		}
+
+		*target_current = ramp_down_target_current;
+	}
+	else
+	{
+		ramp_down_target_current = *target_current;
+		last_ramp_down_decrement_ms = 0;
+	}
+}
+
 
 bool check_power_block()
 {
@@ -868,7 +921,7 @@ void reload_assist_params()
 	{
 		assist_level_data.level = g_config.assist_levels[operation_mode][assist_level];
 
-		assist_level_data.max_wheel_speed_rpm_x10 = ((uint32_t)((uint32_t)global_max_speed_rpm * assist_level_data.level.max_speed_percent) / 10);
+		assist_level_data.max_wheel_speed_rpm_x10 = ((int32_t)global_speed_limit_rpm * assist_level_data.level.max_speed_percent) / 10;
 
 		if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 		{
@@ -892,10 +945,6 @@ void reload_assist_params()
 		
 		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH) * 10;
 	}
-
-	// compute speed ramp intervals
-	assist_level_data.speed_ramp_low_limit_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10 - speed_limit_ramp_interval_rpm_x10;
-	assist_level_data.speed_ramp_high_limit_rpm_x10 = assist_level_data.max_wheel_speed_rpm_x10 + speed_limit_ramp_interval_rpm_x10;
 }
 
 uint16_t convert_wheel_speed_kph_to_rpm(uint8_t speed_kph)

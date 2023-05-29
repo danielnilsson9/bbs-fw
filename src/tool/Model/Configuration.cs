@@ -18,7 +18,7 @@ namespace BBSFW.Model
 		public const int ByteSizeV1 = 120;
 		public const int ByteSizeV2 = 124;
 		public const int ByteSizeV3 = 149;
-		public const int ByteSizeV4 = 150;
+		public const int ByteSizeV4 = 152;
 
 		public enum Feature
 		{
@@ -78,6 +78,13 @@ namespace BBSFW.Model
 			SpeedOverride = 0x40
 		};
 
+		public enum ThrottleGlobalSpeedLimit
+		{
+			Disabled = 0x00,
+			Enabled = 0x01,
+			StandardLevels = 0x02
+		}
+
 		public enum TemperatureSensor
 		{
 			Disabled = 0x00,
@@ -93,6 +100,7 @@ namespace BBSFW.Model
 			RequestedPower = 2,
 			BatteryPercent = 3
 		}
+
 
 		public class AssistLevel
 		{
@@ -171,6 +179,8 @@ namespace BBSFW.Model
 		public uint ThrottleStartMillivolts;
 		public uint ThrottleEndMillivolts;
 		public uint ThrottleStartPercent;
+		public ThrottleGlobalSpeedLimit ThrottleGlobalSpeedLimitOpt;
+		public uint ThrottleGlobalSpeedLimitPercent;
 
 		// shift interrupt options
 		public uint ShiftInterruptDuration;
@@ -219,6 +229,8 @@ namespace BBSFW.Model
 			ThrottleStartMillivolts = 0;
 			ThrottleEndMillivolts = 0;
 			ThrottleStartPercent = 0;
+			ThrottleGlobalSpeedLimitOpt = ThrottleGlobalSpeedLimit.Disabled;
+			ThrottleGlobalSpeedLimitPercent = 0;
 
 			ShiftInterruptDuration = 0;
 			ShiftInterruptCurrentThresholdPercent = 0;
@@ -325,6 +337,8 @@ namespace BBSFW.Model
 			ShiftInterruptDuration = 600;
 			ShiftInterruptCurrentThresholdPercent = 10;
 			LightsAlwaysOn = false;
+			ThrottleGlobalSpeedLimitOpt = ThrottleGlobalSpeedLimit.Disabled;
+			ThrottleGlobalSpeedLimitPercent = 100;
 
 			return true;
 		}
@@ -389,13 +403,15 @@ namespace BBSFW.Model
 				}
 			}
 
-			// apply same default settings for non existing options in version
+			// apply default settings for non existing options in version
 			PasKeepCurrentPercent = 100;
 			PasKeepCurrentCadenceRpm = 255;
 			UseShiftSensor = true;
 			ShiftInterruptDuration = 600;
 			ShiftInterruptCurrentThresholdPercent = 10;
 			LightsAlwaysOn = false;
+			ThrottleGlobalSpeedLimitOpt = ThrottleGlobalSpeedLimit.Disabled;
+			ThrottleGlobalSpeedLimitPercent = 100;
 
 			return true;
 		}
@@ -465,8 +481,10 @@ namespace BBSFW.Model
 				}
 			}
 
-			// apply same default settings for non existing options in version
+			// apply default settings for non existing options in version
 			LightsAlwaysOn = false;
+			ThrottleGlobalSpeedLimitOpt = ThrottleGlobalSpeedLimit.Disabled;
+			ThrottleGlobalSpeedLimitPercent = 100;
 
 			return true;
 		}
@@ -508,6 +526,8 @@ namespace BBSFW.Model
 				ThrottleStartMillivolts = br.ReadUInt16();
 				ThrottleEndMillivolts = br.ReadUInt16();
 				ThrottleStartPercent = br.ReadByte();
+				ThrottleGlobalSpeedLimitOpt = (ThrottleGlobalSpeedLimit)br.ReadByte();
+				ThrottleGlobalSpeedLimitPercent = br.ReadByte();
 
 				ShiftInterruptDuration = br.ReadUInt16();
 				ShiftInterruptCurrentThresholdPercent = br.ReadByte();
@@ -541,6 +561,7 @@ namespace BBSFW.Model
 			return true;
 		}
 
+
 		public byte[] WriteToBuffer()
 		{
 			using (var s = new MemoryStream())
@@ -573,6 +594,8 @@ namespace BBSFW.Model
 				bw.Write((UInt16)ThrottleStartMillivolts);
 				bw.Write((UInt16)ThrottleEndMillivolts);
 				bw.Write((byte)ThrottleStartPercent);
+				bw.Write((byte)ThrottleGlobalSpeedLimitOpt);
+				bw.Write((byte)ThrottleGlobalSpeedLimitPercent);
 
 				bw.Write((UInt16)ShiftInterruptDuration);
 				bw.Write((byte)ShiftInterruptCurrentThresholdPercent);
@@ -630,6 +653,8 @@ namespace BBSFW.Model
 			ThrottleStartMillivolts = cfg.ThrottleStartMillivolts;
 			ThrottleEndMillivolts = cfg.ThrottleEndMillivolts;
 			ThrottleStartPercent = cfg.ThrottleStartPercent;
+			ThrottleGlobalSpeedLimitOpt = cfg.ThrottleGlobalSpeedLimitOpt;
+			ThrottleGlobalSpeedLimitPercent = cfg.ThrottleGlobalSpeedLimitPercent;
 			ShiftInterruptDuration = cfg.ShiftInterruptDuration;
 			ShiftInterruptCurrentThresholdPercent = cfg.ShiftInterruptCurrentThresholdPercent;
 			WalkModeDataDisplay = cfg.WalkModeDataDisplay;
@@ -697,6 +722,7 @@ namespace BBSFW.Model
 			ValidateLimits(ThrottleStartMillivolts, 200, 2500, "Throttle Start (mV)");
 			ValidateLimits(ThrottleEndMillivolts, 2500, 5000, "Throttle End (mV)");
 			ValidateLimits(ThrottleStartPercent, 0, 100, "Throttle Start (%)");
+			ValidateLimits(ThrottleGlobalSpeedLimitPercent, 0, 100, "Throttle Global Speed Limit (%)");
 
 			ValidateLimits(ShiftInterruptDuration, 50, 2000, "Shift Interrupt Duration (ms)");
 			ValidateLimits(ShiftInterruptCurrentThresholdPercent, 0, 100, "Shift Interrupt Current Threshold (%)");

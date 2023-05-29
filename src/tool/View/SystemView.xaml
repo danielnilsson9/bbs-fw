@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BBSFW.View"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="500" d:DesignWidth="850">
 
 	<UserControl.Resources>
 		<BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -75,6 +75,8 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 
 				<TextBlock Grid.Row="0" Text="Throttle" FontSize="18" FontWeight="Bold" />
@@ -87,6 +89,46 @@
 
 				<TextBlock Grid.Column="0" Grid.Row="3" Margin="0 8 0 0" Text="Start Current (%):" />
 				<TextBox Grid.Column="2" Grid.Row="3" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ThrottleStartCurrentPercent, UpdateSourceTrigger=PropertyChanged}" />
+
+				<TextBlock Grid.Column="0" Grid.Row="4" Margin="0 8 0 0" Text="Global Speed Limit Options:">
+					<TextBlock.ToolTip>
+						<TextBlock Width="400" TextWrapping="Wrap">
+						Enable global speed limit when throttle is used. Some countries have laws
+						that only permits use of throttle up to a specific speed. This option can
+						be used in order to comply with such laws.
+						<LineBreak />
+						<LineBreak />
+						When this option is enabled the configured global speed limit will override the 
+						assist level speed limit when throttle is used.
+						<LineBreak />
+						<LineBreak />
+						<Run FontWeight="Bold">Disabled</Run> - No global speed limit.
+						<LineBreak />
+						<Run FontWeight="Bold">Enabled</Run> - Global speed limit applies to all assist levels.
+						<LineBreak />
+						<Run FontWeight="Bold">Standard Levels</Run> - Global speed limit applies to standard assist levels only.
+						</TextBlock>
+					</TextBlock.ToolTip>
+				</TextBlock>
+				<ComboBox Grid.Column="2" Grid.Row="4" Margin="0 8 0 0" Width="120" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.ThrottleGlobalSpeedLimitOptions}" SelectedItem="{Binding ConfigVm.ThrottleGlobalSpeedLimitOpt, UpdateSourceTrigger=PropertyChanged}" />
+
+				<TextBlock Grid.Column="0" Grid.Row="5" Margin="0 8 0 0" Text="Global Speed Limit (%):">
+					<TextBlock.ToolTip>
+					Set speed limit in % of configured max speed when global throttle speed limit is enabled.
+					</TextBlock.ToolTip>
+				</TextBlock>
+				<TextBox Grid.Column="2" Grid.Row="5" Margin="0 8 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.ThrottleGlobalSpeedLimitPercent, UpdateSourceTrigger=PropertyChanged}">
+					<TextBox.Style>
+						<Style TargetType="{x:Type TextBox}">
+							<Setter Property="IsEnabled" Value="True" />
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding ConfigVm.ThrottleGlobalSpeedLimitOpt.Value}" Value="Disabled">
+									<Setter Property="IsEnabled" Value="False" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBox.Style>
+				</TextBox>
 
 			</Grid>
 
@@ -263,6 +305,7 @@
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 
 
@@ -279,6 +322,8 @@
 						<Run FontWeight="Bold">Temperature</Run> - Display max value of motor/controller temperature in °C.
 						<LineBreak />
 						<Run FontWeight="Bold">Requested Power</Run> - Display requested motor power in percent.
+						<LineBreak />
+						<Run FontWeight="Bold">Battery Level</Run> - Display computed battery level in percent.
 						</TextBlock>
 					</TextBlock.ToolTip>
 				</TextBlock>
