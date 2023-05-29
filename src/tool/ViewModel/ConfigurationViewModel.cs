@@ -48,7 +48,6 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<Configuration.AssistModeSelect>(Configuration.AssistModeSelect.Pas9AndLights, "PAS 9 + Lights Button"),
 			};
 
-
 		public static List<ValueItemViewModel<Configuration.WalkModeData>> WalkModeDataDisplayOptions { get; } =
 			new List<ValueItemViewModel<Configuration.WalkModeData>>
 			{
@@ -56,6 +55,14 @@ namespace BBSFW.ViewModel
 				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.Temperature, "Temperature (C)"),
 				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.RequestedPower, "Requested Power (%)"),
 				new ValueItemViewModel<Configuration.WalkModeData>(Configuration.WalkModeData.BatteryPercent, "Battery Level (%)")
+			};
+
+		public static List<ValueItemViewModel<Configuration.ThrottleGlobalSpeedLimit>> ThrottleGlobalSpeedLimitOptions { get; } =
+			new List<ValueItemViewModel<Configuration.ThrottleGlobalSpeedLimit>>
+			{
+				new ValueItemViewModel<Configuration.ThrottleGlobalSpeedLimit>(Configuration.ThrottleGlobalSpeedLimit.Disabled, "Disabled"),
+				new ValueItemViewModel<Configuration.ThrottleGlobalSpeedLimit>(Configuration.ThrottleGlobalSpeedLimit.Enabled, "Enabled"),
+				new ValueItemViewModel<Configuration.ThrottleGlobalSpeedLimit>(Configuration.ThrottleGlobalSpeedLimit.StandardLevels, "Standard Levels"),
 			};
 
 
@@ -301,6 +308,37 @@ namespace BBSFW.ViewModel
 				}
 			}
 		}
+
+		public ValueItemViewModel<Configuration.ThrottleGlobalSpeedLimit> ThrottleGlobalSpeedLimitOpt
+		{
+			get
+			{
+				return ThrottleGlobalSpeedLimitOptions.FirstOrDefault((e) => e.Value == _config.ThrottleGlobalSpeedLimitOpt);
+			}
+			set
+			{
+				if (_config.ThrottleGlobalSpeedLimitOpt != value.Value)
+				{
+					_config.ThrottleGlobalSpeedLimitOpt = value.Value;
+					OnPropertyChanged(nameof(ThrottleGlobalSpeedLimitOpt));
+				}
+			}
+		}
+
+		public uint ThrottleGlobalSpeedLimitPercent
+		{
+			get { return _config.ThrottleGlobalSpeedLimitPercent; }
+			set
+			{
+				if (_config.ThrottleGlobalSpeedLimitPercent != value)
+				{
+					_config.ThrottleGlobalSpeedLimitPercent = value;
+					OnPropertyChanged(nameof(ThrottleGlobalSpeedLimitPercent));
+				}
+			}
+		}
+
+
 
 		public uint PasStartDelayDegrees
 		{

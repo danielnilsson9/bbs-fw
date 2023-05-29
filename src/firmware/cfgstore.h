@@ -45,6 +45,9 @@
 #define WALK_MODE_DATA_REQUESTED_POWER	2
 #define WALK_MODE_DATA_BATTERY_PERCENT	3
 
+#define THROTTLE_GLOBAL_SPEED_LIMIT_DISABLED	0
+#define THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED		1
+#define THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS	2
 
 #define CONFIG_VERSION					4
 #define PSTATE_VERSION					1
@@ -81,8 +84,6 @@ typedef struct
 	uint8_t use_shift_sensor;
 	uint8_t use_push_walk;
 	uint8_t use_temperature_sensor;
-
-	// lights
 	uint8_t lights_always_on;
 
 	// speed sensor
@@ -102,6 +103,8 @@ typedef struct
 	uint8_t throttle_end_voltage_mv_u16l;
 	uint8_t throttle_end_voltage_mv_u16h;
 	uint8_t throttle_start_percent;
+	uint8_t throttle_global_spd_lim_opt;
+	uint8_t throttle_global_spd_lim_percent;
 
 	// shift interrupt options
 	uint8_t shift_interrupt_duration_ms_u16l;
