@@ -309,6 +309,13 @@ uint8_t app_get_status_code()
 		return STATUS_ERROR_CURRENT_SENSE;
 	}
 
+	if (motor & MOTOR_ERROR_POWER_RESET)
+	{
+		// Phase line error code reused, cause and meaning
+		// of MOTOR_ERROR_POWER_RESET triggered on bbs02 is currently unknown
+		return STATUS_ERROR_PHASE_LINE;
+	}
+
 	if (!throttle_ok())
 	{
 		return STATUS_ERROR_THROTTLE;
