@@ -250,6 +250,19 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		public bool LightsAlwaysOn
+		{
+			get { return _config.LightsAlwaysOn; }
+			set
+			{
+				if (_config.LightsAlwaysOn != value)
+				{
+					_config.LightsAlwaysOn = value;
+					OnPropertyChanged(nameof(LightsAlwaysOn));
+				}
+			}
+		}
+
 		public uint ThrottleStartVoltageMillivolts
 		{
 			get { return _config.ThrottleStartMillivolts; }
