@@ -149,7 +149,7 @@ namespace BBSFW.Model
 				_isConnecting = false;
 
 				_port.Close();
-				_port.DataReceived += OnDataReceived;
+				_port.DataReceived -= OnDataReceived;
 				_port = null;
 
 				lock (_rxBuffer)
