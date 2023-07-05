@@ -37,6 +37,7 @@ namespace BBSFW.Model
 		private const int EVT_ERROR_THROTTLE_HIGH_LIMIT =		76;
 		private const int EVT_ERROR_WATCHDOG_TRIGGERED =		77;
 		private const int EVT_ERROR_EXTCOM_CHECKSUM =			78;
+		private const int EVT_ERROR_EXTCOM_DISCARD =			79;
 
 		private const int EVT_DATA_TARGET_CURRENT =				128;
 		private const int EVT_DATA_TARGET_SPEED =				129;
@@ -150,6 +151,8 @@ namespace BBSFW.Model
 					return "Software reset by watchdog, software error.";
 				case EVT_ERROR_EXTCOM_CHECKSUM:
 					return "Message received with invalid checksum.";
+				case EVT_ERROR_EXTCOM_DISCARD:
+					return "Invalid message received on serial port, discarded.";
 
 				case EVT_DATA_TARGET_CURRENT:
 					return $"Motor target current changed to {_data}%.";
