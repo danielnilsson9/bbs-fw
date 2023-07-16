@@ -232,23 +232,25 @@ void app_set_assist_level(uint8_t level)
 	}
 }
 
+static __code uint8_t assist_mode_select_[] = {
+	ASSIST_MODE_SELECT_PAS0_LIGHT,
+	ASSIST_MODE_SELECT_PAS1_LIGHT,
+	ASSIST_MODE_SELECT_PAS2_LIGHT,
+	ASSIST_MODE_SELECT_PAS3_LIGHT,
+	ASSIST_MODE_SELECT_PAS4_LIGHT,
+	ASSIST_MODE_SELECT_PAS5_LIGHT,
+	ASSIST_MODE_SELECT_PAS6_LIGHT,
+	ASSIST_MODE_SELECT_PAS7_LIGHT,
+	ASSIST_MODE_SELECT_PAS8_LIGHT,
+	ASSIST_MODE_SELECT_PAS9_LIGHT
+};
+
 void app_set_lights(bool on)
 {
 	static bool last_light_state = false;
 
-	if ( // it's ok to write ugly code if you say it's ugly...
-		(g_config.assist_mode_select == ASSIST_MODE_SELECT_LIGHTS) ||
-		(assist_level == ASSIST_0 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS0_LIGHT) ||
-		(assist_level == ASSIST_1 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS1_LIGHT) ||
-		(assist_level == ASSIST_2 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS2_LIGHT) ||
-		(assist_level == ASSIST_3 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS3_LIGHT) ||
-		(assist_level == ASSIST_4 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS4_LIGHT) ||
-		(assist_level == ASSIST_5 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS5_LIGHT) ||
-		(assist_level == ASSIST_6 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS6_LIGHT) ||
-		(assist_level == ASSIST_7 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS7_LIGHT) ||
-		(assist_level == ASSIST_8 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS8_LIGHT) ||
-		(assist_level == ASSIST_9 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS9_LIGHT)
-	)
+	if (g_config.assist_mode_select == ASSIST_MODE_SELECT_LIGHTS ||
+		(assist_level < 10 && g_config.assist_mode_select == assist_mode_select_[assist_level]))
 	{
 		if (on)
 		{
