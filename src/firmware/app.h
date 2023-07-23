@@ -47,8 +47,8 @@
 #define STATUS_ERROR_CONTROLLER_TEMP_SENSOR 0x15 // not implemented
 #define STATUS_ERROR_SPEED_SENSOR			0x21 // not implemented
 #define STATUS_ERROR_BMS_COMMUNICATION		0x22 // n/a
-#define STATUS_ERROR_HEAD_LIGHT				0x24 // not implemented
-#define STATUS_ERROR_HEAD_LIGHT_SENSOR		0x25 // not implemented
+#define STATUS_ERROR_HEAD_LIGHT				0x23 // not implemented
+#define STATUS_ERROR_HEAD_LIGHT_SENSOR		0x24 // not implemented
 #define STATUS_ERROR_TORQUE_SENSOR			0x25
 #define STATUS_ERROR_TORQUE_SPEED			0x26 // n/a
 #define STATUS_ERROR_COMMUNICATION			0x30 // n/a
