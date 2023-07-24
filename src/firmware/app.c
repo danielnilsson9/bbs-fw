@@ -755,7 +755,9 @@ void apply_low_voltage_limit(uint8_t* target_current)
 void apply_shift_sensor_interrupt(uint8_t* target_current)
 {
 	static uint32_t shift_sensor_act_ms = 0;
-	static bool interrupt_necessary = false;
+	static bool shift_sensor_last = false;
+	static bool shift_sensor_interrupting = false;
+	static bool shift_sensor_logged = false;
 
 	// Exit immediately if shift interrupts disabled.
 	if (!g_config.use_shift_sensor)
@@ -766,35 +768,56 @@ void apply_shift_sensor_interrupt(uint8_t* target_current)
 	bool active = shift_sensor_is_activated();
 	if (active)
 	{
-		if (shift_sensor_act_ms == 0)
+		// Check for new pulse from the gear sensor during shift interrupt
+		if (!shift_sensor_last && shift_sensor_interrupting)
 		{
-			shift_sensor_act_ms = system_ms();
-			interrupt_necessary = (*target_current) > g_config.shift_interrupt_current_threshold_percent;
-
-			if (interrupt_necessary)
-			{
-				eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 1);
-			}
+			// Consecutive gear change, do restart.
+			shift_sensor_interrupting = false;
 		}
+		if (!shift_sensor_interrupting)
+		{
+			uint16_t duration_ms = EXPAND_U16(
+				g_config.shift_interrupt_duration_ms_u16h,
+				g_config.shift_interrupt_duration_ms_u16l
+			);
+			shift_sensor_act_ms = system_ms() + duration_ms;
+			shift_sensor_interrupting = true;
+		}
+		shift_sensor_last = true;
 	}
-
-	uint16_t duration_ms = EXPAND_U16(
-		g_config.shift_interrupt_duration_ms_u16h,
-		g_config.shift_interrupt_duration_ms_u16l
-	);
-
-	uint32_t timediff = system_ms() - shift_sensor_act_ms;
-	if (interrupt_necessary && (active || timediff < duration_ms))
+	else
 	{
-		// Set target current based on desired current threshold during shift.
-		*target_current = g_config.shift_interrupt_current_threshold_percent;
+		shift_sensor_last = false;
 	}
-	else if (!active && shift_sensor_act_ms != 0)
+
+	if (!shift_sensor_interrupting)
+	{
+		return;
+	}
+
+	if (system_ms() >= shift_sensor_act_ms)
 	{
 		// Shift is finished, reset function state.
-		shift_sensor_act_ms = 0;
-		interrupt_necessary = false;
-		eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 0);
+		shift_sensor_interrupting = false;
+		// Logging is skipped, unless current has been clamped during shift interrupt.
+		if (shift_sensor_logged)
+		{
+			shift_sensor_logged = false;
+			eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 0);
+		}
+		return;
+	}
+
+	if ((*target_current) > g_config.shift_interrupt_current_threshold_percent)
+	{
+		if (!shift_sensor_logged)
+		{
+			// Logging only once per shifting interrupt.
+			shift_sensor_logged = true;
+			eventlog_write_data(EVT_DATA_SHIFT_SENSOR, 1);
+		}
+		// Set target current based on desired current threshold during shift.
+		*target_current = g_config.shift_interrupt_current_threshold_percent;
 	}
 }
 #endif
