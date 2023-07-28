@@ -27,7 +27,8 @@
 #define DISCARD		-1
 
 
-#define BUFFER_SIZE 192
+#define BUFFER_SIZE			192
+#define DISCARD_TIMEOUT_MS	50
 
 #define REQUEST_TYPE_READ						0x01
 #define REQUEST_TYPE_WRITE						0x02
@@ -78,8 +79,8 @@
 
 static uint8_t msg_len;
 static uint8_t msgbuf[BUFFER_SIZE];
-static uint32_t last_recv;
-
+static uint32_t last_recv_ms;
+static uint32_t discard_until_ms;
 
 static uint8_t compute_checksum(uint8_t* buf, uint8_t length);
 static void write_uart_and_increment_checksum(uint8_t data, uint8_t* checksum);
@@ -120,15 +121,16 @@ static int16_t process_bafang_display_write_speed_limit();
 void extcom_init()
 {
 	msg_len = 0;
-	last_recv = 0;
+	last_recv_ms = 0;
+	discard_until_ms = 0;
 
-	// bafang standard baudrate
+	// Bafang standard baud rate
 	uart_open(1200);
 
 
 	// Wait one second for config tool connection.
 	// This is here to that the config tool can enable
-	// the eventlog before system proceeds with initialization.
+	// the event log before system proceeds with initialization.
 	uint32_t end = system_ms() + 1000;
 	while (system_ms() < end)
 	{
@@ -143,7 +145,7 @@ void extcom_process()
 
 	while (uart_available())
 	{
-		if (msg_len == BUFFER_SIZE)
+		if (msg_len == BUFFER_SIZE || (discard_until_ms != 0 && now < discard_until_ms))
 		{
 			// communication error, reset
 			msg_len = 0;
@@ -152,11 +154,12 @@ void extcom_process()
 		else
 		{
 			msgbuf[msg_len++] = uart_read();
-			last_recv = now;
+			last_recv_ms = now;
+			discard_until_ms = 0;
 		}	
 	}
 
-	if (msg_len > 0 && now - last_recv > 100)
+	if (msg_len > 0 && now - last_recv_ms > 100)
 	{
 		// communication error, reset
 		msg_len = 0;
@@ -166,20 +169,24 @@ void extcom_process()
 	if (res == DISCARD)
 	{
 		msg_len = 0;
-		last_recv = 0;
+		last_recv_ms = 0;
+		// Discard received data for the next DISCARD_TIMEOUT_MS milliseconds
+		discard_until_ms = now + DISCARD_TIMEOUT_MS;
+
+		eventlog_write(EVT_ERROR_EXTCOM_DISCARD);
 	}
 	else if (res > 0)
 	{
 		if (res < msg_len)
 		{
-			// will not happend due to request/response communication
+			// will not occur due to request/response communication
 			memcpy(msgbuf, msgbuf + res, msg_len - res);
 			msg_len -= res;
 		}
 		else
 		{
 			msg_len = 0;
-			last_recv = 0;
+			last_recv_ms = 0;
 		}
 	}
 }
@@ -347,6 +354,7 @@ static int16_t process_read_fw_version()
 	else
 	{
 		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
 	}
 
 	return 3;
@@ -370,6 +378,7 @@ static int16_t process_read_evtlog_enable()
 	else
 	{
 		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
 	}
 
 	return 3;
@@ -401,6 +410,7 @@ static int16_t process_read_config()
 	else
 	{
 		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
 	}
 
 	return 3;
@@ -432,6 +442,7 @@ static int16_t process_write_evtlog_enable()
 	else
 	{
 		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
 	}
 
 	return 4;
@@ -470,6 +481,7 @@ static int16_t process_write_config()
 	else
 	{
 		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
 	}
 
 	return 4 + length + 1;
@@ -496,6 +508,7 @@ static int16_t process_write_reset_config()
 	else
 	{
 		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
 	}
 
 	return 3;
@@ -528,6 +541,7 @@ static int16_t process_write_adc_voltage_calibration()
 	else
 	{
 		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
 	}
 
 	return 5;
@@ -725,46 +739,53 @@ static int16_t process_bafang_display_write_pas()
 		return KEEP;
 	}
 
-	uint8_t level = ASSIST_0;
-
-	switch (msgbuf[2])
+	if (compute_checksum(msgbuf, 3) == msgbuf[3])
 	{
-	case 0x00:
-		level = ASSIST_0;
-		break;
-	case 0x01:
-		level = ASSIST_1;
-		break;
-	case 0x0b:
-		level = ASSIST_2;
-		break;
-	case 0x0c:
-		level = ASSIST_3;
-		break;
-	case 0x0d:
-		level = ASSIST_4;
-		break;
-	case 0x02:
-		level = ASSIST_5;
-		break;
-	case 0x15:
-		level = ASSIST_6;
-		break;
-	case 0x16:
-		level = ASSIST_7;
-		break;
-	case 0x17:
-		level = ASSIST_8;
-		break;
-	case 0x03:
-		level = ASSIST_9;
-		break;
-	case 0x06:
-		level = ASSIST_PUSH;
-		break;
+		switch (msgbuf[2])
+		{
+		case 0x00:
+			app_set_assist_level(ASSIST_0);
+			break;
+		case 0x01:
+			app_set_assist_level(ASSIST_1);
+			break;
+		case 0x0b:
+			app_set_assist_level(ASSIST_2);
+			break;
+		case 0x0c:
+			app_set_assist_level(ASSIST_3);
+			break;
+		case 0x0d:
+			app_set_assist_level(ASSIST_4);
+			break;
+		case 0x02:
+			app_set_assist_level(ASSIST_5);
+			break;
+		case 0x15:
+			app_set_assist_level(ASSIST_6);
+			break;
+		case 0x16:
+			app_set_assist_level(ASSIST_7);
+			break;
+		case 0x17:
+			app_set_assist_level(ASSIST_8);
+			break;
+		case 0x03:
+			app_set_assist_level(ASSIST_9);
+			break;
+		case 0x06:
+			app_set_assist_level(ASSIST_PUSH);
+			break;
+		default:
+			// Unsupported level, ignore
+			break;
+		}
 	}
-
-	app_set_assist_level(level);
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
+	}
 
 	return 4;
 }
@@ -776,19 +797,26 @@ static int16_t process_bafang_display_write_mode()
 		return KEEP;
 	}
 
-	uint8_t mode = OPERATION_MODE_DEFAULT;
-
-	switch (msgbuf[2])
+	if (compute_checksum(msgbuf, 3) == msgbuf[3])
 	{
-	case 0x02:
-		mode = OPERATION_MODE_DEFAULT;
-		break;
-	case 0x04:
-		mode = OPERATION_MODE_SPORT;
-		break;
+		switch (msgbuf[2])
+		{
+		case 0x02:
+			app_set_operation_mode(OPERATION_MODE_DEFAULT);
+			break;
+		case 0x04:
+			app_set_operation_mode(OPERATION_MODE_SPORT);
+			break;
+		default:
+			// Unsupported mode, ignore
+			break;
+		}
 	}
-
-	app_set_operation_mode(mode);
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
+	}
 
 	return 4;
 }
@@ -800,6 +828,8 @@ static int16_t process_bafang_display_write_lights()
 		return KEEP;
 	}
 
+	// No checksum
+
 	switch (msgbuf[2])
 	{
 	case 0xf0:
@@ -808,6 +838,8 @@ static int16_t process_bafang_display_write_lights()
 	case 0xf1:
 		app_set_lights(true);
 		break;
+	default:
+		return DISCARD; // unsupported state, assume communication error
 	}
 
 	return 3;
@@ -820,14 +852,21 @@ static int16_t process_bafang_display_write_speed_limit()
 		return KEEP;
 	}
 
-	//if (compute_checksum(msgbuf + 2, 2) == msgbuf[4])
-	//{
-	//	 // Ignoring speed limit requested by display,
-	//	 // global speed limit is configured in firmware config tool.
-	//	 
-	//	 uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
-	//	 app_set_wheel_max_speed_rpm(value);
-	//}
+	/*
+	if (compute_checksum(msgbuf, 4) == msgbuf[4])
+	{
+		 // Ignoring speed limit requested by display,
+		 // Global speed limit is configured in firmware config tool.
+		 
+		 uint16_t value = ((msgbuf[2] << 8) | msgbuf[3]);
+		 app_set_wheel_max_speed_rpm(value);
+	}
+	else
+	{
+		eventlog_write(EVT_ERROR_EXTCOM_CHEKSUM);
+		return DISCARD;
+	}
+	*/
 
 	return 5;
 }
