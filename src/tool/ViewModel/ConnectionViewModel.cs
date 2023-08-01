@@ -129,6 +129,14 @@ namespace BBSFW.ViewModel
 
 		public event Action<EventLogEntry> EventLogReceived;
 
+		public ICommand RefreshCommand
+		{
+			get
+			{
+				return new DelegateCommand(OnRefresh);
+			}
+		}
+
 
 		public ICommand ConnectCommand
 		{
@@ -186,6 +194,11 @@ namespace BBSFW.ViewModel
 			ConfigVersion = 0;
 		}
 
+		private void OnRefresh()
+		{
+			ComPorts = BbsfwConnection.GetComPorts();
+			OnPropertyChanged(nameof(ComPorts));
+		}
 
 		private async void OnConnect()
 		{
