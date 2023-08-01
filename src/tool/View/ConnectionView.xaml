@@ -38,6 +38,15 @@
 
 		<StackPanel Grid.Column="2" Grid.Row="0" Height="80" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding IsDisconnected, Converter={StaticResource BoolToVis}}">
 
+			<Button Content="Refresh" Width="120" Command="{Binding RefreshCommand}">
+				<Button.Style>
+					<Style TargetType="{x:Type Button}">
+						<Setter Property="IsEnabled" Value="True" />
+						<Setter Property="Visibility" Value="Visible" />
+					</Style>
+				</Button.Style>
+			</Button>
+
 			<Button Content="Connect" Width="120" Command="{Binding ConnectCommand}">
 				<Button.Style>
 					<Style TargetType="{x:Type Button}">
