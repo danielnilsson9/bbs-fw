@@ -7,6 +7,7 @@
  */
 
 #include "motor.h"
+#include "sensors.h"
 #include "system.h"
 #include "eventlog.h"
 #include "bbsx/uart_motor.h"
@@ -167,7 +168,16 @@ void motor_enable()
 
 void motor_disable()
 {
-	SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
+	if (!brake_is_activated())
+	{
+		// Brake signal is also connected to motor control MCU.
+		// If we disable motor power here during braking it causes
+		// a small issue where change in target current is not accepted
+		// while in disabled state. This will result in a short power spike
+		// when brake eventually released.
+
+		SET_PIN_LOW(PIN_MOTOR_POWER_ENABLE);
+	}	
 }
 
 uint16_t motor_status()
