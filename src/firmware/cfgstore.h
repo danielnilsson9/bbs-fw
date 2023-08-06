@@ -46,7 +46,7 @@
 #define WALK_MODE_DATA_BATTERY_PERCENT	3
 
 
-#define CONFIG_VERSION					3
+#define CONFIG_VERSION					4
 #define PSTATE_VERSION					1
 
 
