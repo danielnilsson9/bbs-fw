@@ -49,6 +49,11 @@
 #define THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED		1
 #define THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS	2
 
+#define LIGHTS_MODE_DEFAULT				0
+#define LIGHTS_MODE_DISABLED			1
+#define LIGHTS_MODE_ALWAYS_ON			2
+#define LIGHTS_MODE_BRAKE_LIGHT			3
+
 #define CONFIG_VERSION					4
 #define PSTATE_VERSION					1
 
@@ -84,7 +89,7 @@ typedef struct
 	uint8_t use_shift_sensor;
 	uint8_t use_push_walk;
 	uint8_t use_temperature_sensor;
-	uint8_t lights_always_on;
+	uint8_t lights_mode;
 
 	// speed sensor
 	uint8_t wheel_size_inch_x10_u16l;
