@@ -90,7 +90,7 @@ void app_init()
 {
 	motor_disable();
 	lights_disable();
-	lights_set(g_config.lights_always_on);
+	lights_set(g_config.lights_mode == LIGHTS_MODE_ALWAYS_ON);
 
 	lvc_voltage_x100 = g_config.low_cut_off_v * 100u;
 
@@ -184,7 +184,7 @@ void app_process()
 		motor_disable();
 	}
 
-	if (motor_status() & MOTOR_ERROR_LVC)
+	if (g_config.lights_mode == LIGHTS_MODE_DISABLED /*|| (motor_status() & MOTOR_ERROR_LVC) */)
 	{
 		lights_disable();
 	}
@@ -242,12 +242,7 @@ void app_set_lights(bool on)
 	}
 	else
 	{
-		if (g_config.lights_always_on)
-		{
-			on = true;
-		}
-
-		if (last_light_state != on)
+		if (g_config.lights_mode == LIGHTS_MODE_DEFAULT && last_light_state != on)
 		{
 			last_light_state = on;
 			eventlog_write_data(EVT_DATA_LIGHTS, on);
@@ -804,13 +799,19 @@ bool apply_shift_sensor_interrupt(uint8_t* target_current)
 
 bool apply_brake(uint8_t* target_current)
 {
-	if (brake_is_activated())
+	bool is_braking = brake_is_activated();
+
+	if (g_config.lights_mode == LIGHTS_MODE_BRAKE_LIGHT)
 	{
-		*target_current = 0;
-		return true;
+		lights_set(is_braking);
 	}
 
-	return false;
+	if (is_braking)
+	{
+		*target_current = 0;
+	}
+
+	return is_braking;
 }
 
 void apply_current_ramp_up(uint8_t* target_current, bool enable)
