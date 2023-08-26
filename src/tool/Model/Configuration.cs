@@ -720,7 +720,7 @@ namespace BBSFW.Model
 
 			ValidateLimits((uint)WheelSizeInch, 10, 40, "Wheel Size (inch)");
 			ValidateLimits(NumWheelSensorSignals, 1, 10, "Wheel Sensor Signals");
-			ValidateLimits(MaxSpeedKph, 0, 100, "Max Speed (km/h)");
+			ValidateLimits(MaxSpeedKph, 0, 180, "Max Speed (km/h)");
 
 			ValidateLimits(PasStartDelayPulses, 0, 24, "Pas Delay (pulses)");
 			ValidateLimits(PasStopDelayMilliseconds, 50, 1000, "Pas Stop Delay (ms)");
