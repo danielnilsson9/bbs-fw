@@ -34,6 +34,22 @@
 	#define HAS_SHIFT_SENSOR_SUPPORT			0
 #endif
 
+#if defined(BBS02)
+	#define MAX_CADENCE_RPM_X10					1500
+#elif defined(BBSHD)
+	// Measured on BBSHD at 48V
+	#define MAX_CADENCE_RPM_X10					1680
+#else
+	#define MAX_CADENCE_RPM_X10					1200
+#endif
+
+#if defined(BBS02) || defined(BBSHD)
+	#define PAS_PULSES_REVOLUTION				24
+#elif defined(TSDZ2)
+	#define PAS_PULSES_REVOLUTION				20
+#endif
+
+
  // Applied to both motor and controller tmeperature sensor
 #define MAX_TEMPERATURE							85
 
@@ -45,16 +61,6 @@
 // Motor current is ramped down linearly until this value when approaching
 // max temperature.
 #define MAX_TEMPERATURE_LOW_CURRENT_PERCENT		20
-
-
-#if defined(BBS02)
-	#define MAX_CADENCE_RPM_X10					1500
-#elif defined(BBSHD)
-	// Measured on BBSHD at 48V
-	#define MAX_CADENCE_RPM_X10					1680
-#else
-	#define MAX_CADENCE_RPM_X10					1200
-#endif
 
 
 // No battery percent mapping
@@ -112,5 +118,14 @@
 // actual cadence is lower it will be overriden by this
 // configured value.
 #define TORQUE_POWER_LOWER_RPM_X10				300
+
+
+// Number of PAS sensor pulses to engage cruise mode,
+// there are 24 pulses per revolution.
+#define CRUISE_ENGAGE_PAS_PULSES				PAS_PULSES_REVOLUTION / 2
+
+// Number of PAS sensor pulses to disengage curise mode
+// by pedaling backwards.
+#define CRUISE_DISENGAGE_PAS_PULSES				PAS_PULSES_REVOLUTION / 2
 
 #endif

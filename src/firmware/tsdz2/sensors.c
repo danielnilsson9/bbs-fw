@@ -8,6 +8,7 @@
 
 #include "sensors.h"
 #include "intellisense.h"
+#include "fwconfig.h"
 #include "tsdz2/interrupt.h"
 #include "tsdz2/timers.h"
 #include "tsdz2/stm8.h"
@@ -18,7 +19,7 @@
 
 // :TODO: this file contains a lot of duplicated code from bbsx version, try to share code
 
-#define PAS_SENSOR_NUM_SIGNALS			20
+#define PAS_SENSOR_NUM_SIGNALS			PAS_PULSES_REVOLUTION
 #define PAS_SENSOR_MIN_PULSE_MS_X10		50	// 500rpm limit
 
 #define SPEED_SENSOR_MIN_PULSE_MS_X10	500

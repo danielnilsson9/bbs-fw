@@ -24,7 +24,7 @@
 // interrupt runs at 100us interval, see timer0 in timers.c
 // timer0 is shared between system and sensors modules
 
-#define PAS_SENSOR_NUM_SIGNALS			24
+#define PAS_SENSOR_NUM_SIGNALS			PAS_PULSES_REVOLUTION
 #define PAS_SENSOR_MIN_PULSE_MS_X10		50	// 500rpm limit
 
 #define SPEED_SENSOR_MIN_PULSE_MS_X10	500
