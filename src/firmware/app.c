@@ -170,7 +170,7 @@ void app_process()
 	bool is_braking = apply_brake(&target_current);
 	
 	apply_current_ramp_up(&target_current, is_limiting || !throttle_override);
-	apply_current_ramp_down(&target_current, !is_braking);
+	apply_current_ramp_down(&target_current, !is_braking && !shift_limiting);
 
 	motor_set_target_speed(target_cadence);
 	motor_set_target_current(target_current);

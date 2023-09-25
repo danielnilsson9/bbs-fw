@@ -12,8 +12,8 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>BBSFWTool</AssemblyName>
     <Authors>Daniel Nilsson</Authors>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <FileVersion>1.4.0.0</FileVersion>
+    <AssemblyVersion>1.4.1.0</AssemblyVersion>
+    <FileVersion>1.4.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
