@@ -250,7 +250,7 @@
 					</TextBlock>
 				</TextBlock.ToolTip>
 				</TextBlock>
-				<CheckBox Grid.Column="2" Grid.Row="6" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePretension, UpdateSourceTrigger=PropertyChanged}" />
+				<CheckBox Grid.Column="2" Grid.Row="6" Margin="0 8 0 0" HorizontalAlignment="Right"  IsChecked="{Binding ConfigVm.UsePretension, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ConfigVm.UseSpeedSensor}" />
 
 				<TextBlock Grid.Column="0" Grid.Row="7" Margin="0 10 0 0" Text="Pretension Speed Cutoff (km/h):" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}">
 				<TextBlock.ToolTip>
@@ -261,7 +261,7 @@
 					</TextBlock>
 				</TextBlock.ToolTip>
 				</TextBlock>
-				<TextBox Grid.Column="2" Grid.Row="7" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PretensionSpeedCutoffKph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" />
+				<TextBox Grid.Column="2" Grid.Row="7" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PretensionSpeedCutoffKph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseMetricUnits, Converter={StaticResource BoolToVis}}" IsEnabled="{Binding ConfigVm.UseSpeedSensor}" />
 
 				<TextBlock Grid.Column="0" Grid.Row="7" Margin="0 10 0 0" Text="Pretension Speed Cutoff (mph):" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" >
 				<TextBlock.ToolTip>
@@ -272,7 +272,7 @@
 					</TextBlock>
 				</TextBlock.ToolTip>
 				</TextBlock>
-				<TextBox Grid.Column="2" Grid.Row="7" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PretensionSpeedCutoffMph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" />
+				<TextBox Grid.Column="2" Grid.Row="7" Margin="0 10 0 0" Width="60" HorizontalAlignment="Right" Text="{Binding ConfigVm.PretensionSpeedCutoffMph, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ConfigVm.UseImperialUnits, Converter={StaticResource BoolToVis}}" IsEnabled="{Binding ConfigVm.UseSpeedSensor}" />
 			</Grid>
 
 			<Grid Margin="0 20 0 0">

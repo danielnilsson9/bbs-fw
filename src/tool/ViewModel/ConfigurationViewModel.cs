@@ -220,6 +220,13 @@ namespace BBSFW.ViewModel
 					_config.UseSpeedSensor = value;
 					OnPropertyChanged(nameof(UseSpeedSensor));
 				}
+
+				// Require use of speed sensor for pretension feature.
+				if (_config.UseSpeedSensor == false)
+				{
+					_config.UsePretension = false;
+					OnPropertyChanged(nameof(UsePretension));
+				}
 			}
 		}
 
