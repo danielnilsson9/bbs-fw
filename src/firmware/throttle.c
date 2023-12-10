@@ -126,7 +126,7 @@ uint8_t throttle_read()
 		value = max_voltage_adc;
 	}
 
-	throttle_percent = (uint8_t)MAP16(value, min_voltage_adc, max_voltage_adc, 1, 100);
+	throttle_percent = (uint8_t)MAP16(value, min_voltage_adc, max_voltage_adc, 0, 100);
 
 	return throttle_percent;
 }
