@@ -20,23 +20,31 @@ static uint8_t battery_percent;
 static uint32_t motor_disabled_at_ms;
 static bool first_reading_done;
 
-#define BATTERY_NO_LOAD_DELAY_MS		2000
+/*
+No attempt is made to have accurate battery state of charge display.
 
-#define BATTERY_FULL_OFFSET_PERCENT		8
-#define BATTERY_EMPTY_OFFSET_PERCENT	8
+This is only a voltage based approch using configured max and min battery voltages.
+The end values are padded 8% on each side (BATTERY_EMPTY_OFFSET_PERCENT, BATTERY_FULL_OFFSET_PERCENT).
 
-//
-// No attempt is made to have accurate battery state of charge display.
-//
-// This is only a voltage based approch using configred max and min battery voltages.
-// The end values are padded (BATTERY_EMPTY_OFFSET_PERCENT, BATTERY_FULL_OFFSET_PERCENT).
-//
-// Battery voltage is measured when no motor power has been applied for at least 2 seconds
-// (to mitigate measuring voltage sag but is still problematic in cold weather).
-//
-// Battery SOC percentage is calculated from measured voltage using linear interpolation.
-//
+Battery voltage is measured when no motor power has been applied for
+at least 2 seconds (BATTERY_NO_LOAD_DELAY_MS). This is to mitigate measuring voltage sag
+but is still problematic in cold weather.
 
+Battery SOC percentage is calculated from measured voltage using linear interpolation
+between the padded ranges.
+
+The LVC rampdown starts at 10% battery SOC (LVC_RAMP_DOWN_OFFSET_PERCENT) and will linearly
+ramp the current down to 20% (LVC_LOW_CURRENT_PERCENT) of the maximum configured current.
+
+For example, if the maximum battery voltage is 58.8V and the low cutoff voltage is 42V, then:
+
+- The full voltage range is 58.8V - 42V = 16.8V
+- The padding amount is 0.08 * 16.8V = 1.3V
+- The battery is considered at 100% SOC at 58.8V - 1.3V = 57.5V
+- The battery is considered at   0% SOC at 42.0V + 1.3V = 43.3V
+- LVC rampdown will start at 10% SOC, so: 43.3V + 0.1 * (57.5V - 43.3V) = 44.7V
+- Full LVC limiting will occur at 0% SOC, so: 43.3V
+*/
 
 static uint8_t compute_battery_percent()
 {
@@ -99,13 +107,9 @@ void battery_init()
 
 	uint16_t battery_range_x100v = battery_max_voltage_x100v - battery_min_voltage_x100v;
 
-	// Consider battery full if above 92% (100 - BATTERY_FULL_OFFSET_PERCENT)
-	// of configured voltage range
 	battery_full_x100v = battery_max_voltage_x100v -
 		((BATTERY_FULL_OFFSET_PERCENT * battery_range_x100v) / 100);
 
-	// Consider battery empty if below 8% (BATTERY_EMPTY_OFFSET_PERCENT)
-	// of configured voltage range
 	battery_empty_x100v = battery_min_voltage_x100v +
 		((BATTERY_EMPTY_OFFSET_PERCENT * battery_range_x100v) / 100);
 }
@@ -135,9 +139,6 @@ void battery_process()
 
 		if (target_current == 0 && (system_ms() - motor_disabled_at_ms) > BATTERY_NO_LOAD_DELAY_MS)
 		{
-			// Compute battery percent using linear interpolation between lvc
-			// and configured max voltage while under no load.
-
 			battery_percent = compute_battery_percent();
 		}
 	}
