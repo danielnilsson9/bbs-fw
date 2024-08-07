@@ -454,7 +454,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 		}
 
 		// pause cruise if throttle touched while cruise active
-		else if (!cruise_paused && !cruise_block_throttle_return && throttle_percent > 0)
+		else if (!cruise_paused && !cruise_block_throttle_return && throttle_percent > 10)
 		{
 			cruise_paused = true;
 			cruise_block_throttle_return = true;
@@ -468,7 +468,7 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 		}
 
 		// reset flag tracking throttle to make sure throttle returns to idle position before engage/disenage cruise with throttle touch
-		else if (cruise_block_throttle_return && throttle_percent == 0)
+		else if (cruise_block_throttle_return && throttle_percent < 10)
 		{
 			cruise_block_throttle_return = false;
 		}
