@@ -188,7 +188,7 @@ void uart_motor_write(uint8_t byte)
 	uint8_t i = (tx2_head + 1) & TX2_BUFFER_MASK;
 
 	// wait for free space in buffer
-	uint8_t prev_tail = tx1_tail;
+	uint8_t prev_tail = tx2_tail;
 	while (i == tx2_tail)
 	{
 		if (tx2_tail != prev_tail)
