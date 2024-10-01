@@ -1,5 +1,7 @@
 .PHONY: all clean
 
+UNAME := $(shell uname)
+
 # Select target controller (normally done from cmd line):
 #TARGET_CONTROLLER = BBSHD
 #TARGET_CONTROLLER = BBS02
@@ -65,10 +67,30 @@ endif
 	$(info Building bbs-fw for $(TARGET_CONTROLLER))
 
 hex:
+ifeq ($(UNAME), Linux)
+	@packihx bbs-fw.ihx > bbs-fw.hex
+else
 	@cmd /C tohex.bat
-	
+endif
+
 clean:
+ifeq ($(UNAME), Linux)
+	@rm -f bbsx/*.hex tsdz2/*.hex *.hex
+	@rm -f bbsx/*.ihx tsdz2/*.ihx *.ihx
+	@rm -f bbsx/*.asm tsdz2/*.asm *.asm
+	@rm -f bbsx/*.rel tsdz2/*.rel *.rel
+	@rm -f bbsx/*.lk  tsdz2/*.lk  *.lk
+	@rm -f bbsx/*.lst tsdz2/*.lst *.lst
+	@rm -f bbsx/*.rst tsdz2/*.rst *.rst
+	@rm -f bbsx/*.sym tsdz2/*.sym *.sym
+	@rm -f bbsx/*.cdb tsdz2/*.cdb *.cdb
+	@rm -f bbsx/*.map tsdz2/*.map *.map
+	@rm -f bbsx/*.elf tsdz2/*.elf *.elf
+	@rm -f bbsx/*.adb tsdz2/*.adb *.adb
+	@rm -f bbsx/*.mem tsdz2/*.mem *.mem
+else
 	@cmd /C clean.bat
+endif
 	$(info Clean Finished)
 
 .PHONY = all hex clean precheck echo
