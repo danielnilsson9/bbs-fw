@@ -122,7 +122,7 @@ void app_process()
 {
 	uint8_t target_current = 0;
 	uint8_t target_cadence = assist_level_data.level.max_cadence_percent;
-	uint8_t throttle_percent = throttle_read();
+	uint8_t throttle_percent = throttle_map_response(throttle_read());
 	bool throttle_override = false;
 
 	if (check_power_block())
@@ -160,11 +160,11 @@ void app_process()
 #if HAS_SHIFT_SENSOR_SUPPORT
 		apply_shift_sensor_interrupt(&target_current);
 #else
-	false;
+		false;
 #endif
 	bool is_limiting = speed_limiting || thermal_limiting || lvc_limiting || shift_limiting;
 	bool is_braking = apply_brake(&target_current);
-	
+
 	apply_current_ramp_up(&target_current, is_limiting || !throttle_override);
 	apply_current_ramp_down(&target_current, !is_braking && !shift_limiting);
 
@@ -225,7 +225,7 @@ void app_set_lights(bool on)
 		(assist_level == ASSIST_7 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS7_LIGHT) ||
 		(assist_level == ASSIST_8 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS8_LIGHT) ||
 		(assist_level == ASSIST_9 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS9_LIGHT)
-	)
+		)
 	{
 		if (on)
 		{
@@ -415,7 +415,7 @@ void apply_pas_torque(uint8_t* target_current)
 
 			// minimum 1 percent current if pedaling
 			if (tmp_percent < 1)
-			{			
+			{
 				tmp_percent = 1;
 			}
 			// limit to maximum assist current for set level
@@ -495,15 +495,15 @@ bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 
 		// Throttle always overrides PAS if global speed limit is configured for throttle.
 		bool global_throttle_limit_active =
-			g_config.throttle_global_spd_lim_percent > 0 && 
+			g_config.throttle_global_spd_lim_percent > 0 &&
 			(
 				g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
 				(g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
-			);
+				);
 
 		if (current >= *target_current || global_throttle_limit_active)
 		{
-			*target_current = current;	
+			*target_current = current;
 			return true;
 		}
 	}
@@ -528,7 +528,7 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool t
 		(
 			g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
 			(g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
-		);
+			);
 
 	bool throttle_speed_override_active = !global_throttle_limit_active && throttle_override &&
 		(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
@@ -566,7 +566,7 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool t
 				speed_limiting = false;
 				eventlog_write_data(EVT_DATA_SPEED_LIMITING, 0);
 			}
-		}		
+		}
 		else
 		{
 			if (!speed_limiting)
@@ -608,7 +608,7 @@ bool apply_thermal_limit(uint8_t* target_current)
 	int16_t temp_contr_x100 = temperature_contr_x100();
 	temperature_contr_c = temp_contr_x100 / 100;
 
-	int16_t temp_motor_x100 = temperature_motor_x100();	
+	int16_t temp_motor_x100 = temperature_motor_x100();
 	temperature_motor_c = temp_motor_x100 / 100;
 
 	int16_t max_temp_x100 = MAX(temp_contr_x100, temp_motor_x100);
@@ -926,7 +926,7 @@ void reload_assist_params()
 			assist_level_data.keep_current_ramp_start_rpm_x10 = g_config.pas_keep_current_cadence_rpm * 10;
 			assist_level_data.keep_current_ramp_end_rpm_x10 = (uint16_t)(((uint32_t)assist_level_data.level.max_cadence_percent * MAX_CADENCE_RPM_X10) / 100);
 		}
-		
+
 		// pause cruise if swiching level
 		cruise_paused = true;
 	}
@@ -939,7 +939,7 @@ void reload_assist_params()
 		assist_level_data.level.max_speed_percent = 0;
 		assist_level_data.level.max_cadence_percent = 15;
 		assist_level_data.level.max_throttle_current_percent = 0;
-		
+
 		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH) * 10;
 	}
 }
