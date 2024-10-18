@@ -12,6 +12,7 @@
 #include "eventlog.h"
 #include "util.h"
 #include "adc.h"
+#include "fwconfig.h"
 
 #include <stdbool.h>
 
@@ -34,6 +35,13 @@ static uint32_t throttle_hard_limit_hit_at;
 #define THROTTLE_HARD_LOW_LIMIT_ADC			((THROTTLE_HARD_LOW_LIMIT_MV * 256) / ADC_VOLTAGE_MV)
 #define THROTTLE_HARD_HIGH_LIMIT_ADC		((THROTTLE_HARD_HIGH_LIMIT_MV * 256) / ADC_VOLTAGE_MV)
 #define THROTTLE_HARD_LIMIT_TOLERANCE_MS	100
+
+#if (THROTTLE_RESPONSE_CURVE == THROTTLE_RESPONSE_CUSTOM)
+static const uint8_t throttle_custom_map_lut[101] =
+{
+	THROTTLE_CUSTOM_MAP
+};
+#endif
 
 
 
@@ -131,3 +139,14 @@ uint8_t throttle_read()
 	return throttle_percent;
 }
 
+
+uint8_t throttle_map_response(uint8_t throttle_percent)
+{
+#if (THROTTLE_RESPONSE_CURVE == THROTTLE_RESPONSE_QUADRATIC)
+	return (uint8_t)(((uint16_t)throttle_percent * throttle_percent) / 100);
+#elif (THROTTLE_RESPONSE_CURVE == THROTTLE_RESPONSE_CUSTOM)
+	return throttle_custom_map_lut[throttle_percent];
+#else
+	return throttle_percent;
+#endif
+}
