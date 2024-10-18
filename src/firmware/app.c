@@ -402,8 +402,14 @@ void apply_pas_torque(uint8_t* target_current)
 			}
 
 			uint16_t pedal_power_w_x10 = (uint16_t)(((uint32_t)torque_nm_x100 * cadence_rpm_x10) / 955);
+
+			// used in division below to calculate target current,
+			// clamp to 24V if no reading available (unexpected error).
+			uint16_t battery_voltage_x10 = MAX(motor_get_battery_voltage_x10(), 240);
+
 			uint16_t target_current_amp_x100 = (uint16_t)(((uint32_t)10 * pedal_power_w_x10 *
-				assist_level_data.level.torque_amplification_factor_x10) / motor_get_battery_voltage_x10());
+				assist_level_data.level.torque_amplification_factor_x10) / battery_voltage_x10);
+
 			uint16_t max_current_amp_x100 = g_config.max_current_amps * 100;
 
 			// limit target to ensure no overflow in map result
