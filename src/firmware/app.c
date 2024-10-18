@@ -62,7 +62,7 @@ void apply_pas_torque(uint8_t* target_current);
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
-bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool throttle_override);
+bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool pas_engaged, bool throttle_override);
 bool apply_thermal_limit(uint8_t* target_current);
 bool apply_low_voltage_limit(uint8_t* target_current);
 bool apply_shift_sensor_interrupt(uint8_t* target_current);
@@ -123,6 +123,8 @@ void app_process()
 	uint8_t target_current = 0;
 	uint8_t target_cadence = assist_level_data.level.max_cadence_percent;
 	uint8_t throttle_percent = throttle_map_response(throttle_read());
+
+	bool pas_engaged = false;
 	bool throttle_override = false;
 
 	if (check_power_block())
@@ -140,6 +142,8 @@ void app_process()
 		apply_pas_torque(&target_current);
 #endif // HAS_TORQUE_SENSOR
 
+		pas_engaged = target_current > 0;
+
 		apply_cruise(&target_current, throttle_percent);
 
 		throttle_override = apply_throttle(&target_current, throttle_percent);
@@ -153,7 +157,7 @@ void app_process()
 		}
 	}
 
-	bool speed_limiting = apply_speed_limit(&target_current, throttle_percent, throttle_override);
+	bool speed_limiting = apply_speed_limit(&target_current, throttle_percent, pas_engaged, throttle_override);
 	bool thermal_limiting = apply_thermal_limit(&target_current);
 	bool lvc_limiting = apply_low_voltage_limit(&target_current);
 	bool shift_limiting =
@@ -499,15 +503,7 @@ bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 	{
 		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.level.max_throttle_current_percent);
 
-		// Throttle always overrides PAS if global speed limit is configured for throttle.
-		bool global_throttle_limit_active =
-			g_config.throttle_global_spd_lim_percent > 0 &&
-			(
-				g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
-				(g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
-				);
-
-		if (current >= *target_current || global_throttle_limit_active)
+		if (current >= *target_current)
 		{
 			*target_current = current;
 			return true;
@@ -518,7 +514,7 @@ bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 }
 
 
-bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool throttle_override)
+bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool pas_engaged, bool throttle_override)
 {
 	static bool speed_limiting = false;
 
@@ -527,14 +523,15 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool t
 		return false;
 	}
 
+	// global throttle speed limit applies if enabled in configuration, PAS is not engaged and throttle is used
 	bool global_throttle_limit_active =
-		assist_level != ASSIST_PUSH &&
+		!pas_engaged && 
 		throttle_percent > 0 &&
 		g_config.throttle_global_spd_lim_percent > 0 &&
 		(
 			g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
 			(g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
-			);
+		);
 
 	bool throttle_speed_override_active = !global_throttle_limit_active && throttle_override &&
 		(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
