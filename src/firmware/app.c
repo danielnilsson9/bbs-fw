@@ -55,6 +55,8 @@ static int8_t temperature_motor_c;
 static uint16_t ramp_up_current_interval_ms;
 static uint32_t power_blocked_until_ms;
 
+static bool lights_state = false;
+
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
 #if HAS_TORQUE_SENSOR
 void apply_pas_torque(uint8_t* target_current);
@@ -215,8 +217,6 @@ void app_set_assist_level(uint8_t level)
 
 void app_set_lights(bool on)
 {
-	static bool last_light_state = false;
-
 	if ( // it's ok to write ugly code if you say it's ugly...
 		(g_config.assist_mode_select == ASSIST_MODE_SELECT_LIGHTS) ||
 		(assist_level == ASSIST_0 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS0_LIGHT) ||
@@ -242,9 +242,9 @@ void app_set_lights(bool on)
 	}
 	else
 	{
-		if (g_config.lights_mode == LIGHTS_MODE_DEFAULT && last_light_state != on)
+		if (g_config.lights_mode == LIGHTS_MODE_DEFAULT && lights_state != on)
 		{
-			last_light_state = on;
+			lights_state = on;
 			eventlog_write_data(EVT_DATA_LIGHTS, on);
 			lights_set(on);
 		}
@@ -277,6 +277,11 @@ void app_set_wheel_max_speed_rpm(uint16_t value)
 uint8_t app_get_assist_level()
 {
 	return assist_level;
+}
+
+uint8_t app_get_lights()
+{
+	return lights_state;
 }
 
 uint8_t app_get_status_code()

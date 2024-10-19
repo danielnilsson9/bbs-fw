@@ -150,4 +150,23 @@
 // by pedaling backwards.
 #define CRUISE_DISENGAGE_PAS_PULSES				PAS_PULSES_REVOLUTION / 2
 
+
+// Option to control what data is displayed in "Range" field on display
+// since range calculation is not implemented.
+#define DISPLAY_RANGE_FIELD_ZERO				0
+#define DISPLAY_RANGE_FIELD_TEMPERATURE			1	// max temperature of controller / motor
+#define DISPLAY_RANGE_FIELD_POWER				2	// requested current x10 (lights off) / actual current x10 (lights on)
+
+// uncomment and select option above
+// #define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_ZERO
+
+// default to temperature if temperature sensors available (BBS2/BBSHD), else power (TSDZ2)
+#ifndef DISPLAY_RANGE_FIELD_DATA
+	#if HAS_CONTROLLER_TEMP_SENSOR || HAS_MOTOR_TEMP_SENSOR
+	#define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_TEMPERATURE
+	#else
+	#define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_POWER
+	#endif
+#endif 
+
 #endif
