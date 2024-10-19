@@ -18,6 +18,7 @@
 #include "util.h"
 #include "version.h"
 #include "intellisense.h"
+#include "fwconfig.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -662,7 +663,10 @@ static int16_t process_bafang_display_read_range()
 		return KEEP;
 	}
 
-	uint16_t temp = app_get_temperature();
+	uint16_t value = 0;
+
+#if DISPLAY_RANGE_FIELD_DATA == DISPLAY_RANGE_FIELD_TEMPERATURE
+	value = app_get_temperature();
 	if (g_config.use_freedom_units)
 	{
 		// Convert to farenheit and compensate for the km -> miles conversion the diplay will do
@@ -670,13 +674,30 @@ static int16_t process_bafang_display_read_range()
 		// Approximistation:
 		// F_miles = 2.9C + 50.5
 
-		temp = ((290u * temp) + 5050u) / 100u;
+		value = ((290u * value) + 5050u) / 100u;
 	}
+#elif DISPLAY_RANGE_FIELD_DATA == DISPLAY_RANGE_FIELD_POWER
+	if (app_get_lights())
+	{
+		value = motor_get_battery_current_x10();
+	}
+	else
+	{
+		uint16_t max_current_amp_x10 = g_config.max_current_amps * 10;
+		value = MAP32(motor_get_target_current(), 0, 100, 0, max_current_amp_x10);
+	}
+
+	if (g_config.use_freedom_units)
+	{
+		// compensate for km -> miles conversion the display will do
+		value = (value * 161u) / 100u;
+	}
+#endif
 
 	uint8_t checksum = 0;
 
-	write_uart_and_increment_checksum((uint8_t)(temp >> 8), &checksum);
-	write_uart_and_increment_checksum((uint8_t)temp, &checksum);
+	write_uart_and_increment_checksum((uint8_t)(value >> 8), &checksum);
+	write_uart_and_increment_checksum((uint8_t)value, &checksum);
 	uart_write(checksum); // checksum
 
 	return 3;
