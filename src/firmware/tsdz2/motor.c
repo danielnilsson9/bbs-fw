@@ -15,6 +15,7 @@
 #include "uart.h"
 #include "eventlog.h"
 #include "util.h"
+#include "adc.h"
 #include "tsdz2/cpu.h"
 #include "tsdz2/timers.h"
 #include "tsdz2/pins.h"
@@ -54,7 +55,7 @@
 
 // This value should be near 0.
 // You can try to tune with the whell on the air, full throttle and look at batttery current: adjust for lower battery current
-#define MOTOR_ROTOR_OFFSET_ANGLE				9
+#define MOTOR_ROTOR_OFFSET_ANGLE				11
 
 // This value is ERPS speed after which a transition happens from sinewave no interpolation to have
 // interpolation 60 degrees and must be found experimentally
@@ -136,17 +137,6 @@ static const uint8_t sin_table[SIN_TABLE_LEN] =
 	 86,  88,  90,  92,  95,  97,  99, 101, 102, 104, 106, 108, 109, 111, 113,
 	114, 115, 117, 118, 119, 120, 121, 122, 123, 124, 125, 125, 126, 126, 127
 };
-
-// adc buffer access
-// ------------------------------------------
-#define ADC_10BIT_BATTERY_CURRENT			(ADC1->DB5RL)						// AIN5
-#define ADC_10BIT_BATTERY_VOLTAGE			((ADC1->DB6RH << 8) | ADC1->DB6RL)	// AIN6
-
-// adc current reading is truncated to 8bit since that allows a 
-// range of up to 40A which it is not expected to be surpassed.
-// this macro will check for 8bit overflow and is used to limit
-// current in isr if overflow for some reason would occur.
-#define ADC_10BIT_BATTERY_CURRENT_OVF		(ADC1->DB5RH != 0)
 
 
 // motor control state (shared with isr)
@@ -242,7 +232,7 @@ static void read_battery_voltage()
 {
 	// low pass filter the voltage readed value, to avoid possible fast spikes/noise
 	adc_battery_voltage_accumulated -= adc_battery_voltage_accumulated >> BATTERY_VOLTAGE_FILTER_COEFFICIENT;
-	adc_battery_voltage_accumulated += ADC_10BIT_BATTERY_VOLTAGE; // issue: no atomic access, adc reading is triggered from isr
+	adc_battery_voltage_accumulated += adc_get_battery_voltage();
 	adc_battery_voltage_filtered = adc_battery_voltage_accumulated >> BATTERY_VOLTAGE_FILTER_COEFFICIENT;
 
 	is_lvc_triggered = (adc_battery_voltage_filtered < adc_low_voltage_limit);
@@ -558,20 +548,25 @@ static uint8_t adc_battery_ramp_max_current = 0;
 // Measured on 2022-12-04, the interrupt code takes about 45% of the total 64us
 void isr_timer1_cmp(void) __interrupt(ITC_IRQ_TIM1_CAPCOM)
 {
-	// read battery current adc value, should happen at middle
-	// of the pwm duty cycle
-	// disable scan mode
-	ADC1->CR2 &= (uint8_t)(~ADC1_CR2_SCAN);
+	// read battery current adc value, should happen at middle of the pwm duty cycle
+	// no scan, align data right since we are only interested in the 8 lsb.
+	ADC1->CR2 = (ADC1_ALIGN_RIGHT);
 
-	// clear EOC flag and select channel 5 (current sense)
+	// disable eoc interrupt, clear EOC flag and select channel 5 (current sense)
 	ADC1->CSR = 0x05;
 
-	// start ADC1 conversion
+	// perform single mode ADC1 conversion
 	ADC1->CR1 |= ADC1_CR1_ADON;
-	while (!(ADC1->CSR & ADC1_FLAG_EOC));
+	while (!(ADC1->CSR & ADC1_CSR_EOC));
+
+	// adc current reading is truncated to 8bit since that allows a 
+	// range of up to 40A which it is not expected to be surpassed.
+	// check of 8bit overflow and save result, flag is used to limit
+	// current in isr if overflow for some reason would occur.
+	uint8_t adc_battery_current_ovf = ADC1->DRH;
 
 	// atomic write (uint8), current is not expected to exceed adc 255 (40A)
-	adc_battery_current = ADC_10BIT_BATTERY_CURRENT;
+	adc_battery_current = ADC1->DRL;
 
 	switch (control_state)
 	{
@@ -615,9 +610,17 @@ void isr_timer1_cmp(void) __interrupt(ITC_IRQ_TIM1_CAPCOM)
 	}
 
 	// trigger adc conversion of all channels (scan conversion, buffered)
-	ADC1->CR2 |= ADC1_CR2_SCAN; // enable scan mode
-	ADC1->CSR = 0x07; // clear EOC flag first (selected also channel 7)
-	ADC1->CR1 |= ADC1_CR1_ADON; // start ADC1 conversion
+	// adc scan mode conversion will finish before
+	// this motor control interrupt will be run next time
+	// 
+	// enable scan, align left
+	ADC1->CR2 = (ADC1_ALIGN_LEFT | ADC1_CR2_SCAN);
+
+	// clear EOC flag, enable eoc interrupt, scan read all channel 0-7
+	ADC1->CSR = (ADC1_CSR_EOCIE | 0x07);
+
+	// start adc scan mode conversion
+	ADC1->CR1 |= ADC1_CR1_ADON;
 
 
 	// read hall sensor signals
@@ -774,7 +777,7 @@ void isr_timer1_cmp(void) __interrupt(ITC_IRQ_TIM1_CAPCOM)
 			current_controller_counter > CURRENT_CONTROLLER_CHECK_PERIODS &&
 			(
 				// check if truncated 8bit current reading did overflow
-				ADC_10BIT_BATTERY_CURRENT_OVF ||
+				adc_battery_current_ovf ||
 				// compare against ramp controller current limit
 				adc_battery_current > adc_battery_ramp_max_current ||
 				// or hard motor phase current limit

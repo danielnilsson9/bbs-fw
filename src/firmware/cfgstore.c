@@ -178,8 +178,8 @@ static void load_default_config()
 	g_config.pas_keep_current_percent = 60;
 	g_config.pas_keep_current_cadence_rpm = 40;
 
-	g_config.throttle_start_voltage_mv_u16l = (uint8_t)900;
-	g_config.throttle_start_voltage_mv_u16h = (uint8_t)(900 >> 8);
+	g_config.throttle_start_voltage_mv_u16l = (uint8_t)1000;
+	g_config.throttle_start_voltage_mv_u16h = (uint8_t)(1000 >> 8);
 	g_config.throttle_end_voltage_mv_u16l = (uint8_t)3600;
 	g_config.throttle_end_voltage_mv_u16h = (uint8_t)(3600 >> 8);
 	g_config.throttle_start_percent = 1;

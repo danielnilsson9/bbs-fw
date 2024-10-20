@@ -98,8 +98,9 @@
 						be used in order to comply with such laws.
 						<LineBreak />
 						<LineBreak />
-						When this option is enabled the configured global speed limit will override the 
-						assist level speed limit when throttle is used.
+						When this option is enabled the configured global throttle speed limit will override the 
+						assist level speed limit while using throttle and not pedaling. Throttle must still
+						be enabled on each individual assist level for this option to apply.
 						<LineBreak />
 						<LineBreak />
 						<Run FontWeight="Bold">Disabled</Run> - No global speed limit.

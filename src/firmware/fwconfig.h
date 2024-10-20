@@ -99,6 +99,29 @@
 // Target speed in km/h when walk mode is engaged
 #define WALK_MODE_SPEED_KPH						4
 
+
+#define THROTTLE_RESPONSE_LINEAR				1
+#define THROTTLE_RESPONSE_QUADRATIC				2
+#define THROTTLE_RESPONSE_CUSTOM				3
+
+#define THROTTLE_RESPONSE_CURVE					THROTTLE_RESPONSE_CUSTOM
+
+// Custom throttle map
+// y = pow(x / 100.0, 1.5) * 100.0
+#define THROTTLE_CUSTOM_MAP						\
+	0,  0,  0,  1,  1,  1,  1,  2,  2,  3,		\
+	3,  4,  4,  5,  5,  6,  6,  7,  8,  8,		\
+	9,  10, 10, 11, 12, 12, 13, 14, 15, 16,		\
+	16, 17, 18, 19, 20, 21, 22, 23, 23, 24,		\
+	25, 26, 27, 28, 29, 30, 31, 32, 33, 34,		\
+	35, 36, 37, 39, 40, 41, 42, 43, 44, 45,		\
+	46, 48, 49, 50, 51, 52, 54, 55, 56, 57,		\
+	59, 60, 61, 62, 64, 65, 66, 68, 69, 70,		\
+	72, 73, 74, 76, 77, 78, 80, 81, 83, 84,		\
+	85, 87, 88, 90, 91, 93, 94, 96, 97, 99,		\
+	100
+	
+
 // This value is used when assist level is configured with throttle cadence
 // override flag in config tool. Default is 100%.
 #define THROTTLE_CADENCE_OVERRIDE_PERCENT		100
@@ -126,5 +149,24 @@
 // Number of PAS sensor pulses to disengage curise mode
 // by pedaling backwards.
 #define CRUISE_DISENGAGE_PAS_PULSES				PAS_PULSES_REVOLUTION / 2
+
+
+// Option to control what data is displayed in "Range" field on display
+// since range calculation is not implemented.
+#define DISPLAY_RANGE_FIELD_ZERO				0
+#define DISPLAY_RANGE_FIELD_TEMPERATURE			1	// max temperature of controller / motor
+#define DISPLAY_RANGE_FIELD_POWER				2	// requested current x10 (lights off) / actual current x10 (lights on)
+
+// uncomment and select option above
+// #define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_ZERO
+
+// default to temperature if temperature sensors available (BBS2/BBSHD), else power (TSDZ2)
+#ifndef DISPLAY_RANGE_FIELD_DATA
+	#if HAS_CONTROLLER_TEMP_SENSOR || HAS_MOTOR_TEMP_SENSOR
+	#define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_TEMPERATURE
+	#else
+	#define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_POWER
+	#endif
+#endif 
 
 #endif
