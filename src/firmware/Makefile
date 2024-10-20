@@ -1,6 +1,10 @@
 .PHONY: all clean
 
-UNAME := $(shell uname)
+ifeq '$(findstring ;,$(PATH))' ';'
+	UNAME := Windows
+else
+	UNAME := $(shell uname 2>/dev/null || echo Unknown)
+endif
 
 # Select target controller (normally done from cmd line):
 #TARGET_CONTROLLER = BBSHD
