@@ -19,4 +19,6 @@ uint16_t adc_get_torque();
 uint16_t adc_get_temperature_contr();
 uint16_t adc_get_temperature_motor();
 
+uint16_t adc_get_battery_voltage();
+
 #endif

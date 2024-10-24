@@ -43,6 +43,7 @@ static int32_t global_throttle_speed_limit_rpm_x10;
 
 static uint16_t lvc_voltage_x100;
 static uint16_t lvc_ramp_down_start_voltage_x100;
+static uint16_t lvc_ramp_down_end_voltage_x100;
 
 static assist_level_data_t assist_level_data;
 static uint16_t speed_limit_ramp_interval_rpm_x10;
@@ -56,6 +57,8 @@ static uint32_t power_blocked_until_ms;
 
 static uint16_t pretension_cutoff_speed_rpm_x10;
 
+static bool lights_state = false;
+
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
 #if HAS_TORQUE_SENSOR
 void apply_pas_torque(uint8_t* target_current);
@@ -63,7 +66,7 @@ void apply_pas_torque(uint8_t* target_current);
 
 void apply_cruise(uint8_t* target_current, uint8_t throttle_percent);
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent);
-bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool throttle_override);
+bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool pas_engaged, bool throttle_override);
 bool apply_thermal_limit(uint8_t* target_current);
 bool apply_low_voltage_limit(uint8_t* target_current);
 bool apply_shift_sensor_interrupt(uint8_t* target_current);
@@ -88,10 +91,15 @@ void app_init()
 
 	lvc_voltage_x100 = g_config.low_cut_off_v * 100u;
 
-	uint16_t voltage_range_x100 =
+	uint16_t full_voltage_range_x100 =
 		EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l) - lvc_voltage_x100;
-	lvc_ramp_down_start_voltage_x100 = (uint16_t)(lvc_voltage_x100 +
-		((voltage_range_x100 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100));
+	uint16_t padded_voltage_range_x100 = (uint16_t)(full_voltage_range_x100 *
+		(100 - BATTERY_FULL_OFFSET_PERCENT - BATTERY_EMPTY_OFFSET_PERCENT) / 100);
+
+	lvc_ramp_down_end_voltage_x100 = (uint16_t)(lvc_voltage_x100 +
+		(full_voltage_range_x100 * BATTERY_EMPTY_OFFSET_PERCENT / 100));
+	lvc_ramp_down_start_voltage_x100 = (uint16_t)(lvc_ramp_down_end_voltage_x100 +
+		((padded_voltage_range_x100 * LVC_RAMP_DOWN_OFFSET_PERCENT) / 100));
 
 	global_speed_limit_rpm = 0;
 	global_throttle_speed_limit_rpm_x10 = 0;
@@ -122,7 +130,9 @@ void app_process()
 {
 	uint8_t target_current = 0;
 	uint8_t target_cadence = assist_level_data.level.max_cadence_percent;
-	uint8_t throttle_percent = throttle_read();
+	uint8_t throttle_percent = throttle_map_response(throttle_read());
+
+	bool pas_engaged = false;
 	bool throttle_override = false;
 
 	if (check_power_block())
@@ -141,6 +151,8 @@ void app_process()
 		apply_pas_torque(&target_current);
 #endif // HAS_TORQUE_SENSOR
 
+		pas_engaged = target_current > 0;
+
 		apply_cruise(&target_current, throttle_percent);
 
 		throttle_override = apply_throttle(&target_current, throttle_percent);
@@ -154,18 +166,18 @@ void app_process()
 		}
 	}
 
-	bool speed_limiting = apply_speed_limit(&target_current, throttle_percent, throttle_override);
+	bool speed_limiting = apply_speed_limit(&target_current, throttle_percent, pas_engaged, throttle_override);
 	bool thermal_limiting = apply_thermal_limit(&target_current);
 	bool lvc_limiting = apply_low_voltage_limit(&target_current);
 	bool shift_limiting =
 #if HAS_SHIFT_SENSOR_SUPPORT
 		apply_shift_sensor_interrupt(&target_current);
 #else
-	false;
+		false;
 #endif
 	bool is_limiting = speed_limiting || thermal_limiting || lvc_limiting || shift_limiting;
 	bool is_braking = apply_brake(&target_current);
-	
+
 	apply_current_ramp_up(&target_current, is_limiting || !throttle_override);
 	apply_current_ramp_down(&target_current, !is_braking && !shift_limiting);
 
@@ -212,8 +224,6 @@ void app_set_assist_level(uint8_t level)
 
 void app_set_lights(bool on)
 {
-	static bool last_light_state = false;
-
 	if ( // it's ok to write ugly code if you say it's ugly...
 		(g_config.assist_mode_select == ASSIST_MODE_SELECT_LIGHTS) ||
 		(assist_level == ASSIST_0 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS0_LIGHT) ||
@@ -226,7 +236,7 @@ void app_set_lights(bool on)
 		(assist_level == ASSIST_7 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS7_LIGHT) ||
 		(assist_level == ASSIST_8 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS8_LIGHT) ||
 		(assist_level == ASSIST_9 && g_config.assist_mode_select == ASSIST_MODE_SELECT_PAS9_LIGHT)
-	)
+		)
 	{
 		if (on)
 		{
@@ -239,9 +249,9 @@ void app_set_lights(bool on)
 	}
 	else
 	{
-		if (g_config.lights_mode == LIGHTS_MODE_DEFAULT && last_light_state != on)
+		if (g_config.lights_mode == LIGHTS_MODE_DEFAULT && lights_state != on)
 		{
-			last_light_state = on;
+			lights_state = on;
 			eventlog_write_data(EVT_DATA_LIGHTS, on);
 			lights_set(on);
 		}
@@ -274,6 +284,11 @@ void app_set_wheel_max_speed_rpm(uint16_t value)
 uint8_t app_get_assist_level()
 {
 	return assist_level;
+}
+
+uint8_t app_get_lights()
+{
+	return lights_state;
 }
 
 uint8_t app_get_status_code()
@@ -413,8 +428,14 @@ void apply_pas_torque(uint8_t* target_current)
 			}
 
 			uint16_t pedal_power_w_x10 = (uint16_t)(((uint32_t)torque_nm_x100 * cadence_rpm_x10) / 955);
+
+			// used in division below to calculate target current,
+			// clamp to 24V if no reading available (unexpected error).
+			uint16_t battery_voltage_x10 = MAX(motor_get_battery_voltage_x10(), 240);
+
 			uint16_t target_current_amp_x100 = (uint16_t)(((uint32_t)10 * pedal_power_w_x10 *
-				assist_level_data.level.torque_amplification_factor_x10) / motor_get_battery_voltage_x10());
+				assist_level_data.level.torque_amplification_factor_x10) / battery_voltage_x10);
+
 			uint16_t max_current_amp_x100 = g_config.max_current_amps * 100;
 
 			// limit target to ensure no overflow in map result
@@ -426,7 +447,7 @@ void apply_pas_torque(uint8_t* target_current)
 
 			// minimum 1 percent current if pedaling
 			if (tmp_percent < 1)
-			{			
+			{
 				tmp_percent = 1;
 			}
 			// limit to maximum assist current for set level
@@ -504,17 +525,9 @@ bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 	{
 		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.level.max_throttle_current_percent);
 
-		// Throttle always overrides PAS if global speed limit is configured for throttle.
-		bool global_throttle_limit_active =
-			g_config.throttle_global_spd_lim_percent > 0 && 
-			(
-				g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_ENABLED ||
-				(g_config.throttle_global_spd_lim_opt == THROTTLE_GLOBAL_SPEED_LIMIT_STD_LVLS && operation_mode == OPERATION_MODE_DEFAULT)
-			);
-
-		if (current >= *target_current || global_throttle_limit_active)
+		if (current >= *target_current)
 		{
-			*target_current = current;	
+			*target_current = current;
 			return true;
 		}
 	}
@@ -523,7 +536,7 @@ bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 }
 
 
-bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool throttle_override)
+bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool pas_engaged, bool throttle_override)
 {
 	static bool speed_limiting = false;
 
@@ -532,8 +545,9 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool t
 		return false;
 	}
 
+	// global throttle speed limit applies if enabled in configuration, PAS is not engaged and throttle is used
 	bool global_throttle_limit_active =
-		assist_level != ASSIST_PUSH &&
+		!pas_engaged && 
 		throttle_percent > 0 &&
 		g_config.throttle_global_spd_lim_percent > 0 &&
 		(
@@ -577,7 +591,7 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool t
 				speed_limiting = false;
 				eventlog_write_data(EVT_DATA_SPEED_LIMITING, 0);
 			}
-		}		
+		}
 		else
 		{
 			if (!speed_limiting)
@@ -619,7 +633,7 @@ bool apply_thermal_limit(uint8_t* target_current)
 	int16_t temp_contr_x100 = temperature_contr_x100();
 	temperature_contr_c = temp_contr_x100 / 100;
 
-	int16_t temp_motor_x100 = temperature_motor_x100();	
+	int16_t temp_motor_x100 = temperature_motor_x100();
 	temperature_motor_c = temp_motor_x100 / 100;
 
 	int16_t max_temp_x100 = MAX(temp_contr_x100, temp_motor_x100);
@@ -710,10 +724,10 @@ bool apply_low_voltage_limit(uint8_t* target_current)
 			voltage_x100 = lvc_voltage_x100;
 		}
 
-		// ramp down power until 20% when approaching lvc
+		// Ramp down power until LVC_LOW_CURRENT_PERCENT when approaching LVC
 		uint8_t tmp = (uint8_t)MAP32(
 			voltage_x100,						// value
-			lvc_voltage_x100,					// in_min
+			lvc_ramp_down_end_voltage_x100,		// in_min
 			lvc_ramp_down_start_voltage_x100,	// in_max
 			LVC_LOW_CURRENT_PERCENT,			// out_min
 			100									// out_max
@@ -937,7 +951,7 @@ void reload_assist_params()
 			assist_level_data.keep_current_ramp_start_rpm_x10 = g_config.pas_keep_current_cadence_rpm * 10;
 			assist_level_data.keep_current_ramp_end_rpm_x10 = (uint16_t)(((uint32_t)assist_level_data.level.max_cadence_percent * MAX_CADENCE_RPM_X10) / 100);
 		}
-		
+
 		// pause cruise if swiching level
 		cruise_paused = true;
 	}
@@ -950,7 +964,7 @@ void reload_assist_params()
 		assist_level_data.level.max_speed_percent = 0;
 		assist_level_data.level.max_cadence_percent = 15;
 		assist_level_data.level.max_throttle_current_percent = 0;
-		
+
 		assist_level_data.max_wheel_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(WALK_MODE_SPEED_KPH) * 10;
 	}
 }

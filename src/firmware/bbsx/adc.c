@@ -146,3 +146,9 @@ uint16_t adc_get_temperature_motor()
 {
 	return temperature_motor_value;
 }
+
+uint16_t adc_get_battery_voltage()
+{
+	// not implemented, motor MCU sends adc battery voltage value
+	return 0;
+}
