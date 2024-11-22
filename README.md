@@ -67,6 +67,14 @@ BBS02A - No idea, not tested, not recommended to try unless you have an already 
 ### TSDZ2
 Compatible with TSDZ2A/B using the STM microcontroller (which is nearly all off them).
 
+### Displays and Controller 
+
+Only displays with the Bafang display protocol can work. 
+
+Also the controllers need to be those, that are officially designed by Bafang, respectively Tongshen. 
+
+Some shops sell kits with their own controller.
+
 ## Legal
 * Installing this firmware will void your warranty.
 * I cannot be held responsible for any injuries caused by the use of this firmware, use at your own risk.
