@@ -55,6 +55,8 @@ static int8_t temperature_motor_c;
 static uint16_t ramp_up_current_interval_ms;
 static uint32_t power_blocked_until_ms;
 
+static uint16_t pretension_cutoff_speed_rpm_x10;
+
 static bool lights_state = false;
 
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent);
@@ -71,6 +73,8 @@ bool apply_shift_sensor_interrupt(uint8_t* target_current);
 bool apply_brake(uint8_t* target_current);
 void apply_current_ramp_up(uint8_t* target_current, bool enable);
 void apply_current_ramp_down(uint8_t* target_current, bool enable);
+
+void apply_pretension(uint8_t* target_current);
 
 bool check_power_block();
 void block_power_for(uint16_t ms);
@@ -107,6 +111,8 @@ void app_init()
 
 	speed_limit_ramp_interval_rpm_x10 = convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_RAMP_DOWN_INTERVAL_KPH) * 10;
 
+	pretension_cutoff_speed_rpm_x10 = convert_wheel_speed_kph_to_rpm(g_config.pretension_speed_cutoff_kph) * 10;
+
 	cruise_paused = true;
 	operation_mode = OPERATION_MODE_DEFAULT;
 
@@ -139,6 +145,7 @@ void app_process()
 	}
 	else
 	{
+		apply_pretension(&target_current);
 		apply_pas_cadence(&target_current, throttle_percent);
 #if HAS_TORQUE_SENSOR
 		apply_pas_torque(&target_current);
@@ -352,6 +359,16 @@ uint8_t app_get_temperature()
 	return (uint8_t)temp_max;
 }
 
+void apply_pretension(uint8_t* target_current)
+{
+	uint16_t current_speed_rpm_x10 = speed_sensor_get_rpm_x10();
+
+	if (g_config.use_speed_sensor && g_config.use_pretension && current_speed_rpm_x10 > pretension_cutoff_speed_rpm_x10)
+	{
+		*target_current = 1;
+	}
+	return;
+}
 
 void apply_pas_cadence(uint8_t* target_current, uint8_t throttle_percent)
 {

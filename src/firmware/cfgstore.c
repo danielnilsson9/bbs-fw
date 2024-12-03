@@ -26,7 +26,6 @@
 #define EEPROM_ERROR_ERASE			6
 #define EEPROM_ERROR_WRITE			7
 
-
 static const uint8_t default_current_limits[] = { 7, 10, 14, 19, 26, 36, 50, 70, 98 };
 
 #if HAS_TORQUE_SENSOR
@@ -163,6 +162,8 @@ static void load_default_config()
 	g_config.use_speed_sensor = 1;
 	g_config.use_shift_sensor = HAS_SHIFT_SENSOR_SUPPORT;
 	g_config.use_push_walk = 1;
+	g_config.use_pretension = 0;
+	g_config.pretension_speed_cutoff_kph = 16;
 	g_config.use_temperature_sensor = TEMPERATURE_SENSOR_CONTR | TEMPERATURE_SENSOR_MOTOR;
 
 	g_config.lights_mode = LIGHTS_MODE_DEFAULT;
@@ -214,7 +215,6 @@ static void load_default_config()
 #endif	
 	}
 }
-
 
 static bool read_pstate()
 {
@@ -268,8 +268,6 @@ static void load_default_pstate()
 	g_pstate.adc_voltage_calibration_steps_x100_i16l = 0;
 	g_pstate.adc_voltage_calibration_steps_x100_i16h = 0;
 }
-
-
 
 static uint8_t read(uint8_t page, uint8_t version, uint8_t* dst, uint8_t size)
 {
