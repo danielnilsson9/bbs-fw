@@ -242,7 +242,7 @@
 				</TextBlock>
 				<ComboBox Grid.Column="2" Grid.Row="5" Margin="0 8 0 0" Padding="6 2 6 0" Width="100" Height="20" HorizontalAlignment="Right" ItemsSource="{Binding ConfigVm.LightsModeOptions}" SelectedItem="{Binding ConfigVm.LightsMode, UpdateSourceTrigger=PropertyChanged}" />
 
-				<TextBlock Grid.Column="0" Grid.Row="6" Margin="0 8 0 0" Text="Pretension Mode:">
+				<TextBlock Grid.Column="0" Grid.Row="6" Margin="0 8 0 0" Text="Pretension Chain:">
 					<TextBlock.ToolTip>
 						<TextBlock Width="300" TextWrapping="Wrap">
 							Apply 1% of Max Current when above a threshold road speed to pre-tension the drivetrain.
