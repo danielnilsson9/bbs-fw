@@ -745,7 +745,7 @@ static int16_t process_bafang_display_read_moving()
 		return KEEP;
 	}
 
-	uint8_t data = speed_sensor_is_moving() ? 0x30 : 0x31;
+	uint8_t data = speed_sensor_is_moving() ? 0x31 : 0x30;
 	uart_write(data);
 	uart_write(data); // checksum
 
