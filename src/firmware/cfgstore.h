@@ -54,7 +54,7 @@
 #define LIGHTS_MODE_ALWAYS_ON			2
 #define LIGHTS_MODE_BRAKE_LIGHT			3
 
-#define CONFIG_VERSION					4
+#define CONFIG_VERSION					5
 #define PSTATE_VERSION					1
 
 
