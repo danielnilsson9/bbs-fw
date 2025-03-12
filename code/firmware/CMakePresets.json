@@ -1,0 +1,65 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 15,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "bbshd-release",
+            "displayName": "BBSHD",
+            "description": "Build for BBSHD",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/bbshd-release",
+            "toolchainFile": "${sourceDir}/cmake/sdcc-8051-toolchain.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "TARGET_CONTROLLER": {
+                    "type": "STRING",
+                    "value": "BBSHD"
+                }
+            }
+        },
+        {
+            "name": "bbs02-release",
+            "displayName": "BBS02",
+            "description": "Build for BBS02",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/bbs02-release",
+            "toolchainFile": "${sourceDir}/cmake/sdcc-8051-toolchain.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "TARGET_CONTROLLER": {
+                    "type": "STRING",
+                    "value": "BBS02"
+                }
+            }
+        },
+        {
+            "name": "tsdz2-release",
+            "displayName": "TSDZ2",
+            "description": "Build for TSDZ2",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/tsdz2-release",
+            "toolchainFile": "${sourceDir}/cmake/sdcc-stm8-toolchain.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "TARGET_CONTROLLER": {
+                    "type": "STRING",
+                    "value": "TSDZ2"
+                }
+            }
+        }     
+    ],
+    "buildPresets": [
+        {
+            "name": "bbshd-release",
+            "configurePreset": "bbshd-release"
+        },
+        {
+            "name": "tsdz2-release",
+            "configurePreset": "tsdz2-release"
+        }
+    ]
+}
