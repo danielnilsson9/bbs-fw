@@ -587,7 +587,7 @@ namespace BBSFW.Model
 
 		public bool ParseFromBufferV5(byte[] buffer)
 		{
-			if (buffer.Length != ByteSizeV4)
+			if (buffer.Length != ByteSizeV5)
 			{
 				return false;
 			}
