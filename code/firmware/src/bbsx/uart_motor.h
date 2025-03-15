@@ -1,7 +1,7 @@
 /*
  * bbs-fw
  *
- * Copyright (C) Daniel Nilsson, 2022.
+ * Copyright (C) Daniel Nilsson, 2024.
  *
  * Released under the GPL License, Version 3
  */
@@ -9,8 +9,8 @@
 #ifndef _BBSX_UART_MOTOR_H_
 #define _BBSX_UART_MOTOR_H_
 
-#include "bbsx/stc15.h"
 #include "bbsx/interrupt.h"
+#include "bbsx/stc15.h"
 
 #include <stdint.h>
 

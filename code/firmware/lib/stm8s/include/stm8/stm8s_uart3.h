@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -137,8 +137,8 @@ typedef enum
   *     UART3_IT_TXE
   *     UART3_IT_TC
   *     UART3_IT_RXNE
-  *     UART3_IT_IDLE 
-  *     UART3_IT_OR 
+  *     UART3_IT_IDLE
+  *     UART3_IT_OR
   *   - For the UART3_IT_PE value, X means the flag position in the CR1 register.
   *   - For the UART3_IT_LBDF value, X means the flag position in the CR4 register.
   *   - For the UART3_IT_LHDF value, X means the flag position in the CR6 register.
@@ -147,7 +147,7 @@ typedef enum
   *     UART3_IT_TXE
   *     UART3_IT_TC
   *     UART3_IT_RXNE
-  *     UART3_IT_IDLE 
+  *     UART3_IT_IDLE
   *     UART3_IT_OR
   *     UART3_IT_PE
   *  - For the UART3_IT_LBDF value, Y means the flag position in the CR4 register.
@@ -184,7 +184,7 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
   */
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the FLAGs
   */
 #define IS_UART3_FLAG_OK(Flag) \
@@ -203,7 +203,7 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
 
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the FLAGs that can be cleared by writing 0
   */
 #define IS_UART3_CLEAR_FLAG_OK(Flag) \
@@ -213,7 +213,7 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Flag) == UART3_FLAG_LBDF))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the Interrupts
   */
 
@@ -227,7 +227,7 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Interrupt) == UART3_IT_LBDF))
 
 /**
-  * @brief  Macro used by the assert function in order to check the different 
+  * @brief  Macro used by the assert function in order to check the different
   *         sensitivity values for the pending bit
   */
 #define IS_UART3_GET_IT_OK(ITPendingBit) \
@@ -241,7 +241,7 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((ITPendingBit) == UART3_IT_PE))
 
 /**
-  * @brief  Macro used by the assert function in order to check the different 
+  * @brief  Macro used by the assert function in order to check the different
   *         sensitivity values for the pending bit that can be cleared by writing 0
   */
 #define IS_UART3_CLEAR_IT_OK(ITPendingBit) \
@@ -307,13 +307,13 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Parity) == UART3_PARITY_ODD ))
 
 /**
- * @brief Macro used by the assert_param function in order to check the maximum 
+ * @brief Macro used by the assert_param function in order to check the maximum
  *        baudrate value
  */
 #define IS_UART3_BAUDRATE_OK(NUM) ((NUM) <= (uint32_t)625000)
 
 /**
- * @brief Macro used by the assert_param function in order to check the address 
+ * @brief Macro used by the assert_param function in order to check the address
  *        of the UART3 or UART node
  */
 #define UART3_ADDRESS_MAX ((uint8_t)16)
@@ -327,7 +327,7 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Mode) == UART3_LIN_MODE_SLAVE))
 
 /**
- * @brief Macro used by the assert_param function in order to check the LIN 
+ * @brief Macro used by the assert_param function in order to check the LIN
  *        automatic resynchronization mode
  */
 #define IS_UART3_AUTOSYNC_OK(AutosyncMode) \
@@ -335,7 +335,7 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((AutosyncMode) == UART3_LIN_AUTOSYNC_DISABLE))
 
 /**
- * @brief Macro used by the assert_param function in order to check the LIN 
+ * @brief Macro used by the assert_param function in order to check the LIN
  *        divider update method
  */
 #define IS_UART3_DIVUP_OK(DivupMethod) \
@@ -353,14 +353,14 @@ typedef enum { UART3_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
   */
 
 void UART3_DeInit(void);
-void UART3_Init(uint32_t BaudRate, UART3_WordLength_TypeDef WordLength, 
-                UART3_StopBits_TypeDef StopBits, UART3_Parity_TypeDef Parity, 
+void UART3_Init(uint32_t BaudRate, UART3_WordLength_TypeDef WordLength,
+                UART3_StopBits_TypeDef StopBits, UART3_Parity_TypeDef Parity,
                 UART3_Mode_TypeDef Mode);
 void UART3_Cmd(FunctionalState NewState);
 void UART3_ITConfig(UART3_IT_TypeDef UART3_IT, FunctionalState NewState);
 void UART3_LINBreakDetectionConfig(UART3_LINBreakDetectionLength_TypeDef UART3_LINBreakDetectionLength);
-void UART3_LINConfig(UART3_LinMode_TypeDef UART3_Mode, 
-                     UART3_LinAutosync_TypeDef UART3_Autosync, 
+void UART3_LINConfig(UART3_LinMode_TypeDef UART3_Mode,
+                     UART3_LinAutosync_TypeDef UART3_Autosync,
                      UART3_LinDivUp_TypeDef UART3_DivUp);
 void UART3_LINCmd(FunctionalState NewState);
 void UART3_ReceiverWakeUpCmd(FunctionalState NewState);

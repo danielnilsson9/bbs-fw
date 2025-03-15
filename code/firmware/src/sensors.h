@@ -1,7 +1,7 @@
 /*
  * bbs-fw
  *
- * Copyright (C) Daniel Nilsson, 2022.
+ * Copyright (C) Daniel Nilsson, 2024.
  *
  * Released under the GPL License, Version 3
  */
@@ -9,10 +9,8 @@
 #ifndef _SENSORS_H_
 #define _SENSORS_H_
 
-#include "intellisense.h"
-
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 void sensors_init();
 void sensors_process();

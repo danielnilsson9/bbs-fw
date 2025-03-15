@@ -20,7 +20,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
 		</Grid.RowDefinitions>
-		
+
 		<Menu Grid.Row="0">
 			<MenuItem Header="File" Height="22" VerticalContentAlignment="Center">
 				<MenuItem Header="Open..." Command="{Binding OpenConfigCommand}" />
@@ -64,6 +64,6 @@
 				<vw:EventLogView Margin="10" />
 			</TabItem>
 		</TabControl>
-		
+
 	</Grid>
 </Window>

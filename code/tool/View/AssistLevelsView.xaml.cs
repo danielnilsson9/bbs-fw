@@ -13,14 +13,14 @@ using System.Windows.Shapes;
 
 namespace BBSFW.View
 {
-	/// <summary>
-	/// Interaction logic for AssistLevelsView.xaml
-	/// </summary>
-	public partial class AssistLevelsView : UserControl
-	{
-		public AssistLevelsView()
-		{
-			InitializeComponent();
-		}
-	}
+/// <summary>
+/// Interaction logic for AssistLevelsView.xaml
+/// </summary>
+public partial class AssistLevelsView : UserControl
+{
+    public AssistLevelsView()
+    {
+        InitializeComponent();
+    }
+}
 }

@@ -13,14 +13,14 @@ using System.Windows.Shapes;
 
 namespace BBSFW.View
 {
-	/// <summary>
-	/// Interaction logic for EventLogView.xaml
-	/// </summary>
-	public partial class EventLogView : UserControl
-	{
-		public EventLogView()
-		{
-			InitializeComponent();
-		}
-	}
+/// <summary>
+/// Interaction logic for EventLogView.xaml
+/// </summary>
+public partial class EventLogView : UserControl
+{
+    public EventLogView()
+    {
+        InitializeComponent();
+    }
+}
 }

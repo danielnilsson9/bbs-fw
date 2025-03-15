@@ -13,14 +13,14 @@ using System.Windows.Shapes;
 
 namespace BBSFW.View
 {
-	/// <summary>
-	/// Interaction logic for SystemView.xaml
-	/// </summary>
-	public partial class SystemView : UserControl
-	{
-		public SystemView()
-		{
-			InitializeComponent();
-		}
-	}
+/// <summary>
+/// Interaction logic for SystemView.xaml
+/// </summary>
+public partial class SystemView : UserControl
+{
+    public SystemView()
+    {
+        InitializeComponent();
+    }
+}
 }

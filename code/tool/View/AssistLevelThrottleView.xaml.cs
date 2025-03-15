@@ -15,14 +15,14 @@ using System.Windows.Shapes;
 
 namespace BBSFW.View
 {
-	/// <summary>
-	/// Interaction logic for AssistLevelThrottleView.xaml
-	/// </summary>
-	public partial class AssistLevelThrottleView : UserControl
-	{
-		public AssistLevelThrottleView()
-		{
-			InitializeComponent();
-		}
-	}
+/// <summary>
+/// Interaction logic for AssistLevelThrottleView.xaml
+/// </summary>
+public partial class AssistLevelThrottleView : UserControl
+{
+    public AssistLevelThrottleView()
+    {
+        InitializeComponent();
+    }
+}
 }

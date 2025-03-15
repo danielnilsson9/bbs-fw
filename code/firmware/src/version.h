@@ -1,7 +1,7 @@
 /*
  * bbs-fw
  *
- * Copyright (C) Daniel Nilsson, 2022.
+ * Copyright (C) Daniel Nilsson, 2024.
  *
  * Released under the GPL License, Version 3
  */
@@ -9,19 +9,18 @@
 #ifndef _VERSION_H_
 #define _VERSION_H_
 
-#define VERSION_MAJOR		1
-#define VERSION_MINOR		5
-#define VERSION_PATCH		99
-
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 5
+#define VERSION_PATCH 99
 
 #if defined(BBSHD)
-	#define CTRL_TYPE		1
+#define CTRL_TYPE 1
 #elif defined(BBS02)
-	#define CTRL_TYPE		2
+#define CTRL_TYPE 2
 #elif defined(TSDZ2)
-	#define CTRL_TYPE		3
+#define CTRL_TYPE 3
 #else
-	#define CTRL_TYPE		0
+#define CTRL_TYPE 0
 #endif
 
 #endif

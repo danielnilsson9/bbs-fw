@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -161,8 +161,8 @@ typedef enum
   *     UART2_IT_TXE
   *     UART2_IT_TC
   *     UART2_IT_RXNE
-  *     UART2_IT_IDLE 
-  *     UART2_IT_OR 
+  *     UART2_IT_IDLE
+  *     UART2_IT_OR
   *   - For the UART2_IT_PE value, X means the flag position in the CR1 register.
   *   - For the UART2_IT_LBDF value, X means the flag position in the CR4 register.
   *   - For the UART2_IT_LHDF value, X means the flag position in the CR6 register.
@@ -171,7 +171,7 @@ typedef enum
   *     UART2_IT_TXE
   *     UART2_IT_TC
   *     UART2_IT_RXNE
-  *     UART2_IT_IDLE 
+  *     UART2_IT_IDLE
   *     UART2_IT_OR
   *     UART2_IT_PE
   *  - For the UART2_IT_LBDF value, Y means the flag position in the CR4 register.
@@ -215,7 +215,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
  *        sensitivity values for the MODEs possible combination should be one of
  *        the following.
  */
- 
+
 #define IS_UART2_MODE_OK(Mode) \
   (((Mode) == (uint8_t)UART2_MODE_RX_ENABLE) || \
    ((Mode) == (uint8_t)UART2_MODE_RX_DISABLE) || \
@@ -237,7 +237,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
 
 /**
   * @brief  Macro used by the assert_param function in order to check the different
-  *         sensitivity values for the SyncModes; it should exclude values such 
+  *         sensitivity values for the SyncModes; it should exclude values such
   *         as  UART2_CLOCK_ENABLE|UART2_CLOCK_DISABLE
   */
 #define IS_UART2_SYNCMODE_OK(SyncMode) \
@@ -247,7 +247,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
      (((SyncMode)&(((uint8_t)UART2_SYNCMODE_LASTBIT_DISABLE)|((uint8_t)UART2_SYNCMODE_LASTBIT_ENABLE))) == (((uint8_t)UART2_SYNCMODE_LASTBIT_DISABLE)|((uint8_t)UART2_SYNCMODE_LASTBIT_ENABLE)))))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the FLAGs
   */
 #define IS_UART2_FLAG_OK(Flag) \
@@ -266,7 +266,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
 
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the FLAGs that can be cleared by writing 0
   */
 #define IS_UART2_CLEAR_FLAG_OK(Flag) \
@@ -276,7 +276,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Flag) == UART2_FLAG_LBDF))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check 
+  * @brief  Macro used by the assert_param function in order to check
   *         the different sensitivity values for the Interrupts
   */
 
@@ -290,7 +290,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Interrupt) == UART2_IT_LBDF))
 
 /**
-  * @brief  Macro used by the assert function in order to check the different 
+  * @brief  Macro used by the assert function in order to check the different
   *         sensitivity values for the pending bit
   */
 #define IS_UART2_GET_IT_OK(ITPendingBit) \
@@ -304,7 +304,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((ITPendingBit) == UART2_IT_PE))
 
 /**
-  * @brief  Macro used by the assert function in order to check the different 
+  * @brief  Macro used by the assert function in order to check the different
   *         sensitivity values for the pending bit that can be cleared by writing 0
   */
 #define IS_UART2_CLEAR_IT_OK(ITPendingBit) \
@@ -362,7 +362,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
 
 
 /**
- * @brief Macro used by the assert_param function in order to check the address 
+ * @brief Macro used by the assert_param function in order to check the address
  *        of the UART2 or UART node
  */
 #define UART2_ADDRESS_MAX ((uint8_t)16)
@@ -376,7 +376,7 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Mode) == UART2_LIN_MODE_SLAVE))
 
 /**
- * @brief Macro used by the assert_param function in order to check the LIN 
+ * @brief Macro used by the assert_param function in order to check the LIN
  *        automatic resynchronization mode
  */
 #define IS_UART2_AUTOSYNC_OK(AutosyncMode) \
@@ -402,8 +402,8 @@ typedef enum { UART2_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
   */
 
 void UART2_DeInit(void);
-void UART2_Init(uint32_t BaudRate, UART2_WordLength_TypeDef WordLength, 
-                UART2_StopBits_TypeDef StopBits, UART2_Parity_TypeDef Parity, 
+void UART2_Init(uint32_t BaudRate, UART2_WordLength_TypeDef WordLength,
+                UART2_StopBits_TypeDef StopBits, UART2_Parity_TypeDef Parity,
                 UART2_SyncMode_TypeDef SyncMode, UART2_Mode_TypeDef Mode);
 void UART2_Cmd(FunctionalState NewState);
 void UART2_ITConfig(UART2_IT_TypeDef UART2_IT, FunctionalState NewState);
@@ -411,8 +411,8 @@ void UART2_HalfDuplexCmd(FunctionalState NewState);
 void UART2_IrDAConfig(UART2_IrDAMode_TypeDef UART2_IrDAMode);
 void UART2_IrDACmd(FunctionalState NewState);
 void UART2_LINBreakDetectionConfig(UART2_LINBreakDetectionLength_TypeDef UART2_LINBreakDetectionLength);
-void UART2_LINConfig(UART2_LinMode_TypeDef UART2_Mode, 
-                     UART2_LinAutosync_TypeDef UART2_Autosync, 
+void UART2_LINConfig(UART2_LinMode_TypeDef UART2_Mode,
+                     UART2_LinAutosync_TypeDef UART2_Autosync,
                      UART2_LinDivUp_TypeDef UART2_DivUp);
 void UART2_LINCmd(FunctionalState NewState);
 void UART2_SmartCardCmd(FunctionalState NewState);
@@ -442,6 +442,6 @@ void UART2_ClearITPendingBit(UART2_IT_TypeDef UART2_IT);
 /**
   * @}
   */
-  
+
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -16,7 +16,7 @@ if (${TARGET_CONTROLLER} STREQUAL "TSDZ2")
     add_subdirectory(lib/stm8s)
 endif()
 
-set(SOURCE_FILES 
+set(SOURCE_FILES
     "src/adc.h"
     "src/app.c"
     "src/app.h"
@@ -66,7 +66,7 @@ if (${TARGET_CONTROLLER} STREQUAL "BBSHD" OR ${TARGET_CONTROLLER} STREQUAL "BBS0
 endif()
 
 if (${TARGET_CONTROLLER} STREQUAL "TSDZ2")
-    list(APPEND SOURCE_FILES 
+    list(APPEND SOURCE_FILES
         "src/tsdz2/adc.c"
         "src/tsdz2/cpu.h"
         "src/tsdz2/eeprom.c"
@@ -93,5 +93,3 @@ target_include_directories(bbs-fw PRIVATE src)
 if (${TARGET_CONTROLLER} STREQUAL "TSDZ2")
     target_link_libraries(bbs-fw stm8s)
 endif()
-
-

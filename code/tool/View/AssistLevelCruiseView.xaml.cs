@@ -15,14 +15,14 @@ using System.Windows.Shapes;
 
 namespace BBSFW.View
 {
-	/// <summary>
-	/// Interaction logic for AssistLevelCruiseView.xaml
-	/// </summary>
-	public partial class AssistLevelCruiseView : UserControl
-	{
-		public AssistLevelCruiseView()
-		{
-			InitializeComponent();
-		}
-	}
+/// <summary>
+/// Interaction logic for AssistLevelCruiseView.xaml
+/// </summary>
+public partial class AssistLevelCruiseView : UserControl
+{
+    public AssistLevelCruiseView()
+    {
+        InitializeComponent();
+    }
+}
 }

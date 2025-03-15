@@ -1,7 +1,7 @@
 /*
  * bbs-fw
  *
- * Copyright (C) Daniel Nilsson, 2022.
+ * Copyright (C) Daniel Nilsson, 2024.
  *
  * Released under the GPL License, Version 3
  */

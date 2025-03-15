@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -61,14 +61,14 @@ typedef enum
 
 
 /**
-  * @brief   CAN sleep constants 
+  * @brief   CAN sleep constants
  */
 typedef enum {
   CAN_InitStatus_Failed =0,                        /*!< CAN initialization failed */
   CAN_InitStatus_Success =! CAN_InitStatus_Failed  /*!< CAN initialization OK*/
 } CAN_InitStatus_TypeDef;
 
- 
+
  /**
   * @brief  CAN operating mode */
  typedef enum
@@ -87,7 +87,7 @@ typedef enum {
 }CAN_ModeStatus_TypeDef;
 
  /**
-  * @brief   CAN Time Triggered Communication mode 
+  * @brief   CAN Time Triggered Communication mode
   */
 typedef enum
 {
@@ -161,13 +161,13 @@ typedef enum
 /**
   * @brief   CAN filter number */
 typedef enum
-{                                                                  
-  CAN_FilterNumber_0                = ((uint8_t)0x00),  /*!< Filter number 0 */ 
-  CAN_FilterNumber_1                = ((uint8_t)0x01),  /*!< Filter number 1 */ 
+{
+  CAN_FilterNumber_0                = ((uint8_t)0x00),  /*!< Filter number 0 */
+  CAN_FilterNumber_1                = ((uint8_t)0x01),  /*!< Filter number 1 */
   CAN_FilterNumber_2                = ((uint8_t)0x02),  /*!< Filter number 2 */
   CAN_FilterNumber_3                = ((uint8_t)0x03),  /*!< Filter number 3 */
-  CAN_FilterNumber_4                = ((uint8_t)0x04),  /*!< Filter number 4 */ 
-  CAN_FilterNumber_5                = ((uint8_t)0x05)   /*!< Filter number 5 */ 
+  CAN_FilterNumber_4                = ((uint8_t)0x04),  /*!< Filter number 4 */
+  CAN_FilterNumber_5                = ((uint8_t)0x05)   /*!< Filter number 5 */
 }CAN_FilterNumber_TypeDef;
 
 /**
@@ -285,7 +285,7 @@ typedef enum
   /*Transmit Interruption*/
   CAN_IT_TME                  =((uint16_t)0x0001), /*!< Transmit mailbox empty interrupt */
   /*Receive Interruptions*/
-  CAN_IT_FMP                  =((uint16_t)0x0002), /*!< FIFO  message pending interrupt   */  
+  CAN_IT_FMP                  =((uint16_t)0x0002), /*!< FIFO  message pending interrupt   */
   CAN_IT_FF                   =((uint16_t)0x0004), /*!< FIFO  full    interrupt                    */
   CAN_IT_FOV                  =((uint16_t)0x0008), /*!< FIFO  overrun  interrupt               */
   /*Wake Up Interruption*/
@@ -309,15 +309,15 @@ typedef enum
 /**
   * @brief   CAN Error Code description */
 typedef enum
-{                                                                  
-  CAN_ErrorCode_NoErr                 = ((uint8_t)0x00),  /*!< No Error  */ 
-  CAN_ErrorCode_StuffErr              = ((uint8_t)0x10),  /*!< Stuff Error  */ 
-  CAN_ErrorCode_FormErr               = ((uint8_t)0x20),  /*!< Form Error  */ 
-  CAN_ErrorCode_ACKErr                = ((uint8_t)0x30),  /*!< Acknowledgment Error  */ 
-  CAN_ErrorCode_BitRecessiveErr       = ((uint8_t)0x40),  /*!< Bit Recessive Error  */ 
-  CAN_ErrorCode_BitDominantErr        = ((uint8_t)0x50),  /*!< Bit Dominant Error  */ 
-  CAN_ErrorCode_CRCErr                = ((uint8_t)0x60),  /*!< CRC Error  */ 
-  CAN_ErrorCode_SoftwareSetErr        = ((uint8_t)0x70)  /*!< Software Set Error  */ 
+{
+  CAN_ErrorCode_NoErr                 = ((uint8_t)0x00),  /*!< No Error  */
+  CAN_ErrorCode_StuffErr              = ((uint8_t)0x10),  /*!< Stuff Error  */
+  CAN_ErrorCode_FormErr               = ((uint8_t)0x20),  /*!< Form Error  */
+  CAN_ErrorCode_ACKErr                = ((uint8_t)0x30),  /*!< Acknowledgment Error  */
+  CAN_ErrorCode_BitRecessiveErr       = ((uint8_t)0x40),  /*!< Bit Recessive Error  */
+  CAN_ErrorCode_BitDominantErr        = ((uint8_t)0x50),  /*!< Bit Dominant Error  */
+  CAN_ErrorCode_CRCErr                = ((uint8_t)0x60),  /*!< CRC Error  */
+  CAN_ErrorCode_SoftwareSetErr        = ((uint8_t)0x70)  /*!< Software Set Error  */
 }CAN_ErrorCode_TypeDef;
 /**
   * @}
@@ -474,7 +474,7 @@ void CAN_FilterInit(CAN_FilterNumber_TypeDef CAN_FilterNumber,
                     FunctionalState CAN_FilterActivation,
                     CAN_FilterMode_TypeDef CAN_FilterMode,
                     CAN_FilterScale_TypeDef CAN_FilterScale,
-                    uint8_t CAN_FilterID1,  
+                    uint8_t CAN_FilterID1,
                     uint8_t CAN_FilterID2,
                     uint8_t CAN_FilterID3,
                      uint8_t CAN_FilterID4,

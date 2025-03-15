@@ -13,14 +13,14 @@ using System.Windows.Shapes;
 
 namespace BBSFW.View
 {
-	/// <summary>
-	/// Interaction logic for ConnectionView.xaml
-	/// </summary>
-	public partial class ConnectionView : UserControl
-	{
-		public ConnectionView()
-		{
-			InitializeComponent();
-		}
-	}
+/// <summary>
+/// Interaction logic for ConnectionView.xaml
+/// </summary>
+public partial class ConnectionView : UserControl
+{
+    public ConnectionView()
+    {
+        InitializeComponent();
+    }
+}
 }

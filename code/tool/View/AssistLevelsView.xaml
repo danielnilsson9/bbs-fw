@@ -1,11 +1,11 @@
 <UserControl x:Class="BBSFW.View.AssistLevelsView"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:vm="clr-namespace:BBSFW.ViewModel"
 	xmlns:local="clr-namespace:BBSFW.View"
-	mc:Ignorable="d" 
+	mc:Ignorable="d"
 	d:DesignHeight="450" d:DesignWidth="800">
 
 	<Grid>
@@ -19,7 +19,7 @@
 			<RowDefinition />
 		</Grid.RowDefinitions>
 
-	
+
 		<Grid Grid.Column="0" Grid.Row="0">
 
 			<Grid.ColumnDefinitions>
@@ -27,7 +27,7 @@
 				<ColumnDefinition />
 			</Grid.ColumnDefinitions>
 
-			
+
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
 				<RowDefinition />
@@ -50,7 +50,7 @@
 						</Style.Triggers>
 					</Style>
 				</ListView.Style>
-				
+
 				<ListView.ItemTemplate>
 					<DataTemplate DataType="{x:Type vm:AssistLevelViewModel}">
 						<StackPanel Orientation="Vertical">
@@ -97,7 +97,7 @@
 				</ListView.ItemTemplate>
 			</ListView>
 		</Grid>
-		
+
 		<Grid Grid.Column="2" Grid.Row="0">
 
 
@@ -133,7 +133,7 @@
 						<DataTemplate x:Key="EmptyTemplate" DataType="{x:Type vm:AssistLevelViewModel}">
 							<Grid />
 						</DataTemplate>
-						
+
 						<DataTemplate x:Key="PasTemplate" DataType="{x:Type vm:AssistLevelViewModel}">
 							<local:AssistLevelPasView />
 						</DataTemplate>

@@ -1,7 +1,7 @@
 /*
  * bbs-fw
  *
- * Copyright (C) Daniel Nilsson, 2022.
+ * Copyright (C) Daniel Nilsson, 2024.
  *
  * Released under the GPL License, Version 3
  */
@@ -11,10 +11,10 @@
 
 #include <stdint.h>
 
-#define MOTOR_ERROR_LVC				0x0800
-#define MOTOR_ERROR_HALL_SENSOR		0x2000
-#define MOTOR_ERROR_CURRENT_SENSE	0x0004
-#define MOTOR_ERROR_POWER_RESET		0x0020
+#define MOTOR_ERROR_LVC           0x0800
+#define MOTOR_ERROR_HALL_SENSOR   0x2000
+#define MOTOR_ERROR_CURRENT_SENSE 0x0004
+#define MOTOR_ERROR_POWER_RESET   0x0020
 
 void motor_pre_init();
 void motor_init(uint16_t max_current_mA, uint8_t lvc_V, int16_t adc_calib_volt_step_offset);

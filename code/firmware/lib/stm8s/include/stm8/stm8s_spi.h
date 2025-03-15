@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -180,14 +180,14 @@ typedef enum
                                         ((MODE) == SPI_DATADIRECTION_1LINE_TX))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the mode 
+  * @brief  Macro used by the assert_param function in order to check the mode
   *         half duplex data direction values
   */
 #define IS_SPI_DIRECTION_OK(DIRECTION) (((DIRECTION) == SPI_DIRECTION_RX) || \
                                         ((DIRECTION) == SPI_DIRECTION_TX))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the NSS 
+  * @brief  Macro used by the assert_param function in order to check the NSS
   *         management values
   */
 #define IS_SPI_SLAVEMANAGEMENT_OK(NSS) (((NSS) == SPI_NSS_SOFT) || \
@@ -231,21 +231,21 @@ typedef enum
                                  ((CLKPHA) == SPI_CLOCKPHASE_2EDGE))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the first 
+  * @brief  Macro used by the assert_param function in order to check the first
   *         bit to be transmited values
   */
 #define IS_SPI_FIRSTBIT_OK(BIT) (((BIT) == SPI_FIRSTBIT_MSB) || \
                                  ((BIT) == SPI_FIRSTBIT_LSB))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the CRC 
+  * @brief  Macro used by the assert_param function in order to check the CRC
   *         Transmit/Receive
   */
 #define IS_SPI_CRC_OK(CRC) (((CRC) == SPI_CRC_TX) || \
                             ((CRC) == SPI_CRC_RX))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different flags values
   */
 #define IS_SPI_FLAGS_OK(FLAG) (((FLAG) == SPI_FLAG_OVR) || \
@@ -257,15 +257,15 @@ typedef enum
                                ((FLAG) == SPI_FLAG_BSY))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
-  *         different sensitivity values for the flag that can be cleared 
+  * @brief  Macro used by the assert_param function in order to check the
+  *         different sensitivity values for the flag that can be cleared
   *         by writing 0
   */
 #define IS_SPI_CLEAR_FLAGS_OK(FLAG) (((FLAG) == SPI_FLAG_CRCERR) || \
                                      ((FLAG) == SPI_FLAG_WKUP))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *        different sensitivity values for the Interrupts
   */
 #define IS_SPI_CONFIG_IT_OK(Interrupt) (((Interrupt) == SPI_IT_TXE)  || \
@@ -274,7 +274,7 @@ typedef enum
                                         ((Interrupt) == SPI_IT_WKUP))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the pending bit
   */
 #define IS_SPI_GET_IT_OK(ITPendingBit) (((ITPendingBit) == SPI_IT_OVR)  || \
@@ -285,7 +285,7 @@ typedef enum
                                         ((ITPendingBit) == SPI_IT_RXNE))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the pending bit that can be cleared
   *         by writing 0
   */
@@ -300,11 +300,11 @@ typedef enum
   * @{
   */
 void SPI_DeInit(void);
-void SPI_Init(SPI_FirstBit_TypeDef FirstBit, 
-              SPI_BaudRatePrescaler_TypeDef BaudRatePrescaler, 
-              SPI_Mode_TypeDef Mode, SPI_ClockPolarity_TypeDef ClockPolarity, 
-              SPI_ClockPhase_TypeDef ClockPhase, 
-              SPI_DataDirection_TypeDef Data_Direction, 
+void SPI_Init(SPI_FirstBit_TypeDef FirstBit,
+              SPI_BaudRatePrescaler_TypeDef BaudRatePrescaler,
+              SPI_Mode_TypeDef Mode, SPI_ClockPolarity_TypeDef ClockPolarity,
+              SPI_ClockPhase_TypeDef ClockPhase,
+              SPI_DataDirection_TypeDef Data_Direction,
               SPI_NSS_TypeDef Slave_Management, uint8_t CRCPolynomial);
 void SPI_Cmd(FunctionalState NewState);
 void SPI_ITConfig(SPI_IT_TypeDef SPI_IT, FunctionalState NewState);
@@ -331,6 +331,6 @@ void SPI_ClearITPendingBit(SPI_IT_TypeDef SPI_IT);
 /**
   * @}
   */
-  
+
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

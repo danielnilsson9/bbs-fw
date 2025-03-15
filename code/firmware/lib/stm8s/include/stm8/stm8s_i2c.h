@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -269,10 +269,10 @@ typedef enum
     *   I2C_OwnAddress1 field) the I2C_EVENT_SLAVE_XXX_ADDRESS_MATCHED event is set
     *   (where XXX could be TRANSMITTER or RECEIVER).
     *
-    * 2) In case the address sent by the master is General Call (address 0x00) and 
-    *   if the General Call is enabled for the peripheral (using function I2C_GeneralCallCmd()) 
-    *   the following event is set I2C_EVENT_SLAVE_GENERALCALLADDRESS_MATCHED.  
-    * 
+    * 2) In case the address sent by the master is General Call (address 0x00) and
+    *   if the General Call is enabled for the peripheral (using function I2C_GeneralCallCmd())
+    *   the following event is set I2C_EVENT_SLAVE_GENERALCALLADDRESS_MATCHED.
+    *
     */
 
   /* --EV1  (all the events below are variants of EV1) */
@@ -334,7 +334,7 @@ typedef enum
   */
 #define I2C_MAX_STANDARD_FREQ ((uint32_t)100000)
 #define I2C_MAX_FAST_FREQ     ((uint32_t)400000)
-#if defined(STM8S208) || defined(STM8S207) || defined(STM8S007) 
+#if defined(STM8S208) || defined(STM8S207) || defined(STM8S007)
  #define I2C_MAX_INPUT_FREQ     ((uint8_t)24)
 #else
  #define I2C_MAX_INPUT_FREQ     ((uint8_t)16)
@@ -438,7 +438,7 @@ typedef enum
     ((ITPENDINGBIT) == I2C_ITPENDINGBIT_ACKNOWLEDGEFAILURE) || \
     ((ITPENDINGBIT) == I2C_ITPENDINGBIT_ARBITRATIONLOSS) 		|| \
     ((ITPENDINGBIT) == I2C_ITPENDINGBIT_BUSERROR))
-    
+
 /**
   * @brief  Macro used by the assert function to check the different I2C possible
   *   pending bits to clear by writing 0.
@@ -449,7 +449,7 @@ typedef enum
     ((ITPENDINGBIT) == I2C_ITPENDINGBIT_ACKNOWLEDGEFAILURE) || \
     ((ITPENDINGBIT) == I2C_ITPENDINGBIT_ARBITRATIONLOSS)    || \
     ((ITPENDINGBIT) == I2C_ITPENDINGBIT_BUSERROR))
-   
+
 /**
   * @brief   Macro used by the assert function to check the different I2C possible events.
   */
@@ -503,8 +503,8 @@ typedef enum
   */
 
 void I2C_DeInit(void);
-void I2C_Init(uint32_t OutputClockFrequencyHz, uint16_t OwnAddress, 
-              I2C_DutyCycle_TypeDef I2C_DutyCycle, I2C_Ack_TypeDef Ack, 
+void I2C_Init(uint32_t OutputClockFrequencyHz, uint16_t OwnAddress,
+              I2C_DutyCycle_TypeDef I2C_DutyCycle, I2C_Ack_TypeDef Ack,
               I2C_AddMode_TypeDef AddMode, uint8_t InputClockFrequencyMHz );
 void I2C_Cmd(FunctionalState NewState);
 void I2C_GeneralCallCmd(FunctionalState NewState);

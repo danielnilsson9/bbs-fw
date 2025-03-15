@@ -1,5 +1,5 @@
-#include <Arduino.h>
 #include <AltSoftSerial.h>>
+#include <Arduino.h>
 
 #include "ComProxy.h"
 
@@ -11,8 +11,8 @@
 // to compensate for the lack of HW ports (should have used another MCU).
 //
 // This causes a few problems since the entire CPu
-// is stalled when doing transmit. You may therefore see 
-// error code 30 pop up on the display birefly if a lot is 
+// is stalled when doing transmit. You may therefore see
+// error code 30 pop up on the display birefly if a lot is
 // printed to the log since the response is not fast enough.
 
 SoftwareSerial logSerial(11, 12);
@@ -20,7 +20,6 @@ AltSoftSerial controllerSerial(8, 9);
 // HW Serial used for display connection
 
 ComProxy proxy(controllerSerial, Serial, logSerial);
-
 
 void initProxy()
 {
@@ -43,8 +42,8 @@ void initProxy()
     }
 }
 
-void printEvent(const ComProxy::Event& evt)
-{    
+void printEvent(const ComProxy::Event &evt)
+{
     ComProxy::printFormat(logSerial, evt);
     logSerial.println();
 }
@@ -67,9 +66,9 @@ void setup()
     }
     else
     {
-        delay(100);   
+        delay(100);
         initProxy();
-    } 
+    }
 }
 
 void loop()
@@ -77,14 +76,14 @@ void loop()
     if (proxy.isConnected())
     {
         proxy.process();
-     
+
         if (proxy.hasLogEvent())
         {
             ComProxy::Event evt;
             if (proxy.getLogEvent(evt))
             {
-                printEvent(evt); 
-            }          
+                printEvent(evt);
+            }
         }
     }
 }

@@ -15,14 +15,14 @@ using System.Windows.Shapes;
 
 namespace BBSFW.View
 {
-	/// <summary>
-	/// Interaction logic for AssistLevelPasView.xaml
-	/// </summary>
-	public partial class AssistLevelPasView : UserControl
-	{
-		public AssistLevelPasView()
-		{
-			InitializeComponent();
-		}
-	}
+/// <summary>
+/// Interaction logic for AssistLevelPasView.xaml
+/// </summary>
+public partial class AssistLevelPasView : UserControl
+{
+    public AssistLevelPasView()
+    {
+        InitializeComponent();
+    }
+}
 }

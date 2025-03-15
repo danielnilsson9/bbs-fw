@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -161,8 +161,8 @@ typedef enum
   *     UART4_IT_TXE
   *     UART4_IT_TC
   *     UART4_IT_RXNE
-  *     UART4_IT_IDLE 
-  *     UART4_IT_OR 
+  *     UART4_IT_IDLE
+  *     UART4_IT_OR
   *   - For the UART4_IT_PE value, X means the flag position in the CR1 register.
   *   - For the UART4_IT_LBDF value, X means the flag position in the CR4 register.
   *   - For the UART4_IT_LHDF value, X means the flag position in the CR6 register.
@@ -171,7 +171,7 @@ typedef enum
   *     UART4_IT_TXE
   *     UART4_IT_TC
   *     UART4_IT_RXNE
-  *     UART4_IT_IDLE 
+  *     UART4_IT_IDLE
   *     UART4_IT_OR
   *     UART4_IT_PE
   *  - For the UART4_IT_LBDF value, Y means the flag position in the CR4 register.
@@ -214,7 +214,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
  *        sensitivity values for the MODEs possible combination should be one of
  *        the following.
  */
- 
+
 #define IS_UART4_MODE_OK(Mode) \
   (((Mode) == (uint8_t)UART4_MODE_RX_ENABLE) || \
    ((Mode) == (uint8_t)UART4_MODE_RX_DISABLE) || \
@@ -236,7 +236,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
 
 /**
   * @brief  Macro used by the assert_param function in order to check the different
-  *         sensitivity values for the SyncModes; it should exclude values such 
+  *         sensitivity values for the SyncModes; it should exclude values such
   *         as  UART4_CLOCK_ENABLE|UART4_CLOCK_DISABLE
   */
 #define IS_UART4_SYNCMODE_OK(SyncMode) \
@@ -246,7 +246,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
      (((SyncMode)&(((uint8_t)UART4_SYNCMODE_LASTBIT_DISABLE)|((uint8_t)UART4_SYNCMODE_LASTBIT_ENABLE))) == (((uint8_t)UART4_SYNCMODE_LASTBIT_DISABLE)|((uint8_t)UART4_SYNCMODE_LASTBIT_ENABLE)))))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the FLAGs
   */
 #define IS_UART4_FLAG_OK(Flag) \
@@ -265,7 +265,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
 
 
 /**
-  * @brief  Macro used by the assert_param function in order to check the 
+  * @brief  Macro used by the assert_param function in order to check the
   *         different sensitivity values for the FLAGs that can be cleared by writing 0
   */
 #define IS_UART4_CLEAR_FLAG_OK(Flag) \
@@ -275,7 +275,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Flag) == UART4_FLAG_LBDF))
 
 /**
-  * @brief  Macro used by the assert_param function in order to check 
+  * @brief  Macro used by the assert_param function in order to check
   *         the different sensitivity values for the Interrupts
   */
 
@@ -289,7 +289,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Interrupt) == UART4_IT_LBDF))
 
 /**
-  * @brief  Macro used by the assert function in order to check the different 
+  * @brief  Macro used by the assert function in order to check the different
   *         sensitivity values for the pending bit
   */
 #define IS_UART4_GET_IT_OK(ITPendingBit) \
@@ -303,7 +303,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((ITPendingBit) == UART4_IT_PE))
 
 /**
-  * @brief  Macro used by the assert function in order to check the different 
+  * @brief  Macro used by the assert function in order to check the different
   *         sensitivity values for the pending bit that can be cleared by writing 0
   */
 #define IS_UART4_CLEAR_IT_OK(ITPendingBit) \
@@ -360,7 +360,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
 #define IS_UART4_BAUDRATE_OK(NUM) ((NUM) <= (uint32_t)625000)
 
 /**
- * @brief Macro used by the assert_param function in order to check the address 
+ * @brief Macro used by the assert_param function in order to check the address
  *        of the UART4 or UART node
  */
 #define UART4_ADDRESS_MAX ((uint8_t)16)
@@ -374,7 +374,7 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
    ((Mode) == UART4_LIN_MODE_SLAVE))
 
 /**
- * @brief Macro used by the assert_param function in order to check the LIN 
+ * @brief Macro used by the assert_param function in order to check the LIN
  *        automatic resynchronization mode
  */
 #define IS_UART4_AUTOSYNC_OK(AutosyncMode) \
@@ -399,8 +399,8 @@ typedef enum { UART4_IT_TXE        = (uint16_t)0x0277, /**< Transmit interrupt *
   * @{
   */
 void UART4_DeInit(void);
-void UART4_Init(uint32_t BaudRate, UART4_WordLength_TypeDef WordLength, 
-                UART4_StopBits_TypeDef StopBits, UART4_Parity_TypeDef Parity, 
+void UART4_Init(uint32_t BaudRate, UART4_WordLength_TypeDef WordLength,
+                UART4_StopBits_TypeDef StopBits, UART4_Parity_TypeDef Parity,
                 UART4_SyncMode_TypeDef SyncMode, UART4_Mode_TypeDef Mode);
 void UART4_Cmd(FunctionalState NewState);
 void UART4_ITConfig(UART4_IT_TypeDef UART4_IT, FunctionalState NewState);
@@ -408,8 +408,8 @@ void UART4_HalfDuplexCmd(FunctionalState NewState);
 void UART4_IrDAConfig(UART4_IrDAMode_TypeDef UART4_IrDAMode);
 void UART4_IrDACmd(FunctionalState NewState);
 void UART4_LINBreakDetectionConfig(UART4_LINBreakDetectionLength_TypeDef UART4_LINBreakDetectionLength);
-void UART4_LINConfig(UART4_LinMode_TypeDef UART4_Mode, 
-                     UART4_LinAutosync_TypeDef UART4_Autosync, 
+void UART4_LINConfig(UART4_LinMode_TypeDef UART4_Mode,
+                     UART4_LinAutosync_TypeDef UART4_Autosync,
                      UART4_LinDivUp_TypeDef UART4_DivUp);
 void UART4_LINCmd(FunctionalState NewState);
 void UART4_SmartCardCmd(FunctionalState NewState);
@@ -439,6 +439,6 @@ void UART4_ClearITPendingBit(UART4_IT_TypeDef UART4_IT);
 /**
   * @}
   */
-  
+
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

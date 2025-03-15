@@ -15,14 +15,14 @@ using System.Windows.Shapes;
 
 namespace BBSFW.View
 {
-	/// <summary>
-	/// Interaction logic for CalibrationView.xaml
-	/// </summary>
-	public partial class CalibrationView : UserControl
-	{
-		public CalibrationView()
-		{
-			InitializeComponent();
-		}
-	}
+/// <summary>
+/// Interaction logic for CalibrationView.xaml
+/// </summary>
+public partial class CalibrationView : UserControl
+{
+    public CalibrationView()
+    {
+        InitializeComponent();
+    }
+}
 }

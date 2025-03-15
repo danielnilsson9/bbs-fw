@@ -1,16 +1,16 @@
 <UserControl x:Class="BBSFW.View.SystemView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:BBSFW.View"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="500" d:DesignWidth="850">
 
 	<UserControl.Resources>
 		<BooleanToVisibilityConverter x:Key="BoolToVis" />
 	</UserControl.Resources>
-	
+
 	<Grid>
 
 		<Grid.ColumnDefinitions>
@@ -24,7 +24,7 @@
 		</Grid.RowDefinitions>
 
 		<StackPanel Grid.Column="0" Grid.Row="0" >
-			
+
 			<Grid>
 
 				<Grid.ColumnDefinitions>
@@ -98,7 +98,7 @@
 						be used in order to comply with such laws.
 						<LineBreak />
 						<LineBreak />
-						When this option is enabled the configured global throttle speed limit will override the 
+						When this option is enabled the configured global throttle speed limit will override the
 						assist level speed limit while using throttle and not pedaling. Throttle must still
 						be enabled on each individual assist level for this option to apply.
 						<LineBreak />
@@ -314,7 +314,7 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
-				
+
 				<TextBlock Grid.Row="0" Text="Shift Sensor" FontSize="18" FontWeight="Bold" />
 
 				<TextBlock Grid.Column="0" Grid.Row="1" Margin="0 8 0 0" Text="Shift Interrupt Duration (ms):">
@@ -345,7 +345,7 @@
 					 Text="{Binding ConfigVm.ShiftInterruptCurrentThresholdPercent, UpdateSourceTrigger=PropertyChanged}" />
 
 			</Grid>
-			
+
 			<Grid Margin="0 20 0 0">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition />

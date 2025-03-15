@@ -1,7 +1,7 @@
 /*
  * bbs-fw
  *
- * Copyright (C) Daniel Nilsson, 2022.
+ * Copyright (C) Daniel Nilsson, 2024.
  *
  * Released under the GPL License, Version 3
  */
@@ -9,9 +9,8 @@
 #ifndef _EEPROM_H_
 #define _EEPROM_H_
 
-#include "intellisense.h"
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 void eeprom_init();
 bool eeprom_select_page(int page);

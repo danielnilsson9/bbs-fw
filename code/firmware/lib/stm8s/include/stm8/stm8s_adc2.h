@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -223,21 +223,21 @@ typedef enum {
   * @{
   */
 void ADC2_DeInit(void);
-void ADC2_Init(ADC2_ConvMode_TypeDef ADC2_ConversionMode, 
-               ADC2_Channel_TypeDef ADC2_Channel, 
-               ADC2_PresSel_TypeDef ADC2_PrescalerSelection, 
-               ADC2_ExtTrig_TypeDef ADC2_ExtTrigger, 
-               FunctionalState ADC2_ExtTriggerState, 
-               ADC2_Align_TypeDef ADC2_Align, 
-               ADC2_SchmittTrigg_TypeDef ADC2_SchmittTriggerChannel, 
+void ADC2_Init(ADC2_ConvMode_TypeDef ADC2_ConversionMode,
+               ADC2_Channel_TypeDef ADC2_Channel,
+               ADC2_PresSel_TypeDef ADC2_PrescalerSelection,
+               ADC2_ExtTrig_TypeDef ADC2_ExtTrigger,
+               FunctionalState ADC2_ExtTriggerState,
+               ADC2_Align_TypeDef ADC2_Align,
+               ADC2_SchmittTrigg_TypeDef ADC2_SchmittTriggerChannel,
                FunctionalState ADC2_SchmittTriggerState);
 void ADC2_Cmd(FunctionalState NewState);
 void ADC2_ITConfig(FunctionalState NewState);
 void ADC2_PrescalerConfig(ADC2_PresSel_TypeDef ADC2_Prescaler);
-void ADC2_SchmittTriggerConfig(ADC2_SchmittTrigg_TypeDef ADC2_SchmittTriggerChannel, 
+void ADC2_SchmittTriggerConfig(ADC2_SchmittTrigg_TypeDef ADC2_SchmittTriggerChannel,
                               FunctionalState NewState);
-void ADC2_ConversionConfig(ADC2_ConvMode_TypeDef ADC2_ConversionMode, 
-                           ADC2_Channel_TypeDef ADC2_Channel, 
+void ADC2_ConversionConfig(ADC2_ConvMode_TypeDef ADC2_ConversionMode,
+                           ADC2_Channel_TypeDef ADC2_Channel,
                            ADC2_Align_TypeDef ADC2_Align);
 void ADC2_ExternalTriggerConfig(ADC2_ExtTrig_TypeDef ADC2_ExtTrigger, FunctionalState NewState);
 void ADC2_StartConversion(void);

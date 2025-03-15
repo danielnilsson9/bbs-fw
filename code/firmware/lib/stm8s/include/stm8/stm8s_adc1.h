@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -41,7 +41,7 @@
   * @brief  ADC1 clock prescaler selection
   */
 
-typedef enum 
+typedef enum
 {
   ADC1_PRESSEL_FCPU_D2  = (uint8_t)0x00, /**< Prescaler selection fADC1 = fcpu/2 */
   ADC1_PRESSEL_FCPU_D3  = (uint8_t)0x10, /**< Prescaler selection fADC1 = fcpu/3 */
@@ -56,7 +56,7 @@ typedef enum
 /**
   * @brief   ADC1 External conversion trigger event selection
   */
-typedef enum 
+typedef enum
 {
   ADC1_EXTTRIG_TIM   = (uint8_t)0x00, /**< Conversion from Internal TIM1 TRGO event */
   ADC1_EXTTRIG_GPIO  = (uint8_t)0x10  /**< Conversion from External interrupt on ADC_ETR pin*/
@@ -65,7 +65,7 @@ typedef enum
 /**
   * @brief  ADC1 data alignment
   */
-typedef enum 
+typedef enum
 {
   ADC1_ALIGN_LEFT  = (uint8_t)0x00, /**< Data alignment left */
   ADC1_ALIGN_RIGHT = (uint8_t)0x08  /**< Data alignment right */
@@ -74,7 +74,7 @@ typedef enum
 /**
   * @brief  ADC1 Interrupt source
   */
-typedef enum 
+typedef enum
 {
   ADC1_IT_AWDIE = (uint16_t)0x010, /**< Analog WDG interrupt enable */
   ADC1_IT_EOCIE = (uint16_t)0x020, /**< EOC interrupt enable */
@@ -98,7 +98,7 @@ typedef enum
 /**
   * @brief  ADC1 Flags
   */
-typedef enum 
+typedef enum
 {
   ADC1_FLAG_OVR   = (uint8_t)0x41, /**< Overrun status flag */
   ADC1_FLAG_AWD   = (uint8_t)0x40, /**< Analog WDG status */
@@ -121,7 +121,7 @@ typedef enum
 /**
   * @brief  ADC1 schmitt Trigger
   */
-typedef enum 
+typedef enum
 {
   ADC1_SCHMITTTRIG_CHANNEL0  = (uint8_t)0x00, /**< Schmitt trigger disable on AIN0 */
   ADC1_SCHMITTTRIG_CHANNEL1  = (uint8_t)0x01, /**< Schmitt trigger disable on AIN1 */
@@ -133,16 +133,16 @@ typedef enum
   ADC1_SCHMITTTRIG_CHANNEL7  = (uint8_t)0x07, /**< Schmitt trigger disable on AIN7 */
   ADC1_SCHMITTTRIG_CHANNEL8  = (uint8_t)0x08, /**< Schmitt trigger disable on AIN8 */
   ADC1_SCHMITTTRIG_CHANNEL9  = (uint8_t)0x09, /**< Schmitt trigger disable on AIN9 */
-  ADC1_SCHMITTTRIG_CHANNEL12 = (uint8_t)0x0C, /**< Schmitt trigger disable on AIN12 */  
-                                              /* refer to product datasheet for channel 12 availability */ 
-  ADC1_SCHMITTTRIG_ALL       = (uint8_t)0xFF /**< Schmitt trigger disable on All channels */ 
+  ADC1_SCHMITTTRIG_CHANNEL12 = (uint8_t)0x0C, /**< Schmitt trigger disable on AIN12 */
+                                              /* refer to product datasheet for channel 12 availability */
+  ADC1_SCHMITTTRIG_ALL       = (uint8_t)0xFF /**< Schmitt trigger disable on All channels */
 } ADC1_SchmittTrigg_TypeDef;
 
 /**
   * @brief  ADC1 conversion mode selection
   */
 
-typedef enum 
+typedef enum
 {
   ADC1_CONVERSIONMODE_SINGLE     = (uint8_t)0x00, /**< Single conversion mode */
   ADC1_CONVERSIONMODE_CONTINUOUS = (uint8_t)0x01  /**< Continuous conversion mode */
@@ -152,7 +152,7 @@ typedef enum
   * @brief  ADC1 analog channel selection
   */
 
-typedef enum 
+typedef enum
 {
   ADC1_CHANNEL_0  = (uint8_t)0x00, /**< Analog channel 0 */
   ADC1_CHANNEL_1  = (uint8_t)0x01, /**< Analog channel 1 */
@@ -164,7 +164,7 @@ typedef enum
   ADC1_CHANNEL_7  = (uint8_t)0x07, /**< Analog channel 7 */
   ADC1_CHANNEL_8  = (uint8_t)0x08, /**< Analog channel 8 */
   ADC1_CHANNEL_9  = (uint8_t)0x09, /**< Analog channel 9 */
-  ADC1_CHANNEL_12 = (uint8_t)0x0C /**< Analog channel 12 */ 
+  ADC1_CHANNEL_12 = (uint8_t)0x0C /**< Analog channel 12 */
                  /* refer to product datasheet for channel 12 availability */
 } ADC1_Channel_TypeDef;
 
@@ -299,12 +299,12 @@ typedef enum
   * @{
   */
 void ADC1_DeInit(void);
-void ADC1_Init(ADC1_ConvMode_TypeDef ADC1_ConversionMode, 
+void ADC1_Init(ADC1_ConvMode_TypeDef ADC1_ConversionMode,
                ADC1_Channel_TypeDef ADC1_Channel,
-               ADC1_PresSel_TypeDef ADC1_PrescalerSelection, 
-               ADC1_ExtTrig_TypeDef ADC1_ExtTrigger, 
-               FunctionalState ADC1_ExtTriggerState, ADC1_Align_TypeDef ADC1_Align, 
-               ADC1_SchmittTrigg_TypeDef ADC1_SchmittTriggerChannel, 
+               ADC1_PresSel_TypeDef ADC1_PrescalerSelection,
+               ADC1_ExtTrig_TypeDef ADC1_ExtTrigger,
+               FunctionalState ADC1_ExtTriggerState, ADC1_Align_TypeDef ADC1_Align,
+               ADC1_SchmittTrigg_TypeDef ADC1_SchmittTriggerChannel,
                FunctionalState ADC1_SchmittTriggerState);
 void ADC1_Cmd(FunctionalState NewState);
 void ADC1_ScanModeCmd(FunctionalState NewState);
@@ -313,8 +313,8 @@ void ADC1_ITConfig(ADC1_IT_TypeDef ADC1_IT, FunctionalState NewState);
 void ADC1_PrescalerConfig(ADC1_PresSel_TypeDef ADC1_Prescaler);
 void ADC1_SchmittTriggerConfig(ADC1_SchmittTrigg_TypeDef ADC1_SchmittTriggerChannel,
                               FunctionalState NewState);
-void ADC1_ConversionConfig(ADC1_ConvMode_TypeDef ADC1_ConversionMode, 
-                           ADC1_Channel_TypeDef ADC1_Channel, 
+void ADC1_ConversionConfig(ADC1_ConvMode_TypeDef ADC1_ConversionMode,
+                           ADC1_Channel_TypeDef ADC1_Channel,
                            ADC1_Align_TypeDef ADC1_Align);
 void ADC1_ExternalTriggerConfig(ADC1_ExtTrig_TypeDef ADC1_ExtTrigger, FunctionalState NewState);
 void ADC1_AWDChannelConfig(ADC1_Channel_TypeDef Channel, FunctionalState NewState);

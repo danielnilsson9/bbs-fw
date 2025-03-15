@@ -1,7 +1,7 @@
 /*
  * bbs-fw
  *
- * Copyright (C) Daniel Nilsson, 2022.
+ * Copyright (C) Daniel Nilsson, 2024.
  *
  * Released under the GPL License, Version 3
  */
@@ -10,6 +10,6 @@
 #define _TSDZ2_CPU_H_
 
 #define STM8S105
-#define CPU_FREQ	16000000L
+#define CPU_FREQ 16000000L
 
 #endif

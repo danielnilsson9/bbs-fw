@@ -7,7 +7,7 @@ set(CMAKE_EXE_LINKER_FLAGS_INIT "")
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-# which compilers to use for C and ASM 
+# which compilers to use for C and ASM
 set(CMAKE_C_COMPILER sdcc)
 set(CMAKE_ASM_COMPILER sdasstm8)
 

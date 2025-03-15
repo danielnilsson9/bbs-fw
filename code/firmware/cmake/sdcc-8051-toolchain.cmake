@@ -7,7 +7,7 @@ set(CMAKE_EXE_LINKER_FLAGS_INIT "")
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-# which compilers to use for C and ASM 
+# which compilers to use for C and ASM
 set(CMAKE_C_COMPILER sdcc)
 
 find_program (SDCC NAMES sdcc)
@@ -25,4 +25,3 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 set(CMAKE_ASM_OUTPUT_EXTENSION ".rel")
-

@@ -16,8 +16,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -35,7 +35,7 @@
 /** @addtogroup STM8S_StdPeriph_Driver
   * @{
   */
-  
+
 /** @addtogroup TIM1_Exported_Types
  * @{
  */
@@ -492,62 +492,62 @@ typedef enum
   */
 
 void TIM1_DeInit(void);
-void TIM1_TimeBaseInit(uint16_t TIM1_Prescaler, 
+void TIM1_TimeBaseInit(uint16_t TIM1_Prescaler,
                        TIM1_CounterMode_TypeDef TIM1_CounterMode,
                        uint16_t TIM1_Period, uint8_t TIM1_RepetitionCounter);
-void TIM1_OC1Init(TIM1_OCMode_TypeDef TIM1_OCMode, 
-                  TIM1_OutputState_TypeDef TIM1_OutputState, 
-                  TIM1_OutputNState_TypeDef TIM1_OutputNState, 
-                  uint16_t TIM1_Pulse, TIM1_OCPolarity_TypeDef TIM1_OCPolarity, 
-                  TIM1_OCNPolarity_TypeDef TIM1_OCNPolarity, 
-                  TIM1_OCIdleState_TypeDef TIM1_OCIdleState, 
+void TIM1_OC1Init(TIM1_OCMode_TypeDef TIM1_OCMode,
+                  TIM1_OutputState_TypeDef TIM1_OutputState,
+                  TIM1_OutputNState_TypeDef TIM1_OutputNState,
+                  uint16_t TIM1_Pulse, TIM1_OCPolarity_TypeDef TIM1_OCPolarity,
+                  TIM1_OCNPolarity_TypeDef TIM1_OCNPolarity,
+                  TIM1_OCIdleState_TypeDef TIM1_OCIdleState,
                   TIM1_OCNIdleState_TypeDef TIM1_OCNIdleState);
-void TIM1_OC2Init(TIM1_OCMode_TypeDef TIM1_OCMode, 
-                  TIM1_OutputState_TypeDef TIM1_OutputState, 
-                  TIM1_OutputNState_TypeDef TIM1_OutputNState, 
-                  uint16_t TIM1_Pulse, TIM1_OCPolarity_TypeDef TIM1_OCPolarity, 
-                  TIM1_OCNPolarity_TypeDef TIM1_OCNPolarity, 
-                  TIM1_OCIdleState_TypeDef TIM1_OCIdleState, 
+void TIM1_OC2Init(TIM1_OCMode_TypeDef TIM1_OCMode,
+                  TIM1_OutputState_TypeDef TIM1_OutputState,
+                  TIM1_OutputNState_TypeDef TIM1_OutputNState,
+                  uint16_t TIM1_Pulse, TIM1_OCPolarity_TypeDef TIM1_OCPolarity,
+                  TIM1_OCNPolarity_TypeDef TIM1_OCNPolarity,
+                  TIM1_OCIdleState_TypeDef TIM1_OCIdleState,
                   TIM1_OCNIdleState_TypeDef TIM1_OCNIdleState);
-void TIM1_OC3Init(TIM1_OCMode_TypeDef TIM1_OCMode, 
-                  TIM1_OutputState_TypeDef TIM1_OutputState, 
-                  TIM1_OutputNState_TypeDef TIM1_OutputNState, 
-                  uint16_t TIM1_Pulse, TIM1_OCPolarity_TypeDef TIM1_OCPolarity, 
-                  TIM1_OCNPolarity_TypeDef TIM1_OCNPolarity, 
-                  TIM1_OCIdleState_TypeDef TIM1_OCIdleState, 
+void TIM1_OC3Init(TIM1_OCMode_TypeDef TIM1_OCMode,
+                  TIM1_OutputState_TypeDef TIM1_OutputState,
+                  TIM1_OutputNState_TypeDef TIM1_OutputNState,
+                  uint16_t TIM1_Pulse, TIM1_OCPolarity_TypeDef TIM1_OCPolarity,
+                  TIM1_OCNPolarity_TypeDef TIM1_OCNPolarity,
+                  TIM1_OCIdleState_TypeDef TIM1_OCIdleState,
                   TIM1_OCNIdleState_TypeDef TIM1_OCNIdleState);
-void TIM1_OC4Init(TIM1_OCMode_TypeDef TIM1_OCMode, 
+void TIM1_OC4Init(TIM1_OCMode_TypeDef TIM1_OCMode,
                   TIM1_OutputState_TypeDef TIM1_OutputState, uint16_t TIM1_Pulse,
-                  TIM1_OCPolarity_TypeDef TIM1_OCPolarity, 
+                  TIM1_OCPolarity_TypeDef TIM1_OCPolarity,
                   TIM1_OCIdleState_TypeDef TIM1_OCIdleState);
-void TIM1_BDTRConfig(TIM1_OSSIState_TypeDef TIM1_OSSIState, 
+void TIM1_BDTRConfig(TIM1_OSSIState_TypeDef TIM1_OSSIState,
                      TIM1_LockLevel_TypeDef TIM1_LockLevel, uint8_t TIM1_DeadTime,
-                     TIM1_BreakState_TypeDef TIM1_Break, 
-                     TIM1_BreakPolarity_TypeDef TIM1_BreakPolarity, 
+                     TIM1_BreakState_TypeDef TIM1_Break,
+                     TIM1_BreakPolarity_TypeDef TIM1_BreakPolarity,
                      TIM1_AutomaticOutput_TypeDef TIM1_AutomaticOutput);
-void TIM1_ICInit(TIM1_Channel_TypeDef TIM1_Channel, 
-                 TIM1_ICPolarity_TypeDef TIM1_ICPolarity, 
-                 TIM1_ICSelection_TypeDef TIM1_ICSelection, 
+void TIM1_ICInit(TIM1_Channel_TypeDef TIM1_Channel,
+                 TIM1_ICPolarity_TypeDef TIM1_ICPolarity,
+                 TIM1_ICSelection_TypeDef TIM1_ICSelection,
                  TIM1_ICPSC_TypeDef TIM1_ICPrescaler, uint8_t TIM1_ICFilter);
-void TIM1_PWMIConfig(TIM1_Channel_TypeDef TIM1_Channel, 
-                     TIM1_ICPolarity_TypeDef TIM1_ICPolarity, 
-                     TIM1_ICSelection_TypeDef TIM1_ICSelection, 
+void TIM1_PWMIConfig(TIM1_Channel_TypeDef TIM1_Channel,
+                     TIM1_ICPolarity_TypeDef TIM1_ICPolarity,
+                     TIM1_ICSelection_TypeDef TIM1_ICSelection,
                      TIM1_ICPSC_TypeDef TIM1_ICPrescaler, uint8_t TIM1_ICFilter);
 void TIM1_Cmd(FunctionalState NewState);
 void TIM1_CtrlPWMOutputs(FunctionalState NewState);
 void TIM1_ITConfig(TIM1_IT_TypeDef TIM1_IT, FunctionalState NewState);
 void TIM1_InternalClockConfig(void);
-void TIM1_ETRClockMode1Config(TIM1_ExtTRGPSC_TypeDef TIM1_ExtTRGPrescaler, 
-                              TIM1_ExtTRGPolarity_TypeDef TIM1_ExtTRGPolarity, 
+void TIM1_ETRClockMode1Config(TIM1_ExtTRGPSC_TypeDef TIM1_ExtTRGPrescaler,
+                              TIM1_ExtTRGPolarity_TypeDef TIM1_ExtTRGPolarity,
                               uint8_t ExtTRGFilter);
-void TIM1_ETRClockMode2Config(TIM1_ExtTRGPSC_TypeDef TIM1_ExtTRGPrescaler, 
-                              TIM1_ExtTRGPolarity_TypeDef TIM1_ExtTRGPolarity, 
+void TIM1_ETRClockMode2Config(TIM1_ExtTRGPSC_TypeDef TIM1_ExtTRGPrescaler,
+                              TIM1_ExtTRGPolarity_TypeDef TIM1_ExtTRGPolarity,
                               uint8_t ExtTRGFilter);
-void TIM1_ETRConfig(TIM1_ExtTRGPSC_TypeDef TIM1_ExtTRGPrescaler, 
-                    TIM1_ExtTRGPolarity_TypeDef TIM1_ExtTRGPolarity, 
+void TIM1_ETRConfig(TIM1_ExtTRGPSC_TypeDef TIM1_ExtTRGPrescaler,
+                    TIM1_ExtTRGPolarity_TypeDef TIM1_ExtTRGPolarity,
                     uint8_t ExtTRGFilter);
-void TIM1_TIxExternalClockConfig(TIM1_TIxExternalCLK1Source_TypeDef TIM1_TIxExternalCLKSource, 
-                                 TIM1_ICPolarity_TypeDef TIM1_ICPolarity, 
+void TIM1_TIxExternalClockConfig(TIM1_TIxExternalCLK1Source_TypeDef TIM1_TIxExternalCLKSource,
+                                 TIM1_ICPolarity_TypeDef TIM1_ICPolarity,
                                  uint8_t ICFilter);
 void TIM1_SelectInputTrigger(TIM1_TS_TypeDef TIM1_InputTriggerSource);
 void TIM1_UpdateDisableConfig(FunctionalState NewState);
@@ -557,8 +557,8 @@ void TIM1_SelectOnePulseMode(TIM1_OPMode_TypeDef TIM1_OPMode);
 void TIM1_SelectOutputTrigger(TIM1_TRGOSource_TypeDef TIM1_TRGOSource);
 void TIM1_SelectSlaveMode(TIM1_SlaveMode_TypeDef TIM1_SlaveMode);
 void TIM1_SelectMasterSlaveMode(FunctionalState NewState);
-void TIM1_EncoderInterfaceConfig(TIM1_EncoderMode_TypeDef TIM1_EncoderMode, 
-                                 TIM1_ICPolarity_TypeDef TIM1_IC1Polarity, 
+void TIM1_EncoderInterfaceConfig(TIM1_EncoderMode_TypeDef TIM1_EncoderMode,
+                                 TIM1_ICPolarity_TypeDef TIM1_IC1Polarity,
                                  TIM1_ICPolarity_TypeDef TIM1_IC2Polarity);
 void TIM1_PrescalerConfig(uint16_t Prescaler, TIM1_PSCReloadMode_TypeDef TIM1_PSCReloadMode);
 void TIM1_CounterModeConfig(TIM1_CounterMode_TypeDef TIM1_CounterMode);
