@@ -662,7 +662,7 @@ Source: www.st.com, BAT60J.pdf</description>
 Based on the previous libraries:
 &lt;ul&gt;
 &lt;li&gt;r.lbr
-&lt;li&gt;cap.lbr 
+&lt;li&gt;cap.lbr
 &lt;li&gt;cap-fe.lbr
 &lt;li&gt;captant.lbr
 &lt;li&gt;polcap.lbr
@@ -8236,10 +8236,10 @@ Siemens, Philips, Valvo&lt;p&gt;
 <wire x1="104.14" y1="96.52" x2="104.14" y2="83.82" width="0.1524" layer="97"/>
 <wire x1="104.14" y1="83.82" x2="73.66" y2="83.82" width="0.1524" layer="97"/>
 <wire x1="73.66" y1="83.82" x2="73.66" y2="96.52" width="0.1524" layer="97"/>
-<text x="102.616" y="94.996" size="1.016" layer="97" rot="R180">Components missing, located on 
+<text x="102.616" y="94.996" size="1.016" layer="97" rot="R180">Components missing, located on
 the bottom side of pcb right under STC MCU.
 
-Two SOT-23, likely two transistors, 
+Two SOT-23, likely two transistors,
 some form of input protection maybe?</text>
 <text x="17.018" y="60.198" size="1.778" layer="97">PAS1</text>
 <text x="17.018" y="62.738" size="1.778" layer="97">PAS2</text>

@@ -1,0 +1,13 @@
+LineEnding: LF
+UseTab: Never
+IndentWidth: 4
+ColumnLimit: 120
+
+IndentCaseLabels: false
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false

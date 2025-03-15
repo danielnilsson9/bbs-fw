@@ -1,0 +1,16 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+    args: [--markdown-linebreak-ext=md]
+  - id: check-added-large-files
+  - id: mixed-line-ending
+    args: [--fix=lf]
+    exclude: '^drawings/'
+- repo: https://github.com/pre-commit/mirrors-clang-format
+  rev: v18.1.8
+  hooks:
+  - id: clang-format

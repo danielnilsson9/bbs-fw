@@ -28,7 +28,7 @@ If you find this project useful, consider sending a small [donation](https://www
 * ⚠️ Unstable on BBS02 controllers!
 
 ## Highlights
-* ✅ A bit more power without hardware modifications! (max 33A). 
+* ✅ A bit more power without hardware modifications! (max 33A).
 * ✅ No upper voltage limit in software, can by default run up to 63V (maximum rating of components).
 * ✅ Support lower voltage cutoff for use with e.g. 36V battery.
 * ✅ Smooth Throttle/PAS override.
@@ -67,11 +67,11 @@ BBS02A - No idea, not tested, not recommended to try unless you have an already 
 ### TSDZ2
 Compatible with TSDZ2A/B using the STM microcontroller (which is nearly all off them).
 
-### Displays and Controller 
+### Displays and Controller
 
-Only displays with the Bafang display protocol can work. 
+Only displays with the Bafang display protocol can work.
 
-Also the controllers need to be those, that are officially designed by Bafang, respectively Tongshen. 
+Also the controllers need to be those, that are officially designed by Bafang, respectively Tongshen.
 
 Some shops sell kits with their own controller.
 
