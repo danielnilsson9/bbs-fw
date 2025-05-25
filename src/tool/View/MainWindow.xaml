@@ -22,20 +22,20 @@
 		
 		<Menu Grid.Row="0">
 			<MenuItem Header="_File" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="_Open..." Command="{Binding OpenConfigCommand}"/>
-				<MenuItem Header="_Close..." Command="{Binding CloseConfigCommand}" IsEnabled="{Binding ConfigFilenameExists}"/>
-				<MenuItem Header="_Save..." Command="{Binding SaveConfigCommand}" IsEnabled="{Binding ConfigFilenameExists}"/>
-				<MenuItem Header="Save _As..." Command="{Binding SaveAsConfigCommand}"/>
+				<MenuItem Header="_Open..." Command="{Binding OpenConfigCommand}" InputGestureText="Ctrl+O" />
+				<MenuItem Header="_Close..." Command="{Binding CloseConfigCommand}" IsEnabled="{Binding ConfigFilenameExists}" InputGestureText="Ctrl+X" />
+				<MenuItem Header="_Save..." Command="{Binding SaveConfigCommand}" IsEnabled="{Binding ConfigFilenameExists}" InputGestureText="Ctrl+S" />
+				<MenuItem Header="Save _As..." Command="{Binding SaveAsConfigCommand}" InputGestureText="Ctrl+A"/>
 				<Separator />
 				<MenuItem Header="Save _Log..." Command="{Binding SaveLogCommand}" />
 				<Separator />
-				<MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
+				<MenuItem Header="E_xit" Command="{Binding ExitCommand}"  InputGestureText="Ctrl+Q"/>
 			</MenuItem>
 			<MenuItem Header="F_lash" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="_Read" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ReadFlashCommand}" />
-				<MenuItem Header="_Write" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding WriteFlashCommand}" />
+				<MenuItem Header="_Read" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ReadFlashCommand}"  InputGestureText="Win+R" />
+				<MenuItem Header="_Write" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding WriteFlashCommand}" InputGestureText="Win+W" />
 				<Separator />
-				<MenuItem Header="Rese_t" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ResetFlashCommand}" />
+				<MenuItem Header="Rese_t" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ResetFlashCommand}" InputGestureText="Win+D" />
 			</MenuItem>
 			<MenuItem Header="_Options" Height="22" VerticalContentAlignment="Center">
 				<MenuItem Header="_Units">
@@ -71,7 +71,13 @@
 		<KeyBinding Key="o" Modifiers="Ctrl" Command="{Binding OpenConfigCommand}" />
 		<KeyBinding Key="s" Modifiers="Ctrl" Command="{Binding SaveConfigCommand}" />
 		<KeyBinding Key="a" Modifiers="Ctrl" Command="{Binding SaveAsConfigCommand}" />
-		<KeyBinding Key="w" Modifiers="Ctrl" Command="{Binding CloseConfigCommand}" />
+		<KeyBinding Key="x" Modifiers="Ctrl" Command="{Binding CloseConfigCommand}" />
+		<KeyBinding Key="q" Modifiers="Ctrl" Command="{Binding ExitCommand}" />
+		<KeyBinding Key="r" Modifiers="Windows" Command="{Binding ReadFlashCommand}" />
+		<KeyBinding Key="w" Modifiers="Windows" Command="{Binding WriteFlashCommand}" />
+		<KeyBinding Key="d" Modifiers="Windows" Command="{Binding ResetFlashCommand}" />
+		<KeyBinding Key="m" Modifiers="Ctrl+Alt" Command="{Binding ConfigVm.UseMetricUnits}" />
+		<KeyBinding Key="i" Modifiers="Ctrl+Alt" Command="{Binding ConfigVm.UseImperialUnits}" />
 	</Window.InputBindings>
 
 </Window>

@@ -2,6 +2,7 @@ using BBSFW.Model;
 using BBSFW.ViewModel.Base;
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
@@ -12,7 +13,23 @@ namespace BBSFW.ViewModel
 	public class MainViewModel : ObservableObject
 	{
 		private const string APP_TITLE = "BBS-FW Tool";
+		// Stores the name of the open config file. It's explicitly not a file handle, just a filename.
 		private string _configFileName;
+
+		// Has the configuration been modified by a reload or UI changes?
+		private bool _configModified;
+		private bool ConfigModified
+		{
+			get { return _configModified; }
+			set
+			{
+				if (value != _configModified)
+				{
+					_configModified = value;
+					OnPropertyChanged(nameof(ConfigModified));
+				}
+			}
+		}
 
 		public string ConfigFileName
 		{
@@ -22,13 +39,15 @@ namespace BBSFW.ViewModel
 				if (_configFileName != value)
 				{
 					_configFileName = value;
-					ApplicationTitle = ConfigFilenameExists ? APP_TITLE + " - " + System.IO.Path.GetFileName(value) : APP_TITLE; 
 					OnPropertyChanged(nameof(ConfigFileName));
 					OnPropertyChanged(nameof(ConfigFilenameExists));
 				}
 			}
 		}
 
+		/// <summary>
+		/// Not sure if there's a better way of doing this, But it's used to hide certain menus when there is no file loaded.
+		/// </summary>
 		public bool ConfigFilenameExists
 		{
 			get
@@ -38,6 +57,12 @@ namespace BBSFW.ViewModel
 		}
 
 		private string _applicationTitle = "BBS - FW Tool";
+
+		/// <summary>
+		/// Store the current configuration values that have been modified in the UI.
+		/// </summary>
+		private Dictionary<String, String> CurrentConfigValues = new();
+
 		public string ApplicationTitle {
 			get { return _applicationTitle; }
 			set {
@@ -46,6 +71,19 @@ namespace BBSFW.ViewModel
 					_applicationTitle = value;
 					OnPropertyChanged(nameof(ApplicationTitle));
 				}
+			}
+		}
+
+		private string getAppTitle()
+		{
+			string modified = ConfigModified ? " (modified)" : String.Empty;
+			if (ConfigFilenameExists)
+			{
+				return $"{APP_TITLE} - {System.IO.Path.GetFileName(ConfigFileName)}{modified}";
+			}
+			else
+			{
+				return $"{APP_TITLE}{modified}";
 			}
 		}
 
@@ -121,6 +159,56 @@ namespace BBSFW.ViewModel
 		public MainViewModel()
 		{
 			ConfigVm = new ConfigurationViewModel();
+			
+			this.PropertyChanged += (sender, args) =>
+			{
+				if (args.PropertyName == nameof(ConfigModified))
+				{
+					ApplicationTitle = getAppTitle();
+				}
+
+			};
+
+			ConfigVm.PropertyChanged += (sender, args) =>
+			{
+				ConfigModified = false;
+				var propertyName = args.PropertyName;
+				if (propertyName != null && sender != null)
+				{
+					var property = sender.GetType().GetProperty(propertyName);
+					if (property != null)
+					{
+						var value = property.GetValue(sender);
+						if (!CurrentConfigValues.ContainsKey(propertyName))
+						{
+							CurrentConfigValues[propertyName] = value?.ToString() ?? "NULL";
+							ConfigModified = true;
+						}
+						else
+						{
+							string originalValue = CurrentConfigValues[propertyName];
+							string newValue = value?.ToString();
+
+							bool usedToBeNull = (newValue == null && originalValue != null);
+							bool doesntMatch = (newValue != originalValue);
+
+							if (usedToBeNull || doesntMatch)
+							{
+								ConfigModified = true;
+							}
+							else
+							{
+								CurrentConfigValues.Remove(propertyName);
+								// no values left means we have the original config again
+								if (CurrentConfigValues.Count == 0)
+								{
+									ConfigModified = false;
+								}
+							}
+						}
+					}
+				}
+			};
 
 			ConnectionVm = new ConnectionViewModel();
 			SystemVm = new SystemViewModel(ConfigVm);
@@ -158,6 +246,7 @@ namespace BBSFW.ViewModel
 		private void OnCloseConfig()
 		{
 			ConfigFileName = null;
+			ConfigModified = false;	
 		}
 
 		private void OnOpenConfig()
@@ -173,6 +262,7 @@ namespace BBSFW.ViewModel
 				{
 					ConfigVm.ReadConfiguration(dialog.FileName);
 					ConfigFileName = dialog.FileName;
+					ConfigModified = false;
 				}
 				catch (Exception e)
 				{
@@ -198,6 +288,7 @@ namespace BBSFW.ViewModel
 			try
 			{
 				ConfigVm.WriteConfiguration(ConfigFileName);
+				ConfigModified = false;
 			}
 			catch (Exception e)
 			{
@@ -235,6 +326,7 @@ namespace BBSFW.ViewModel
 					ConfigVm.WriteConfiguration(dialog.FileName);
 					// Updating the config file name will also update the application title.
 					ConfigFileName = dialog.FileName;
+					ConfigModified = false;
 				}
 				catch (Exception e)
 				{
@@ -264,6 +356,7 @@ namespace BBSFW.ViewModel
 			{
 				MessageBox.Show("Failed to read configuration from flash, timeout occured.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
+			ConfigModified = true;
 		}
 
 		private async void OnWriteFlash()
@@ -335,19 +428,31 @@ namespace BBSFW.ViewModel
 
 		private void OnExit()
 		{
-			Application.Current.Shutdown();
-		}
-
-		private bool VerifyConfigVersionForRead()
-		{
-			if (ConnectionVm.ConfigVersion < Configuration.MinVersion || ConnectionVm.ConfigVersion > Configuration.MaxVersion)
+			if (ConfigModified && ConfigFilenameExists)
 			{
-				MessageBox.Show("Unsupported firmware config version. Please use BBS-FW Config Tool for firmware version " + ConnectionVm.FirmwareVersion + " to read configuration from flash.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-				return false;
-			}
-
-			return true;
+				var result = MessageBox.Show($"You have unsaved changes, would you like to save or discard changes?", "BBS-FW Tool", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+				if (result.Equals(MessageBoxResult.OK))
+				{
+					OnSaveConfig();
+					Properties.Settings.Default.LastLoadedFile = ConfigFileName;
+					Properties.Settings.Default.Save();
+					Application.Current.Shutdown();
+				}
+			} else {
+				Application.Current.Shutdown();
+			} 
 		}
+
+				private bool VerifyConfigVersionForRead()
+				{
+					if (ConnectionVm.ConfigVersion < Configuration.MinVersion || ConnectionVm.ConfigVersion > Configuration.MaxVersion)
+					{
+						MessageBox.Show("Unsupported firmware config version. Please use BBS-FW Config Tool for firmware version " + ConnectionVm.FirmwareVersion + " to read configuration from flash.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+						return false;
+					}
+
+					return true;
+				}
 
 		private bool VerifyConfigVersionForWrite()
 		{
