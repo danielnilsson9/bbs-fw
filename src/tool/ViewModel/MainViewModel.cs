@@ -3,8 +3,10 @@ using BBSFW.ViewModel.Base;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace BBSFW.ViewModel
@@ -18,7 +20,7 @@ namespace BBSFW.ViewModel
 
 		// Has the configuration been modified by a reload or UI changes?
 		private bool _configModified;
-		private bool ConfigModified
+		public bool ConfigModified
 		{
 			get { return _configModified; }
 			set
@@ -30,6 +32,13 @@ namespace BBSFW.ViewModel
 				}
 			}
 		}
+
+		// Stores a set of the changed UI properties so we can mark the config unmodified if it's reverted
+		private HashSet<string> ChangedProperties = new HashSet<string>();
+
+		// Store a set of properties to ignore because they're triggered by a related metric update
+		private HashSet<string> ImperialProperties = new HashSet<string> {
+			"PretensionSpeedCutoffMph", "MaxSpeedMph" };
 
 		public string ConfigFileName
 		{
@@ -47,6 +56,7 @@ namespace BBSFW.ViewModel
 
 		/// <summary>
 		/// Not sure if there's a better way of doing this, But it's used to hide certain menus when there is no file loaded.
+		/// This check is trivial but allows us to do IsEnabled="{Binding ConfigFilenameExists}" in MainViewModel.xaml to show/hide menus.
 		/// </summary>
 		public bool ConfigFilenameExists
 		{
@@ -57,11 +67,6 @@ namespace BBSFW.ViewModel
 		}
 
 		private string _applicationTitle = "BBS - FW Tool";
-
-		/// <summary>
-		/// Store the current configuration values that have been modified in the UI.
-		/// </summary>
-		private Dictionary<String, String> CurrentConfigValues = new();
 
 		public string ApplicationTitle {
 			get { return _applicationTitle; }
@@ -74,7 +79,7 @@ namespace BBSFW.ViewModel
 			}
 		}
 
-		private string getAppTitle()
+		private string GetAppTitle()
 		{
 			string modified = ConfigModified ? " (modified)" : String.Empty;
 			if (ConfigFilenameExists)
@@ -85,6 +90,14 @@ namespace BBSFW.ViewModel
 			{
 				return $"{APP_TITLE}{modified}";
 			}
+		}
+
+		/// <summary>
+		/// Original state of the configuration, so we can check for modifications
+		/// </summary>
+		private Configuration OriginalConfigurationState
+		{
+			get; set;
 		}
 
 		public ConfigurationViewModel ConfigVm { get; private set; }
@@ -104,6 +117,11 @@ namespace BBSFW.ViewModel
 		public ICommand OpenConfigCommand
 		{
 			get { return new DelegateCommand(OnOpenConfig); }
+		}
+
+		public ICommand OpenConfigDirectCommand
+		{
+			get { return new DelegateCommand(OnOpenConfigDirect); }
 		}
 
 		/**
@@ -154,59 +172,27 @@ namespace BBSFW.ViewModel
 			get { return new DelegateCommand(OnShowAbout); }
 		}
 
+		public ICommand UseMetricUnitsCommand
+		{
+			get { return new DelegateCommand(OnUseMetric); }
+		}
 
+		public ICommand UseImperialUnitsCommand
+		{
+			get { return new DelegateCommand(OnUseImperial); }
+		}
 
 		public MainViewModel()
 		{
 			ConfigVm = new ConfigurationViewModel();
-			
+
 			this.PropertyChanged += (sender, args) =>
 			{
-				if (args.PropertyName == nameof(ConfigModified))
+				// Updates the title when the config is modified (to mark it so), and the filename when it's set.
+				if (args.PropertyName == nameof(ConfigModified) ||
+					args.PropertyName == nameof(ConfigFileName))
 				{
-					ApplicationTitle = getAppTitle();
-				}
-
-			};
-
-			ConfigVm.PropertyChanged += (sender, args) =>
-			{
-				ConfigModified = false;
-				var propertyName = args.PropertyName;
-				if (propertyName != null && sender != null)
-				{
-					var property = sender.GetType().GetProperty(propertyName);
-					if (property != null)
-					{
-						var value = property.GetValue(sender);
-						if (!CurrentConfigValues.ContainsKey(propertyName))
-						{
-							CurrentConfigValues[propertyName] = value?.ToString() ?? "NULL";
-							ConfigModified = true;
-						}
-						else
-						{
-							string originalValue = CurrentConfigValues[propertyName];
-							string newValue = value?.ToString();
-
-							bool usedToBeNull = (newValue == null && originalValue != null);
-							bool doesntMatch = (newValue != originalValue);
-
-							if (usedToBeNull || doesntMatch)
-							{
-								ConfigModified = true;
-							}
-							else
-							{
-								CurrentConfigValues.Remove(propertyName);
-								// no values left means we have the original config again
-								if (CurrentConfigValues.Count == 0)
-								{
-									ConfigModified = false;
-								}
-							}
-						}
-					}
+					ApplicationTitle = GetAppTitle();
 				}
 			};
 
@@ -215,11 +201,56 @@ namespace BBSFW.ViewModel
 			AssistLevelsVm = new AssistLevelsViewModel(ConfigVm);
 			CalibrationVm = new CalibrationViewModel(ConnectionVm);
 			EventLogVm = new EventLogViewModel();
-
-
+			StartConfigMonitoring();
+			if (!String.IsNullOrEmpty(Properties.Settings.Default.LastLoadedFile))
+			{
+				ConfigFileName = Properties.Settings.Default.LastLoadedFile;
+				OpenConfigDirectCommand.Execute(ConfigFileName);
+			}
+			// start monitoring after load so we don't trigger all the events
 			ConnectionVm.EventLogReceived += EventLogVm.AddEvent;
 		}
 
+		/// <summary>
+		/// Updates the OriginalConfigurationState to match the current config, for when loading/reseting etc.
+		/// </summary>
+		private void ResetOriginalConfigurationState()
+		{
+			OriginalConfigurationState = ConfigVm.GetConfig().Clone();
+		}
+
+		/// <summary>
+		/// Start monitoring the ConfigurationViewModel for changes so we can mark it as modified when the user changes something in the UI.
+		/// </summary>
+		private void ConfigMonitoring(object? sender, PropertyChangedEventArgs args)
+		{
+			var propertyName = args.PropertyName;
+			if (propertyName != null && sender != null && !ImperialProperties.Contains(propertyName))
+			{
+				var property = sender.GetType().GetProperty(propertyName);
+				if (property != null)
+				{
+					var value = property.GetValue(sender) ?? "NULL";
+					string originalValue = OriginalConfigurationState.GetType().GetField(propertyName)?.GetValue(OriginalConfigurationState).ToString() ?? "NULL";
+					string newValue = value?.ToString();
+
+					if (newValue != originalValue)
+					{
+						ConfigModified = true;
+						ChangedProperties.Add(propertyName);
+					}
+					else
+					{
+						ChangedProperties.Remove(propertyName);
+						// no values left means we have the original config again
+						if (ChangedProperties.Count == 0)
+						{
+							ConfigModified = false;
+						}
+					}
+				}
+			}
+		}
 
 		private void OnSaveLog()
 		{
@@ -236,7 +267,7 @@ namespace BBSFW.ViewModel
 				{
 					EventLogVm.ExportLog(dialog.FileName);
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
 					MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				}
@@ -246,7 +277,17 @@ namespace BBSFW.ViewModel
 		private void OnCloseConfig()
 		{
 			ConfigFileName = null;
-			ConfigModified = false;	
+			ConfigModified = false;
+		}
+
+		private void StopConfigMonitoring()
+		{
+			ConfigVm.PropertyChanged -= ConfigMonitoring;
+		}
+		private void StartConfigMonitoring()
+		{
+			ResetOriginalConfigurationState();
+			ConfigVm.PropertyChanged += ConfigMonitoring;
 		}
 
 		private void OnOpenConfig()
@@ -260,6 +301,7 @@ namespace BBSFW.ViewModel
 			{
 				try
 				{
+					StopConfigMonitoring();
 					ConfigVm.ReadConfiguration(dialog.FileName);
 					ConfigFileName = dialog.FileName;
 					ConfigModified = false;
@@ -268,6 +310,25 @@ namespace BBSFW.ViewModel
 				{
 					MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				}
+				finally
+				{
+					StartConfigMonitoring();
+				}
+			}
+		}
+		private void OnOpenConfigDirect()
+		{
+			try
+			{
+				StopConfigMonitoring();
+				ConfigVm.ReadConfiguration(_configFileName);
+				ConfigFileName = _configFileName;
+				ConfigModified = false;
+				StartConfigMonitoring();
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
 
@@ -278,7 +339,6 @@ namespace BBSFW.ViewModel
 				return;
 			}
 
-			// This should be impossible anyhow as the menu item should be disabled.
 			if (!ConfigFilenameExists)
 			{
 				OnSaveAsConfig();
@@ -294,7 +354,7 @@ namespace BBSFW.ViewModel
 			{
 				MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
-		}		
+		}
 
 		private void OnSaveAsConfig()
 		{
@@ -315,7 +375,7 @@ namespace BBSFW.ViewModel
 			else
 			{
 				dialog.InitialDirectory = System.IO.Path.GetDirectoryName(ConfigFileName);
-				dialog.FileName =  System.IO.Path.GetFileName(ConfigFileName);
+				dialog.FileName = System.IO.Path.GetFileName(ConfigFileName);
 			}
 
 			var result = dialog.ShowDialog();
@@ -350,7 +410,9 @@ namespace BBSFW.ViewModel
 			var res = await ConnectionVm.GetConnection().ReadConfiguration(TimeSpan.FromSeconds(5));
 			if (!res.Timeout && res.Result != null)
 			{
+				StopConfigMonitoring();
 				ConfigVm.UpdateFrom(res.Result);
+				StartConfigMonitoring();
 			}
 			else
 			{
@@ -419,6 +481,15 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		private void OnUseMetric()
+		{
+			ConfigVm.UseMetricUnits = true;
+		}
+
+		private void OnUseImperial()
+		{
+			ConfigVm.UseImperialUnits = true;
+		}
 
 		private void OnShowAbout()
 		{
@@ -426,33 +497,53 @@ namespace BBSFW.ViewModel
 			MessageBox.Show($"Version: {version.Major}.{version.Minor}.{version.Build}\nAuthor: Daniel Nilsson", "BBS-FW Tool", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
 
-		private void OnExit()
+		/// <summary>
+		/// Displays the save/save as dialog as necessary.
+		/// </summary>
+		/// <returns>True if this exit was cancelled</returns>
+		public bool OnExitCancellable()
 		{
-			if (ConfigModified && ConfigFilenameExists)
+			if (ConfigModified)
 			{
-				var result = MessageBox.Show($"You have unsaved changes, would you like to save or discard changes?", "BBS-FW Tool", MessageBoxButton.OKCancel, MessageBoxImage.Information);
-				if (result.Equals(MessageBoxResult.OK))
+				var result = MessageBox.Show($"You have unsaved changes, would you like to save them?",
+					"BBS-FW Tool", MessageBoxButton.YesNoCancel, MessageBoxImage.Information);
+
+				if (result == MessageBoxResult.Yes)
 				{
-					OnSaveConfig();
-					Properties.Settings.Default.LastLoadedFile = ConfigFileName;
-					Properties.Settings.Default.Save();
-					Application.Current.Shutdown();
+					if (ConfigFilenameExists)
+					{
+						OnSaveConfig();
+					}
+					else
+					{
+						OnSaveAsConfig();
+					}
 				}
-			} else {
-				Application.Current.Shutdown();
-			} 
+				return (result == MessageBoxResult.Cancel);
+			}
+			else
+			{
+				Properties.Settings.Default.LastLoadedFile = ConfigFileName ?? "";
+				Properties.Settings.Default.Save();
+				return false;
+			}
 		}
 
-				private bool VerifyConfigVersionForRead()
-				{
-					if (ConnectionVm.ConfigVersion < Configuration.MinVersion || ConnectionVm.ConfigVersion > Configuration.MaxVersion)
-					{
-						MessageBox.Show("Unsupported firmware config version. Please use BBS-FW Config Tool for firmware version " + ConnectionVm.FirmwareVersion + " to read configuration from flash.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-						return false;
-					}
+		private void OnExit()
+		{
+			Application.Current.Shutdown();
+		}
 
-					return true;
-				}
+		private bool VerifyConfigVersionForRead()
+		{
+			if (ConnectionVm.ConfigVersion < Configuration.MinVersion || ConnectionVm.ConfigVersion > Configuration.MaxVersion)
+			{
+				MessageBox.Show("Unsupported firmware config version. Please use BBS-FW Config Tool for firmware version " + ConnectionVm.FirmwareVersion + " to read configuration from flash.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				return false;
+			}
+
+			return true;
+		}
 
 		private bool VerifyConfigVersionForWrite()
 		{

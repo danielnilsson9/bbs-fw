@@ -9,7 +9,6 @@ namespace BBSFW.ViewModel
 	public class ConfigurationViewModel : ObservableObject
 	{
 		private Configuration _config;
-		private bool configModified = false;
 
 		public static List<uint> PasStartDelayOptions { get; } =
 			new List<uint>() {

@@ -726,6 +726,17 @@ namespace BBSFW.Model
 			}
 		}
 
+		/// <summary>
+		/// Creates a new Configuration, copies the contents to it, and returns the new config object
+		/// </summary>
+		/// <returns>A completely new config object with the same values as this configuration</returns>
+		public Configuration Clone()
+		{
+			Configuration newConfig = new Configuration();
+			newConfig.CopyFrom(this);
+			return newConfig;
+		}
+
 		public void CopyFrom(Configuration cfg)
 		{
 			Target = cfg.Target;

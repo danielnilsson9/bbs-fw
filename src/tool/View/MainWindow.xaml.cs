@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,20 @@ namespace BBSFW
 		public MainWindow()
 		{
 			InitializeComponent();
+		}
+
+		/// <summary>
+		/// Application closing callback.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void Window_Closing(object sender, CancelEventArgs e)
+		{
+			// Get the view model
+			if (DataContext is ViewModel.MainViewModel viewModel)
+			{
+				e.Cancel = viewModel.OnExitCancellable();
+			}
 		}
 	}
 }
