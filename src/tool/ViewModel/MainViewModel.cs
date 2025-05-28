@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace BBSFW.ViewModel
@@ -84,7 +83,18 @@ namespace BBSFW.ViewModel
 			string modified = ConfigModified ? " (modified)" : String.Empty;
 			if (ConfigFilenameExists)
 			{
-				return $"{APP_TITLE} - {System.IO.Path.GetFileName(ConfigFileName)}{modified}";
+				string fileName;
+				try
+				{
+					// this would likely only fail if the config file was deleted or moved.
+					fileName = System.IO.Path.GetFileName(ConfigFileName);
+				} catch
+				{
+					// and if that's the case it's still valid to use that filename, we'll just make it explicit what the path is also.
+					fileName = ConfigFileName;
+				}
+
+				return $"{APP_TITLE} - {fileName}{modified}";
 			}
 			else
 			{
@@ -282,10 +292,12 @@ namespace BBSFW.ViewModel
 
 		private void StopConfigMonitoring()
 		{
+			ChangedProperties.Clear();
 			ConfigVm.PropertyChanged -= ConfigMonitoring;
 		}
 		private void StartConfigMonitoring()
 		{
+			ChangedProperties.Clear();
 			ResetOriginalConfigurationState();
 			ConfigVm.PropertyChanged += ConfigMonitoring;
 		}
@@ -498,7 +510,7 @@ namespace BBSFW.ViewModel
 		}
 
 		/// <summary>
-		/// Displays the save/save as dialog as necessary.
+		/// Displays the save/save as dialog as necessary. This should probably be in a service class?
 		/// </summary>
 		/// <returns>True if this exit was cancelled</returns>
 		public bool OnExitCancellable()
@@ -531,7 +543,8 @@ namespace BBSFW.ViewModel
 
 		private void OnExit()
 		{
-			Application.Current.Shutdown();
+			
+			Application.Current.MainWindow.Close();
 		}
 
 		private bool VerifyConfigVersionForRead()
