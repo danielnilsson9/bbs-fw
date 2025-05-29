@@ -1,6 +1,6 @@
 using BBSFW.ViewModel.Base;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace BBSFW.ViewModel
 {
@@ -39,6 +39,7 @@ namespace BBSFW.ViewModel
 				{
 					_selectedOperationModePage = value;
 					OnPropertyChanged(nameof(SelectedOperationModePage));
+					UpdateSelectedAssistLevel();
 				}
 			}
 		}
@@ -57,11 +58,22 @@ namespace BBSFW.ViewModel
 			}
 		}
 
+		/// <summary>
+		/// Updates the assist level manually so we can refresh it when we switch mode
+		/// </summary>
+		private void UpdateSelectedAssistLevel()
+		{
+			var newAssist = SelectedOperationModePage.Value == OperationMode.Sport ?
+				ConfigVm.SportAssistLevels : ConfigVm.StandardAssistLevels;
+			int index = SelectedAssistLevel?.Id ?? 0;
+			SelectedAssistLevel = newAssist.ElementAt(index);
+		}
+
 		public AssistLevelsViewModel(ConfigurationViewModel config)
 		{
 			_configVm = config;
 			SelectedOperationModePage = OperationModes[0];
+			UpdateSelectedAssistLevel();
 		}
-
 	}
 }
