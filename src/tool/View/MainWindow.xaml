@@ -7,8 +7,9 @@
 		xmlns:vm="clr-namespace:BBSFW.ViewModel"
 		xmlns:vw="clr-namespace:BBSFW.View"
         mc:Ignorable="d"
-        Title="BBS-FW Tool" Height="640" Width="860"
-		Background="#FFE8E8E8">
+		Title="{Binding ApplicationTitle}" Height="640" Width="860"  
+        Background="#FFE8E8E8"  
+        Closing="Window_Closing">
 
 	<Window.DataContext>
 		<vm:MainViewModel />
@@ -20,30 +21,32 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
 		</Grid.RowDefinitions>
-		
+
 		<Menu Grid.Row="0">
-			<MenuItem Header="File" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="Open..." Command="{Binding OpenConfigCommand}" />
-				<MenuItem Header="Save As..." Command="{Binding SaveConfigCommand}" />
+			<MenuItem Header="_File" Height="22" VerticalContentAlignment="Center">
+				<MenuItem Header="_Open..." Command="{Binding OpenConfigCommand}" InputGestureText="Ctrl+O" />
+				<MenuItem Header="_Close..." Command="{Binding CloseConfigCommand}"  IsEnabled="{Binding ConfigFilenameExists}" InputGestureText="Ctrl+W" />
+				<MenuItem Header="_Save..." Command="{Binding SaveConfigCommand}" IsEnabled="{Binding ConfigFilenameExists}" InputGestureText="Ctrl+S" />
+				<MenuItem Header="Save As..." Command="{Binding SaveAsConfigCommand}" InputGestureText="Ctrl+Shift+S" />
 				<Separator />
-				<MenuItem Header="Save Log..." Command="{Binding SaveLogCommand}" />
+				<MenuItem Header="Save _Log..." Command="{Binding SaveLogCommand}" />
 				<Separator />
-				<MenuItem Header="Exit" Command="{Binding ExitCommand}" />
+				<MenuItem Header="E_xit" Command="{Binding ExitCommand}" InputGestureText="Alt+F4" />
 			</MenuItem>
-			<MenuItem Header="Flash" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="Read" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ReadFlashCommand}" />
-				<MenuItem Header="Write" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding WriteFlashCommand}" />
+			<MenuItem Header="F_lash" Height="22" VerticalContentAlignment="Center">
+				<MenuItem Header="_Read" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ReadFlashCommand}"  InputGestureText="Ctrl+Shift+R" />
+				<MenuItem Header="_Write" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding WriteFlashCommand}" InputGestureText="Ctrl+Shift+W" />
 				<Separator />
-				<MenuItem Header="Reset" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ResetFlashCommand}" />
+				<MenuItem Header="Rese_t" IsEnabled="{Binding ConnectionVm.IsConnected}" Command="{Binding ResetFlashCommand}" InputGestureText="Ctrl+Shift+D" />
 			</MenuItem>
-			<MenuItem Header="Options" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="Units">
-					<MenuItem Header="Metric" IsCheckable="True" IsChecked="{Binding ConfigVm.UseMetricUnits}" />
-					<MenuItem Header="Imperial" IsCheckable="True" IsChecked="{Binding ConfigVm.UseImperialUnits}" />
+			<MenuItem Header="_Options" Height="22" VerticalContentAlignment="Center">
+				<MenuItem Header="_Units">
+					<MenuItem Header="_Metric" IsCheckable="True" IsChecked="{Binding ConfigVm.UseMetricUnits}" InputGestureText="Ctrl+Shift+M" />
+					<MenuItem Header="_Imperial" IsCheckable="True" IsChecked="{Binding ConfigVm.UseImperialUnits}" InputGestureText="Ctrl+Shift+I" />
 				</MenuItem>
 			</MenuItem>
-			<MenuItem Header="Help" Height="22" VerticalContentAlignment="Center">
-				<MenuItem Header="About" Command="{Binding ShowAboutCommand}" />
+			<MenuItem Header="_Help" Height="22" VerticalContentAlignment="Center">
+				<MenuItem Header="_About" Command="{Binding ShowAboutCommand}" />
 			</MenuItem>
 		</Menu>
 
@@ -64,6 +67,19 @@
 				<vw:EventLogView Margin="10" />
 			</TabItem>
 		</TabControl>
-		
 	</Grid>
+
+	<Window.InputBindings>
+		<KeyBinding Key="o" Modifiers="Ctrl" Command="{Binding OpenConfigCommand}" />
+		<KeyBinding Key="s" Modifiers="Ctrl" Command="{Binding SaveConfigCommand}" />
+		<KeyBinding Key="s" Modifiers="Ctrl+Shift" Command="{Binding SaveAsConfigCommand}" />
+		<KeyBinding Key="w" Modifiers="Ctrl" Command="{Binding CloseConfigCommand}" />
+		<KeyBinding Key="F4" Modifiers="Alt" Command="{Binding ExitCommand}" />
+		<KeyBinding Key="r" Modifiers="Ctrl+Shift" Command="{Binding ReadFlashCommand}" />
+		<KeyBinding Key="w" Modifiers="Ctrl+Shift" Command="{Binding WriteFlashCommand}" />
+		<KeyBinding Key="d" Modifiers="Ctrl+Shift" Command="{Binding ResetFlashCommand}" />
+		<KeyBinding Key="m" Modifiers="Ctrl+Shift" Command="{Binding UseMetricUnitsCommand}" />
+		<KeyBinding Key="i" Modifiers="Ctrl+Shift" Command="{Binding UseImperialUnitsCommand}" />
+	</Window.InputBindings>
+	
 </Window>
