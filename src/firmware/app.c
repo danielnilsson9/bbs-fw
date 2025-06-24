@@ -257,6 +257,18 @@ void app_set_lights(bool on)
 	}
 }
 
+void app_set_speed_limit_operation_mode(uint16_t display_speed_limit_rpm)
+{
+	if (display_speed_limit_rpm == convert_wheel_speed_kph_to_rpm(SPEED_LIMIT_SPORT_SWITCH_KPH))
+	{
+		app_set_operation_mode(OPERATION_MODE_SPORT);
+	}
+	else
+	{
+		app_set_operation_mode(OPERATION_MODE_DEFAULT);
+	}
+}
+
 void app_set_operation_mode(uint8_t mode)
 {
 	if (operation_mode != mode)
@@ -546,7 +558,7 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool p
 
 	// global throttle speed limit applies if enabled in configuration, PAS is not engaged and throttle is used
 	bool global_throttle_limit_active =
-		!pas_engaged && 
+		!pas_engaged &&
 		throttle_percent > 0 &&
 		g_config.throttle_global_spd_lim_percent > 0 &&
 		(

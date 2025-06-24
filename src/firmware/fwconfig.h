@@ -64,7 +64,7 @@
 // No battery percent mapping
 #define BATTERY_PERCENT_MAP_NONE				0
 // Map battery percent to provide a linear relationship on the
-// 5-bar battery indicator of the SW102 display. 
+// 5-bar battery indicator of the SW102 display.
 #define BATTERY_PERCENT_MAP_SW102				1
 
 // Select battery percent mapping
@@ -120,7 +120,7 @@
 	72, 73, 74, 76, 77, 78, 80, 81, 83, 84,		\
 	85, 87, 88, 90, 91, 93, 94, 96, 97, 99,		\
 	100
-	
+
 
 // This value is used when assist level is configured with throttle cadence
 // override flag in config tool. Default is 100%.
@@ -167,6 +167,18 @@
 	#else
 	#define DISPLAY_RANGE_FIELD_DATA		DISPLAY_RANGE_FIELD_POWER
 	#endif
-#endif 
+#endif
+
+// Eggrider compatibility. When the display sets the speed limit
+// to a certain value, use sport mode. The actual speed limit of the motor
+// remains unchanged. This is a workaround; it is not possible to
+// program the controller using an Eggrider as it doesn't understand the
+// bbs-fw protocol. App configuration:
+// - Set "Bafang switch mode" to "Only live data"
+// - Make sure the bbs-fw wheel diameter in inches matches the Eggrider
+//   wheel circumference in mm. Formula:
+//   circumference (mm) = diameter * π * 25.4
+// - Set "Max speed OffRoad" to the value set below.
+#define SPEED_LIMIT_SPORT_SWITCH_KPH 			0 // speed in km/h. Setting to 0 disables this feature
 
 #endif

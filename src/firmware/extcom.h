@@ -13,4 +13,3 @@ void extcom_init();
 void extcom_process();
 
 #endif
-
