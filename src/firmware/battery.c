@@ -106,12 +106,11 @@ void battery_init()
 		EXPAND_U16(g_config.max_battery_x100v_u16h, g_config.max_battery_x100v_u16l);
 
 	uint16_t battery_range_x100v = battery_max_voltage_x100v - battery_min_voltage_x100v;
+	uint16_t battery_full_pad_x100v = battery_range_x100v * BATTERY_FULL_OFFSET_PERCENT / 100;
+	uint16_t battery_empty_pad_x100v = battery_range_x100v * BATTERY_EMPTY_OFFSET_PERCENT / 100;
 
-	battery_full_x100v = battery_max_voltage_x100v -
-		((BATTERY_FULL_OFFSET_PERCENT * battery_range_x100v) / 100);
-
-	battery_empty_x100v = battery_min_voltage_x100v +
-		((BATTERY_EMPTY_OFFSET_PERCENT * battery_range_x100v) / 100);
+	battery_full_x100v = battery_max_voltage_x100v - battery_full_pad_x100v;
+	battery_empty_x100v = battery_min_voltage_x100v + battery_empty_pad_x100v;
 }
 
 void battery_process()
