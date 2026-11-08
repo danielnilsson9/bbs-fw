@@ -18,6 +18,8 @@
 #include "util.h"
 #include "system.h"
 
+#define CRUISE_THROTTLE_VALUE_PERCENT		25
+
 
 typedef struct
 {
@@ -87,6 +89,8 @@ void app_init()
 	motor_disable();
 	lights_disable();
 	lights_set(g_config.lights_mode == LIGHTS_MODE_ALWAYS_ON);
+	if(g_config.lights_mode == LIGHTS_MODE_DEFAULT)
+		lights_set(true);
 
 	lvc_voltage_x100 = g_config.low_cut_off_v * 100u;
 
@@ -487,15 +491,16 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 		// pause cruise if throttle touched while cruise active
 		else if (!cruise_paused && !cruise_block_throttle_return && throttle_percent > 0)
 		{
-			cruise_paused = true;
-			cruise_block_throttle_return = true;
+//			cruise_paused = true;
+//			cruise_block_throttle_return = true;
 		}
 
-		// unpause cruise if pedaling forward while engaging throttle > 50%
-		else if (cruise_paused && !cruise_block_throttle_return && throttle_percent > 50 && pas_is_pedaling_forwards() && pas_get_pulse_counter() > CRUISE_ENGAGE_PAS_PULSES)
+		// unpause cruise if pedaling forward while engaging throttle > CRUISE_THROTTLE_VALUE_PERCENT
+		else if (cruise_paused && !cruise_block_throttle_return && throttle_percent > CRUISE_THROTTLE_VALUE_PERCENT && pas_is_pedaling_forwards() && pas_get_pulse_counter() > CRUISE_ENGAGE_PAS_PULSES)
 		{
 			cruise_paused = false;
 			cruise_block_throttle_return = true;
+			reload_assist_params();
 		}
 
 		// reset flag tracking throttle to make sure throttle returns to idle position before engage/disenage cruise with throttle touch
@@ -520,9 +525,12 @@ void apply_cruise(uint8_t* target_current, uint8_t throttle_percent)
 
 bool apply_throttle(uint8_t* target_current, uint8_t throttle_percent)
 {
-	if ((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) && throttle_percent > 0 && throttle_ok())
+	if (((assist_level_data.level.flags & ASSIST_FLAG_THROTTLE) || (assist_level_data.level.flags & ASSIST_FLAG_CRUISE)) && throttle_percent > 0 && throttle_ok())
 	{
+		
 		uint8_t current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, assist_level_data.level.max_throttle_current_percent);
+		if (assist_level_data.level.flags & ASSIST_FLAG_CRUISE)
+			current = (uint8_t)MAP16(throttle_percent, 0, 100, g_config.throttle_start_percent, 100);
 
 		if (current >= *target_current)
 		{
@@ -555,8 +563,9 @@ bool apply_speed_limit(uint8_t* target_current, uint8_t throttle_percent, bool p
 		);
 
 	bool throttle_speed_override_active = !global_throttle_limit_active && throttle_override &&
-		(assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
-		(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_SPEED);
+		(((assist_level_data.level.flags & ASSIST_FLAG_PAS) &&
+		(assist_level_data.level.flags & ASSIST_FLAG_OVERRIDE_SPEED)) ||
+		(assist_level_data.level.flags & ASSIST_FLAG_CRUISE));
 
 	int32_t max_speed_rpm_x10;
 	if (global_throttle_limit_active)
@@ -941,7 +950,10 @@ void reload_assist_params()
 	{
 		assist_level_data.level = g_config.assist_levels[operation_mode][assist_level];
 
-		assist_level_data.max_wheel_speed_rpm_x10 = ((int32_t)global_speed_limit_rpm * assist_level_data.level.max_speed_percent) / 10;
+		if (assist_level_data.level.max_speed_percent == 0)
+			assist_level_data.max_wheel_speed_rpm_x10 = speed_sensor_get_rpm_x10();
+		else
+			assist_level_data.max_wheel_speed_rpm_x10 = ((int32_t)global_speed_limit_rpm * assist_level_data.level.max_speed_percent) / 10;
 
 		if (assist_level_data.level.flags & ASSIST_FLAG_PAS)
 		{
@@ -951,7 +963,8 @@ void reload_assist_params()
 		}
 
 		// pause cruise if swiching level
-		cruise_paused = true;
+		if(!(assist_level_data.level.flags & ASSIST_FLAG_CRUISE))
+			cruise_paused = true;
 	}
 	// only apply push walk params if push walk is active in config,
 	// otherwise data of previous assist level is kept.
